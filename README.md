@@ -32,7 +32,7 @@ This initial launch focuses on a high-utility, "Paste & Download" workflow. No a
 
 ### Prerequisites
 * Python 3.10+
-* Playwright browsers installed (`playwright install chromium`)
+* Playwright browsers installed (`python -m playwright install chromium`)
 
 ### Installation
 1. **Clone the repository:**
