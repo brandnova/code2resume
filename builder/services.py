@@ -46,7 +46,13 @@ class PDFService:
         """
         document = self._build_document()
         with sync_playwright() as p:
-            browser = p.chromium.launch()
+            # browser = p.chromium.launch() Return to this state later
+            browser = p.chromium.launch(
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                ]
+            )
             page    = browser.new_page()
             page.set_content(document, wait_until="networkidle")
             pdf_bytes = page.pdf(
