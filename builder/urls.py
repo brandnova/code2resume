@@ -4,6 +4,7 @@ from . import views
 app_name = 'builder'
 
 urlpatterns = [
-    path('', views.workspace, name='workspace'),
-    path('export/pdf/', views.export_pdf, name='export_pdf'),
+    path('',              views.workspace,     name='workspace'),
+    path('export/pdf/',   views.export_pdf,    name='export_pdf'),
+    path('session/save/', views.save_session,  name='save_session'),
 ]

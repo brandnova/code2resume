@@ -2,15 +2,11 @@ from playwright.sync_api import sync_playwright
 
 
 class PDFService:
-    """
-    Standalone PDF rendering service using Playwright/Chromium.
-    Structured to be easily extended with AI resume analysis in a future phase.
-    """
-
-    def __init__(self, html: str, css: str, framework_css: str = ""):
-        self.html = html
-        self.css = css
+    def __init__(self, html: str, css: str, framework_css: str = "", paper_format: str = "A4"):
+        self.html          = html
+        self.css           = css
         self.framework_css = framework_css
+        self.paper_format  = paper_format
 
     def _build_document(self) -> str:
         """
@@ -24,6 +20,17 @@ class PDFService:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {self.framework_css}
     <style>
+        /*
+         * PDF-specific reset: let content determine height naturally.
+         * This prevents Playwright from capturing trailing whitespace
+         * when content doesn't fill the full page height.
+         */
+        html, body {{
+            margin: 0;
+            padding: 0;
+            height: auto !important;
+            min-height: unset !important;
+        }}
         {self.css}
     </style>
 </head>
@@ -38,23 +45,25 @@ class PDFService:
         Returns raw PDF bytes.
         """
         document = self._build_document()
-
         with sync_playwright() as p:
             browser = p.chromium.launch()
-            page = browser.new_page()
+            page    = browser.new_page()
             page.set_content(document, wait_until="networkidle")
             pdf_bytes = page.pdf(
-                format="A4",
+                format=self.paper_format,
                 print_background=True,
+                # 'auto' height: Playwright respects natural content height
+                # and won't pad to a full page if content is shorter.
+                # Multi-page content still flows correctly across pages.
+                height=None,
                 margin={
-                    "top": "10mm",
+                    "top":    "10mm",
                     "bottom": "10mm",
-                    "left": "10mm",
-                    "right": "10mm",
+                    "left":   "10mm",
+                    "right":  "10mm",
                 },
             )
             browser.close()
-
         return pdf_bytes
 
     def extract_plain_text(self) -> str:
@@ -64,14 +73,13 @@ class PDFService:
         """
         from html.parser import HTMLParser
 
-        class TextExtractor(HTMLParser):
+        class _Extractor(HTMLParser):
             def __init__(self):
                 super().__init__()
                 self.chunks = []
-
             def handle_data(self, data):
                 self.chunks.append(data)
 
-        parser = TextExtractor()
-        parser.feed(self.html)
-        return " ".join(self.chunks).strip()
+        p = _Extractor()
+        p.feed(self.html)
+        return " ".join(p.chunks).strip()

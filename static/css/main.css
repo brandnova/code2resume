@@ -599,3 +599,182 @@ html, body {
     .hide-mobile { display: none !important; }
     .show-mobile-only { display: inline-flex !important; }
 }
+
+/* ---------- Session indicator ---------- */
+.session-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 9px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.session-indicator.saved {
+    color: var(--success);
+    border-color: rgba(52, 211, 153, 0.2);
+    background: rgba(52, 211, 153, 0.08);
+}
+
+.session-indicator.unsaved {
+    color: var(--warning);
+    border-color: rgba(251, 191, 36, 0.2);
+    background: rgba(251, 191, 36, 0.08);
+}
+
+@media (max-width: 768px) {
+    .session-indicator { display: none; }
+}
+
+/* ---------- Shortcuts Modal ---------- */
+.shortcuts-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.shortcuts-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--bg-border);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 560px;
+    max-height: 85vh;
+    box-shadow: var(--shadow-lg), 0 0 60px rgba(79, 126, 247, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.shortcuts-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid var(--bg-border);
+    flex-shrink: 0;
+}
+
+.shortcuts-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+}
+
+.shortcuts-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.shortcuts-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--bg-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.shortcuts-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--accent);
+}
+
+.shortcuts-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+}
+
+.shortcuts-body::-webkit-scrollbar { width: 4px; }
+.shortcuts-body::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: 4px; }
+
+.shortcuts-group-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 12px;
+}
+
+.shortcuts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.shortcut-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    transition: background 0.1s;
+}
+
+.shortcut-row:hover {
+    background: var(--bg-elevated);
+}
+
+.shortcut-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.shortcut-keys {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.shortcuts-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--bg-border);
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    flex-shrink: 0;
+}
+
+/* ---------- Footer shortcuts button ---------- */
+.footer-shortcuts-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: color 0.15s, background 0.15s;
+}
+
+.footer-shortcuts-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+}

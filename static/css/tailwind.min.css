@@ -8672,7 +8672,7 @@ code,
 kbd,
 samp,
 pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "Courier New", monospace;
   /* 1 */
   font-feature-settings: normal;
   /* 2 */
@@ -9077,6 +9077,18 @@ video {
   border-collapse:collapse
 }
 
+.scale-100{
+  --tw-scale-x:1;
+  --tw-scale-y:1;
+  transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.scale-95{
+  --tw-scale-x:.95;
+  --tw-scale-y:.95;
+  transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
 .transform{
   transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
 }
@@ -9107,6 +9119,14 @@ video {
   text-align:justify
 }
 
+.opacity-0{
+  opacity:0
+}
+
+.opacity-100{
+  opacity:1
+}
+
 .outline{
   outline-style:solid
 }
@@ -9128,6 +9148,22 @@ video {
   transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration:150ms
+}
+
+.duration-150{
+  transition-duration:150ms
+}
+
+.duration-200{
+  transition-duration:200ms
+}
+
+.ease-in{
+  transition-timing-function:cubic-bezier(0.4, 0, 1, 1)
+}
+
+.ease-out{
+  transition-timing-function:cubic-bezier(0, 0, 0.2, 1)
 }
 
 .\[a-zA-Z\:\\-\\\.\]{

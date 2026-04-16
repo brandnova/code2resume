@@ -1,15 +1,23 @@
+import json
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .services import PDFService
 
-# Framework CDN map — extend this dict to add more frameworks later
 FRAMEWORK_CDN_MAP = {
-    "tailwind": '<link rel="stylesheet" href="https://cdn.tailwindcss.com">',
+    "tailwind":  '<script src="https://cdn.tailwindcss.com"></script>',
     "bootstrap": '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">',
-    "none": "",
+    "none":      "",
+}
+
+# Paper sizes: name -> (playwright_format, width_px_at_96dpi, height_px_at_96dpi)
+PAPER_SIZES = {
+    "a4":     ("A4",     794,  1123),
+    "letter": ("Letter", 816,  1056),
+    "legal":  ("Legal",  816,  1344),
+    "a5":     ("A5",     559,   794),
 }
 
 DEFAULT_HTML = """\
@@ -57,10 +65,7 @@ header {
   padding-bottom: 1rem;
 }
 
-h1 {
-  font-size: 2rem;
-  margin: 0 0 0.25rem;
-}
+h1 { font-size: 2rem; margin: 0 0 0.25rem; }
 
 h2 {
   font-size: 1.1rem;
@@ -71,54 +76,72 @@ h2 {
   margin-top: 1.5rem;
 }
 
-h3 {
-  margin: 0.5rem 0 0.1rem;
-  font-size: 1rem;
-}
+h3 { margin: 0.5rem 0 0.1rem; font-size: 1rem; }
 
-.date {
-  font-size: 0.85rem;
-  color: #555;
-}
+.date { font-size: 0.85rem; color: #555; }
 
-ul {
-  margin: 0.4rem 0 0 1rem;
-  padding: 0;
-}
-
-li {
-  margin-bottom: 0.25rem;
-}"""
+ul { margin: 0.4rem 0 0 1rem; padding: 0; }
+li { margin-bottom: 0.25rem; }"""
 
 
+@ensure_csrf_cookie
 def workspace(request):
     """
-    Main editor view. Passes default content and framework options to the template.
-    The `user` object is already available via request.user — when auth is added,
-    we'll load saved resume data here. For now, we use the defaults.
+    Main editor view. Loads saved session state if present, otherwise defaults.
     """
+    session_state = request.session.get('resume_state', {})
+
     context = {
-        "default_html": DEFAULT_HTML,
-        "default_css": DEFAULT_CSS,
-        "frameworks": ["none", "tailwind", "bootstrap"],
-        # Future hook: user = request.user (will be AnonymousUser for now)
+        "default_html":  session_state.get('html',      DEFAULT_HTML),
+        "default_css":   session_state.get('css',       DEFAULT_CSS),
+        "default_fw":    session_state.get('framework', 'none'),
+        "default_paper": session_state.get('paper',     'a4'),
+        "frameworks":    list(FRAMEWORK_CDN_MAP.keys()),
+        "paper_sizes":   list(PAPER_SIZES.keys()),
     }
     return render(request, "builder/workspace.html", context)
 
 
 @require_POST
+def save_session(request):
+    """
+    Receives editor state and persists it to the Django session.
+    Called by the frontend on a debounced interval.
+    """
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    request.session['resume_state'] = {
+        'html':      data.get('html',      ''),
+        'css':       data.get('css',       ''),
+        'framework': data.get('framework', 'none'),
+        'paper':     data.get('paper',     'a4'),
+    }
+    request.session.modified = True
+    return JsonResponse({"status": "ok"})
+
+
+@require_POST
 def export_pdf(request):
     """
-    Receives HTML, CSS, and framework choice via POST.
-    Returns a PDF file as an attachment download.
-    HTMX will handle this as a standard form POST.
+    Renders the resume to PDF via Playwright and returns it as a download.
     """
-    html = request.POST.get("html", "")
-    css = request.POST.get("css", "")
+    html      = request.POST.get("html",      "")
+    css       = request.POST.get("css",       "")
     framework = request.POST.get("framework", "none")
-    framework_css = FRAMEWORK_CDN_MAP.get(framework, "")
+    paper     = request.POST.get("paper",     "a4")
 
-    service = PDFService(html=html, css=css, framework_css=framework_css)
+    framework_css   = FRAMEWORK_CDN_MAP.get(framework, "")
+    paper_format, _, _ = PAPER_SIZES.get(paper, PAPER_SIZES["a4"])
+
+    service = PDFService(
+        html=html,
+        css=css,
+        framework_css=framework_css,
+        paper_format=paper_format,
+    )
 
     try:
         pdf_bytes = service.render_pdf()
