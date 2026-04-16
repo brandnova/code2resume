@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Django stuff
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Static & media (optional: depends on your setup)
+staticfiles/
+media/
+
+# Environment variables
+.env
+.env.*
+
+# Migrations (optional – usually keep these!)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Testing / coverage
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Node (if you're using Tailwind, which you probably are)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Playwright (since you clearly went there)
+.playwright/
+test-results/
+Todo.md

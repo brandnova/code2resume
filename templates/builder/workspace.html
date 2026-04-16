@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static builder_extras %}
+
+{% block title %}Workspace — Code2Resume{% endblock %}
+
+{% block extra_head %}
+{# Pass Django template data to JS via data attributes on a script tag — avoids tojson in template #}
+<script id="c2r-data" type="application/json">
+    {"html": {{ default_html|tojson|safe }}, "css": {{ default_css|tojson|safe }}}
+</script>
+<script>
+    const _d = JSON.parse(document.getElementById('c2r-data').textContent);
+    window.__C2R_HTML__ = _d.html;
+    window.__C2R_CSS__  = _d.css;
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div
+    x-data="resumeWorkspace()"
+    x-init="init()"
+    class="workspace-root"
+>
+
+    {# ===================== NAVBAR ===================== #}
+    <header class="navbar">
+
+        <a href="#" class="navbar-brand">
+            <span class="brand-wordmark">code<span>2</span>resume</span>
+            <span class="brand-badge">Beta</span>
+        </a>
+
+        <div class="navbar-controls">
+
+            {# Framework selector #}
+            <div class="fw-group">
+                <span class="control-label">Framework</span>
+                <select
+                    x-model="framework"
+                    @change="updatePreview()"
+                    class="select-control"
+                >
+                    {% for fw in frameworks %}
+                    <option value="{{ fw }}">{{ fw|capfirst }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# A4 guides toggle — hidden on mobile #}
+            <button
+                @click="showPageBreaks = !showPageBreaks"
+                :class="showPageBreaks ? 'active' : ''"
+                class="btn btn-ghost hide-mobile"
+                title="Toggle A4 page break guides"
+            >
+                <i class="fa-regular fa-file-lines"></i>
+                <span>A4 Guides</span>
+            </button>
+
+            {# Mobile: toggle between editor and preview #}
+            <button
+                @click="toggleMobileView()"
+                class="btn btn-ghost show-mobile-only"
+                x-text="mobileView === 'editor' ? 'Preview' : 'Editor'"
+            ></button>
+
+            {# Export PDF #}
+            <form
+                method="POST"
+                action="{% url 'builder:export_pdf' %}"
+                @submit.prevent="prepareExport($el); $el.submit()"
+            >
+                {% csrf_token %}
+                <input type="hidden" name="html">
+                <input type="hidden" name="css">
+                <input type="hidden" name="framework">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="isExporting"
+                >
+                    <i class="fa-solid fa-download" x-show="!isExporting"></i>
+                    <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
+                    <span x-text="isExporting ? 'Generating…' : 'Export PDF'"></span>
+                </button>
+            </form>
+
+        </div>
+    </header>
+
+    {# ===================== SPLIT PANE ===================== #}
+    <main class="split-pane">
+
+        {# --- EDITOR PANE --- #}
+        <div
+            class="editor-pane"
+            :class="{ 'mobile-hidden': mobileView !== 'editor' }"
+        >
+
+            {# Desktop tab bar #}
+            <div class="tab-bar desktop-tab-bar">
+                <button
+                    @click="switchTab('html')"
+                    :class="{ active: activeTab === 'html' }"
+                    class="tab-btn"
+                >
+                    <span class="tab-dot"></span>
+                    HTML
+                </button>
+                <button
+                    @click="switchTab('css')"
+                    :class="{ active: activeTab === 'css' }"
+                    class="tab-btn"
+                >
+                    <span class="tab-dot"></span>
+                    CSS
+                </button>
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span>Live</span>
+                </div>
+            </div>
+
+            {# Mobile tab bar #}
+            <div class="mobile-tab-bar">
+                <button
+                    @click="switchTab('html')"
+                    :class="{ active: activeTab === 'html' }"
+                    class="tab-btn"
+                >
+                    <span class="tab-dot"></span>
+                    HTML
+                </button>
+                <button
+                    @click="switchTab('css')"
+                    :class="{ active: activeTab === 'css' }"
+                    class="tab-btn"
+                >
+                    <span class="tab-dot"></span>
+                    CSS
+                </button>
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span>Live</span>
+                </div>
+            </div>
+
+            {# HTML editor #}
+            <div
+                id="html-editor-wrap"
+                class="editor-wrap"
+                x-show="activeTab === 'html'"
+            >
+                <div id="html-editor" class="code-editor language-html"></div>
+            </div>
+
+            {# CSS editor #}
+            <div
+                id="css-editor-wrap"
+                class="editor-wrap"
+                x-show="activeTab === 'css'"
+            >
+                <div id="css-editor" class="code-editor language-css"></div>
+            </div>
+
+        </div>
+
+        {# --- PREVIEW PANE --- #}
+        <div
+            class="preview-pane"
+            :class="{ 'mobile-hidden': mobileView !== 'preview' }"
+        >
+            <div class="pane-header">
+                <span class="pane-label">Preview</span>
+                <span class="pane-meta">A4 · 210 × 297 mm</span>
+            </div>
+
+            <div class="preview-scroll">
+                <div class="a4-paper">
+
+                    {# Page break overlay #}
+                    <div class="page-break-overlay" x-show="showPageBreaks">
+                        <template x-for="(breakY, i) in pageBreakPositions" :key="i">
+                            <div
+                                class="page-break-line-group"
+                                :style="`top: ${breakY}px`"
+                            >
+                                <hr class="page-break-rule">
+                                <span
+                                    class="page-break-tag"
+                                    x-text="`Page ${i + 2}`"
+                                ></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <iframe
+                        x-ref="previewFrame"
+                        :srcdoc="iframeDocument"
+                        class="preview-iframe"
+                        sandbox="allow-scripts allow-same-origin"
+                        title="Resume Preview"
+                    ></iframe>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    {# ===================== FOOTER ===================== #}
+    <footer class="workspace-footer">
+        <div class="footer-hints">
+            <span class="footer-hint-text">
+                <kbd class="kbd">Tab</kbd> indent
+            </span>
+            <span class="footer-hint-text">
+                <kbd class="kbd">Ctrl Z</kbd> undo
+            </span>
+        </div>
+        <span class="footer-credit">
+            Built with <span style="color: var(--danger)">❤</span> by
+            <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a>
+        </span>
+    </footer>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{% static 'js/workspace.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,7 @@
+/* Import Font Awesome FIRST */
+@import "../node_modules/@fortawesome/fontawesome-free/css/all.min.css";
+
+/* Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

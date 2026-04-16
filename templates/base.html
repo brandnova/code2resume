@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Code2Resume{% endblock %}</title>
+    <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
+
+    <!-- AOS CSS -->
+    <link href="{% static 'css/aos.min.css' %}" rel="stylesheet">
+
+    <!-- Tailwind CSS (app UI) -->
+    <link rel="stylesheet" href="{% static 'css/tailwind.min.css' %}">
+
+    <!-- Highlight.js theme (atom-one-dark) -->
+    <link rel="stylesheet" href="{% static 'css/highlight.min.css' %}">
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    {% block content %}{% endblock %}
+
+    <!-- Highlight.js — must load before Alpine/CodeJar -->
+    <script src="{% static 'js/highlight.min.js' %}"></script>
+
+    <!-- CodeJar — ES module, exposed to window for Alpine -->
+    <script type="module">
+        import { CodeJar } from "{% static 'js/codejar.min.js' %}";
+        window.CodeJar = CodeJar;
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="{% static 'js/alpine.min.js' %}"></script>
+
+    <!-- HTMX -->
+    <script defer src="{% static 'js/htmx.min.js' %}"></script>
+
+    <!-- AOS -->
+    <script src="{% static 'js/aos.min.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
