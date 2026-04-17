@@ -41,6 +41,175 @@
     --shadow-glow: 0 0 24px var(--accent-glow);
 }
 
+/* ---- Light theme variable overrides ---- */
+[data-theme="light"] {
+    --bg-base:     #f4f6fa;
+    --bg-surface:  #ffffff;
+    --bg-elevated: #eef1f7;
+    --bg-border:   #dde2ed;
+    --bg-hover:    #e6eaf4;
+
+    --text-primary:   #111827;
+    --text-secondary: #4b5563;
+    --text-muted:     #9ca3af;
+
+    --accent:        #3b6ef5;
+    --accent-hover:  #2558e8;
+    --accent-dim:    rgba(59, 110, 245, 0.12);
+    --accent-glow:   rgba(59, 110, 245, 0.2);
+
+    --success:  #059669;
+    --danger:   #dc2626;
+    --warning:  #d97706;
+
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md:   0 4px 16px rgba(0,0,0,0.1);
+    --shadow-lg:   0 8px 40px rgba(0,0,0,0.14);
+    --shadow-glow: 0 0 24px var(--accent-glow);
+}
+
+/* Light theme: editor background */
+[data-theme="light"] .editor-wrap,
+[data-theme="light"] .code-editor {
+    background: #f8f9fc;
+    color: #1e2a3a;
+}
+
+[data-theme="light"] .workspace-root {
+    background: var(--bg-base);
+}
+
+/* Light theme: preview area background */
+[data-theme="light"] .preview-scroll {
+    background: #dde4ef;
+}
+
+/* Light theme: A4 paper gets a subtle border so it's distinct from bg */
+[data-theme="light"] .a4-paper {
+    box-shadow:
+        0 0 0 1px rgba(0,0,0,0.08),
+        0 4px 6px rgba(0,0,0,0.06),
+        0 20px 60px rgba(0,0,0,0.1);
+}
+
+/* Light theme: select arrow color */
+[data-theme="light"] .select-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234b5563' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+/* ---------- Theme toggle button ---------- */
+.btn-theme {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+/* ---------- Mobile navbar section ---------- */
+.navbar-always-visible {
+    display: none;  /* hidden on desktop; shown on mobile via media query */
+    align-items: center;
+    gap: 6px;
+}
+
+.mobile-menu-btn {
+    display: none;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.navbar-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--bg-border);
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: var(--shadow-md);
+}
+
+.navbar-dropdown.open {
+    display: flex;
+}
+
+.dropdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dropdown-row .control-label {
+    display: block;
+    min-width: 72px;
+    font-size: 11px;
+}
+
+.dropdown-row .select-control {
+    flex: 1;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--bg-border);
+    margin: 2px 0;
+}
+
+.dropdown-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.dropdown-actions .btn {
+    flex: 1;
+    justify-content: center;
+}
+
+/* ---- Mobile dropdown export button ---- */
+.dropdown-export-form {
+    width: 100%;
+    display: flex;
+}
+
+.dropdown-export-form .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: inline-flex;
+    }
+
+    /* Hide desktop controls on mobile — shown in dropdown instead */
+    /* Double specificity to beat .navbar-controls { display: flex } */
+    .navbar-controls.navbar-desktop-controls {
+        display: none !important;
+    }
+
+    /* Show mobile controls on mobile devices */
+    .navbar-always-visible {
+        display: inline-flex;
+    }
+
+    .navbar {
+        position: relative; /* anchor for dropdown */
+    }
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -607,7 +776,7 @@ html, body {
     gap: 5px;
     font-size: 11px;
     font-weight: 500;
-    padding: 4px 9px;
+    padding: 2px 4.5px;
     border-radius: 20px;
     border: 1px solid transparent;
     transition: all 0.3s ease;
@@ -624,10 +793,6 @@ html, body {
     color: var(--warning);
     border-color: rgba(251, 191, 36, 0.2);
     background: rgba(251, 191, 36, 0.08);
-}
-
-@media (max-width: 768px) {
-    .session-indicator { display: none; }
 }
 
 /* ---------- Shortcuts Modal ---------- */

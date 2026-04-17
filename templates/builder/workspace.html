@@ -6,19 +6,19 @@
 {% block extra_head %}
 <script id="c2r-data" type="application/json">
 {
-    "html":   {{ default_html|tojson|safe }},
-    "css":    {{ default_css|tojson|safe }},
-    "fw":     "{{ default_fw }}",
-    "paper":  "{{ default_paper }}",
+    "html":    {{ default_html|tojson|safe }},
+    "css":     {{ default_css|tojson|safe }},
+    "fw":      "{{ default_fw }}",
+    "paper":   "{{ default_paper }}",
     "saveUrl": "{% url 'builder:save_session' %}"
 }
 </script>
 <script>
-    const _d             = JSON.parse(document.getElementById('c2r-data').textContent);
-    window.__C2R_HTML__  = _d.html;
-    window.__C2R_CSS__   = _d.css;
-    window.__C2R_FW__    = _d.fw;
-    window.__C2R_PAPER__ = _d.paper;
+    const _d                = JSON.parse(document.getElementById('c2r-data').textContent);
+    window.__C2R_HTML__     = _d.html;
+    window.__C2R_CSS__      = _d.css;
+    window.__C2R_FW__       = _d.fw;
+    window.__C2R_PAPER__    = _d.paper;
     window.__C2R_SAVE_URL__ = _d.saveUrl;
 </script>
 {% endblock %}
@@ -37,67 +37,58 @@
         <a href="#" class="navbar-brand">
             <span class="brand-wordmark">code<span>2</span>resume</span>
             <span class="brand-badge">Beta</span>
+
+            <span
+                class="session-indicator"
+                :class="sessionSaved ? 'saved' : 'unsaved'"
+                :title="sessionSaved ? 'All changes saved' : 'Unsaved changes'"
+            >
+                <i class="fa-solid fa-circle" style="font-size:7px;"></i>
+                <span x-text="sessionSaved ? 'Saved' : 'Saving…'"></span>
+            </span>
+
         </a>
 
-        <div class="navbar-controls">
+        {# ---- Desktop controls ---- #}
+        <div class="navbar-controls navbar-desktop-controls">
 
-            {# Framework selector #}
             <div class="fw-group">
                 <span class="control-label">Framework</span>
-                <select
-                    x-model="framework"
-                    @change="onFrameworkChange()"
-                    class="select-control"
-                >
+                <select x-model="framework" @change="onFrameworkChange()" class="select-control">
                     {% for fw in frameworks %}
                     <option value="{{ fw }}">{{ fw|capfirst }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            {# Paper size selector #}
             <div class="fw-group">
                 <span class="control-label">Paper</span>
-                <select
-                    x-model="paper"
-                    @change="onPaperChange()"
-                    class="select-control"
-                >
+                <select x-model="paper" @change="onPaperChange()" class="select-control">
                     {% for ps in paper_sizes %}
                     <option value="{{ ps }}">{{ ps|upper }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            {# Session saved indicator #}
-            <span
-                class="session-indicator"
-                :class="sessionSaved ? 'saved' : 'unsaved'"
-                :title="sessionSaved ? 'All changes saved' : 'Unsaved changes'"
-            >
-                <i class="fa-solid fa-circle" style="font-size: 7px;"></i>
-                <span x-text="sessionSaved ? 'Saved' : 'Saving…'"></span>
-            </span>
-
-            {# A4 guides toggle #}
             <button
                 @click="showPageBreaks = !showPageBreaks"
                 :class="showPageBreaks ? 'active' : ''"
-                class="btn btn-ghost hide-mobile"
+                class="btn btn-ghost"
                 title="Toggle page break guides"
             >
                 <i class="fa-regular fa-file-lines"></i>
                 <span>Guides</span>
             </button>
 
-            {# Mobile: editor/preview toggle #}
             <button
-                @click="toggleMobileView()"
-                class="btn btn-ghost show-mobile-only"
-                x-text="mobileView === 'editor' ? '⬡ Preview' : '⬡ Editor'"
-            ></button>
+                @click="toggleTheme()"
+                class="btn btn-ghost btn-theme"
+                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+                <i x-show="isDark"  class="fa-solid fa-sun"></i>
+                <i x-show="!isDark" class="fa-solid fa-moon"></i>
+            </button>
 
-            {# Export PDF #}
             <form
                 method="POST"
                 action="{% url 'builder:export_pdf' %}"
@@ -108,43 +99,127 @@
                 <input type="hidden" name="css">
                 <input type="hidden" name="framework">
                 <input type="hidden" name="paper">
-
                 <button type="submit" class="btn btn-primary" :disabled="isExporting">
-                    <i class="fa-solid fa-download"       x-show="!isExporting"></i>
+                    <i class="fa-solid fa-download"            x-show="!isExporting"></i>
                     <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
                     <span x-text="isExporting ? 'Generating…' : 'Export PDF'"></span>
                 </button>
             </form>
 
         </div>
+
+        {# ---- Mobile: always-visible right side ---- #}
+        <div class="navbar-always-visible">
+            <button
+                @click="toggleTheme()"
+                class="btn btn-ghost btn-theme"
+            >
+                <i x-show="isDark"  class="fa-solid fa-sun"></i>
+                <i x-show="!isDark" class="fa-solid fa-moon"></i>
+            </button>
+
+            <button
+                @click="mobileMenuOpen = !mobileMenuOpen"
+                class="btn btn-ghost mobile-menu-btn"
+                :class="mobileMenuOpen ? 'active' : ''"
+                title="Options"
+            >
+                <i x-show="!mobileMenuOpen" class="fa-solid fa-bars"></i>
+                <i x-show="mobileMenuOpen"  class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        {# ---- Mobile dropdown panel ---- #}
+        <div
+            class="navbar-dropdown"
+            :class="mobileMenuOpen ? 'open' : ''"
+        >
+            <div class="dropdown-row">
+                <span class="control-label">Framework</span>
+                <select x-model="framework" @change="onFrameworkChange(); closeMobileMenu()" class="select-control">
+                    {% for fw in frameworks %}
+                    <option value="{{ fw }}">{{ fw|capfirst }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="dropdown-row">
+                <span class="control-label">Paper</span>
+                <select x-model="paper" @change="onPaperChange(); closeMobileMenu()" class="select-control">
+                    {% for ps in paper_sizes %}
+                    <option value="{{ ps }}">{{ ps|upper }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-actions">
+                <button
+                    @click="showPageBreaks = !showPageBreaks; closeMobileMenu()"
+                    :class="showPageBreaks ? 'active' : ''"
+                    class="btn btn-ghost"
+                >
+                    <i class="fa-regular fa-file-lines"></i>
+                    <span x-text="showPageBreaks ? 'Hide Guides' : 'Show Guides'"></span>
+                </button>
+
+                <button
+                    @click="openShortcuts()"
+                    class="btn btn-ghost"
+                >
+                    <i class="fa-solid fa-keyboard"></i>
+                    <span>Shortcuts</span>
+                </button>
+
+                <button
+                    @click="toggleMobileView()"
+                    class="btn btn-ghost"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                    <span x-text="mobileView === 'editor' ? 'Preview' : 'Editor'"></span>
+                </button>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <form
+                method="POST"
+                action="{% url 'builder:export_pdf' %}"
+                @submit.prevent="prepareExport($el); $el.submit()"
+                class="dropdown-export-form"
+            >
+                {% csrf_token %}
+                <input type="hidden" name="html">
+                <input type="hidden" name="css">
+                <input type="hidden" name="framework">
+                <input type="hidden" name="paper">
+                <button type="submit" class="btn btn-primary" :disabled="isExporting">
+                    <i class="fa-solid fa-download"            x-show="!isExporting"></i>
+                    <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
+                    <span x-text="isExporting ? 'Generating PDF…' : 'Export PDF'"></span>
+                </button>
+            </form>
+        </div>
+
     </header>
 
     {# ===================== SPLIT PANE ===================== #}
     <main class="split-pane">
 
-        {# --- EDITOR PANE --- #}
+        {# ---- Editor pane ---- #}
         <div
             class="editor-pane"
             :class="{ 'mobile-hidden': mobileView !== 'editor' }"
         >
-
             {# Desktop tab bar #}
             <div class="tab-bar desktop-tab-bar">
-                <button
-                    @click="switchTab('html')"
-                    :class="{ active: activeTab === 'html' }"
-                    class="tab-btn"
-                >
-                    <span class="tab-dot"></span>
-                    HTML
+                <button @click="switchTab('html')" :class="{ active: activeTab === 'html' }" class="tab-btn">
+                    <span class="tab-dot"></span>HTML
                 </button>
-                <button
-                    @click="switchTab('css')"
-                    :class="{ active: activeTab === 'css' }"
-                    class="tab-btn"
-                >
-                    <span class="tab-dot"></span>
-                    CSS
+                <button @click="switchTab('css')"  :class="{ active: activeTab === 'css'  }" class="tab-btn">
+                    <span class="tab-dot"></span>CSS
                 </button>
                 <div class="live-indicator">
                     <span class="live-dot"></span>
@@ -154,21 +229,11 @@
 
             {# Mobile tab bar #}
             <div class="mobile-tab-bar">
-                <button
-                    @click="switchTab('html')"
-                    :class="{ active: activeTab === 'html' }"
-                    class="tab-btn"
-                >
-                    <span class="tab-dot"></span>
-                    HTML
+                <button @click="switchTab('html')" :class="{ active: activeTab === 'html' }" class="tab-btn">
+                    <span class="tab-dot"></span>HTML
                 </button>
-                <button
-                    @click="switchTab('css')"
-                    :class="{ active: activeTab === 'css' }"
-                    class="tab-btn"
-                >
-                    <span class="tab-dot"></span>
-                    CSS
+                <button @click="switchTab('css')"  :class="{ active: activeTab === 'css'  }" class="tab-btn">
+                    <span class="tab-dot"></span>CSS
                 </button>
                 <div class="live-indicator">
                     <span class="live-dot"></span>
@@ -177,33 +242,25 @@
             </div>
 
             {# HTML editor #}
-            <div
-                id="html-editor-wrap"
-                class="editor-wrap"
-                x-show="activeTab === 'html'"
-            >
+            <div id="html-editor-wrap" class="editor-wrap" x-show="activeTab === 'html'">
                 <div id="html-editor" class="code-editor language-html"></div>
             </div>
 
             {# CSS editor #}
-            <div
-                id="css-editor-wrap"
-                class="editor-wrap"
-                x-show="activeTab === 'css'"
-            >
+            <div id="css-editor-wrap" class="editor-wrap" x-show="activeTab === 'css'">
                 <div id="css-editor" class="code-editor language-css"></div>
             </div>
 
         </div>
 
-        {# --- PREVIEW PANE --- #}
+        {# ---- Preview pane ---- #}
         <div
             class="preview-pane"
             :class="{ 'mobile-hidden': mobileView !== 'preview' }"
         >
             <div class="pane-header">
                 <span class="pane-label">Preview</span>
-                <span class="pane-meta">A4 · 210 × 297 mm</span>
+                <span class="pane-meta" x-text="`${paper.toUpperCase()} · ${paperDims.w} × ${paperDims.h}px`"></span>
             </div>
 
             <div class="preview-scroll">
@@ -211,19 +268,12 @@
                     class="a4-paper"
                     :style="`width: ${paperDims.w}px; min-height: ${paperDims.h}px;`"
                 >
-
                     {# Page break overlay #}
                     <div class="page-break-overlay" x-show="showPageBreaks">
                         <template x-for="(breakY, i) in pageBreakPositions" :key="i">
-                            <div
-                                class="page-break-line-group"
-                                :style="`top: ${breakY}px`"
-                            >
+                            <div class="page-break-line-group" :style="`top: ${breakY}px`">
                                 <hr class="page-break-rule">
-                                <span
-                                    class="page-break-tag"
-                                    x-text="`Page ${i + 2}`"
-                                ></span>
+                                <span class="page-break-tag" x-text="`Page ${i + 2}`"></span>
                             </div>
                         </template>
                     </div>
@@ -232,10 +282,10 @@
                         x-ref="previewFrame"
                         :srcdoc="iframeDocument"
                         class="preview-iframe"
+                        :style="`min-height: ${paperDims.h}px;`"
                         sandbox="allow-scripts allow-same-origin"
                         title="Resume Preview"
                     ></iframe>
-
                 </div>
             </div>
         </div>
@@ -245,14 +295,10 @@
     {# ===================== FOOTER ===================== #}
     <footer class="workspace-footer">
         <div class="footer-hints">
-            <button
-                @click="openShortcuts()"
-                class="footer-shortcuts-btn"
-                title="View keyboard shortcuts (Ctrl+/)"
-            >
+            <button @click="openShortcuts()" class="footer-shortcuts-btn" title="Keyboard shortcuts (Ctrl+K)">
                 <i class="fa-solid fa-keyboard"></i>
                 <span>Shortcuts</span>
-                <kbd class="kbd">Ctrl+/</kbd>
+                <kbd class="kbd">Ctrl+K</kbd>
             </button>
         </div>
         <span class="footer-credit">
@@ -260,6 +306,7 @@
             <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a>
         </span>
     </footer>
+
     {# ===================== SHORTCUTS MODAL ===================== #}
     <div
         x-show="showShortcuts"
@@ -270,7 +317,6 @@
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         @click.self="closeShortcuts()"
-        @keydown.escape.window="closeShortcuts()"
         class="shortcuts-backdrop"
         style="display:none;"
     >
@@ -283,7 +329,7 @@
             <div class="shortcuts-header">
                 <div>
                     <h2 class="shortcuts-title">Keyboard Shortcuts</h2>
-                    <p class="shortcuts-subtitle">Press <kbd class="kbd">Ctrl+/</kbd> or <kbd class="kbd">?</kbd> to toggle</p>
+                    <p class="shortcuts-subtitle">Press <kbd class="kbd">Ctrl+K</kbd> or <kbd class="kbd">?</kbd> to toggle</p>
                 </div>
                 <button @click="closeShortcuts()" class="shortcuts-close">
                     <i class="fa-solid fa-xmark"></i>
@@ -291,7 +337,6 @@
             </div>
 
             <div class="shortcuts-body">
-
                 <div class="shortcuts-group">
                     <h3 class="shortcuts-group-title">Editor</h3>
                     <div class="shortcuts-list">
@@ -320,16 +365,14 @@
                             <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">A</kbd></div>
                         </div>
                         <div class="shortcut-row">
-                            <span class="shortcut-desc">Copy</span>
-                            <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">C</kbd></div>
-                        </div>
-                        <div class="shortcut-row">
-                            <span class="shortcut-desc">Cut</span>
-                            <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">X</kbd></div>
-                        </div>
-                        <div class="shortcut-row">
-                            <span class="shortcut-desc">Paste</span>
-                            <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">V</kbd></div>
+                            <span class="shortcut-desc">Copy / Cut / Paste</span>
+                            <div class="shortcut-keys">
+                                <kbd class="kbd">Ctrl</kbd><kbd class="kbd">C</kbd>
+                                <span style="color:var(--text-muted); font-size:11px; margin: 0 2px;">/</span>
+                                <kbd class="kbd">X</kbd>
+                                <span style="color:var(--text-muted); font-size:11px; margin: 0 2px;">/</span>
+                                <kbd class="kbd">V</kbd>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -342,26 +385,25 @@
                             <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">S</kbd></div>
                         </div>
                         <div class="shortcut-row">
-                            <span class="shortcut-desc">Toggle shortcuts</span>
-                            <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">/</kbd></div>
+                            <span class="shortcut-desc">Toggle shortcuts panel</span>
+                            <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">K</kbd></div>
                         </div>
                         <div class="shortcut-row">
-                            <span class="shortcut-desc">Close modal</span>
+                            <span class="shortcut-desc">Close modal / menu</span>
                             <div class="shortcut-keys"><kbd class="kbd">Esc</kbd></div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="shortcuts-footer">
-                <span>Undo / Redo / Copy / Cut / Paste are native browser shortcuts — they work inside the editors without any custom handling.</span>
+                Undo, Redo, Copy, Cut, and Paste are native browser shortcuts — they work inside the editors without any custom handling.
             </div>
         </div>
     </div>
+
 </div>
 {% endblock %}
-
 
 {% block extra_js %}
 <script src="{% static 'js/workspace.js' %}"></script>

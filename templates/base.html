@@ -4,8 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta property="og:title" content="Code2Resume – Build Your Resume Like Code">
+    <meta property="og:description" content="A developer-first resume builder. Write HTML & CSS, preview in real-time, and export pixel-perfect PDFs. No drag-and-drop nonsense.">
+    <meta property="og:image" content="https://code2resume.onrender.com/static/images/001-Beta-Plus.png">
+    <meta property="og:url" content="https://code2resume.onrender.com">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Code2Resume – Build Your Resume Like Code">
+    <meta name="twitter:description" content="Create your resume with real code. Live preview + perfect PDF export.">
+    <meta name="twitter:image" content="https://code2resume.onrender.com/static/images/001-Beta-Plus.png">
+    <meta name="theme-color" content="#0f172a">
+
     <title>{% block title %}Code2Resume{% endblock %}</title>
-    <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
+    <link rel="icon" href="https://code2resume.onrender.com/static/images/favicon.png" type="image/svg+xml">
 
     <!-- AOS CSS -->
     <link href="{% static 'css/aos.min.css' %}" rel="stylesheet">
@@ -15,6 +28,9 @@
 
     <!-- Highlight.js theme (atom-one-dark) -->
     <link rel="stylesheet" href="{% static 'css/highlight.min.css' %}">
+
+    <!-- Highlight.js light theme (github) — toggled via JS -->
+    <link id="hljs-light-theme" rel="stylesheet" href="{% static 'css/highlight-light.min.css' %}" disabled>
 
     <!-- App styles -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
