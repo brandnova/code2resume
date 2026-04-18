@@ -1,0 +1,31 @@
+{% extends "account/base.html" %}
+
+{% block title %}Sign Up Closed — Code2Resume{% endblock %}
+{% block auth_tagline %}Registration is temporarily unavailable.{% endblock %}
+
+{% block auth_content %}
+<div class="text-center py-4">
+    <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-lock text-3xl text-red-400"></i>
+    </div>
+    <h1 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Sign up is currently closed</h1>
+    <p class="text-sm mb-6" style="color: var(--text-muted);">
+        New account registration is temporarily disabled. Please check back later or 
+        <a href="mailto:support@code2resume.com" style="color: var(--accent);" class="hover:underline">contact support</a> 
+        if you need immediate access.
+    </p>
+    
+    <a href="{% url 'account_login' %}" class="btn btn-primary w-full justify-center">
+        <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
+        Sign in to existing account
+    </a>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-sm" style="color: var(--text-muted);">
+    <a href="/" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Return to homepage
+    </a>
+</p>
+{% endblock %}

@@ -50,6 +50,9 @@
         window.CodeJar = CodeJar;
     </script>
 
+    <!-- Custom Toast -->
+    <script src="{% static 'js/toasts.js' %}"></script>
+
     <!-- Alpine.js -->
     <script defer src="{% static 'js/alpine.min.js' %}"></script>
 
@@ -60,5 +63,6 @@
     <script src="{% static 'js/aos.min.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
+    {% include "partials/toasts.html" %}
 </body>
 </html>

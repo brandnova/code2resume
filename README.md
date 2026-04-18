@@ -69,6 +69,93 @@ On small screens the split pane collapses to a single full-screen panel. A hambu
 
 ---
 
+## Phase 2: User Accounts & Resume Management
+
+### Authentication
+
+User accounts are powered by **django-allauth** with the following configuration:
+
+- Email/password signup and login
+- Social login via **Google** and **GitHub** (OAuth credentials required in `.env`)
+- Email verification: controlled by `EMAIL_VERIFICATION` in `.env`
+  (`none` | `optional` | `mandatory`)
+- Password reset via email
+- Session persistence — no account required to use the workspace
+
+### User Model
+
+Extends Django's `AbstractUser` with these additional fields:
+
+| Field | Purpose |
+|---|---|
+| `display_name` | Preferred public name |
+| `avatar_url` | Filled automatically by social login |
+| `bio` | Short tagline for future public profile |
+| `website` | Personal or portfolio URL |
+
+Social connections (GitHub, Google) are managed via allauth's
+`SocialAccount` model — no manual token storage required.
+
+### Resume Model
+
+| Field | Type | Notes |
+|---|---|---|
+| `user` | FK → User | Owner |
+| `title` | CharField | User-defined name |
+| `slug` | SlugField | Auto-generated, unique |
+| `html_content` | TextField | Resume HTML |
+| `css_content` | TextField | Resume CSS |
+| `framework` | CharField | none / tailwind / bootstrap |
+| `paper_size` | CharField | a4 / letter / legal / a5 |
+| `photo_url` | URLField | Optional profile photo URL |
+| `is_public` | BooleanField | Controls public slug visibility |
+| `created_at` | DateTimeField | Auto |
+| `updated_at` | DateTimeField | Auto on save |
+
+### Workspace + Account Integration
+
+- **Autosave:** Editor state is saved to the Django session every 1.5s.
+  If a saved resume is loaded (slug present in session), changes are also
+  written to the database record automatically.
+- **Save as new:** A modal prompts for a title (and optional photo URL)
+  and creates a new `Resume` record linked to the user.
+- **New Resume flow:** A confirmation modal checks for unsaved work before
+  clearing the workspace. Users can save first or discard and start fresh.
+- **Open from profile:** Loading a saved resume writes its content to the
+  session and redirects to the workspace.
+
+### Public Resume URLs
+
+Saved resumes can be published at `/r/<slug>/`.
+
+- Toggle visibility per resume from the profile page (eye icon).
+- Public pages render sanitized HTML/CSS via `bleach` — script tags,
+  event handlers, and dangerous CSS patterns are stripped.
+- A fixed attribution bar shows the owner's name and links back to
+  Code2Resume.
+- Private or non-existent slugs render a custom 404 page.
+- The public page enforces desktop-width layout (`min-width` set to paper
+  width) so resume formatting is preserved on all screen sizes.
+
+### Key URLs
+
+| URL | View |
+|---|---|
+| `/accounts/signup/` | Create account |
+| `/accounts/login/` | Sign in |
+| `/accounts/logout/` | Sign out |
+| `/accounts/password/reset/` | Request password reset |
+| `/u/profile/` | Resume list + profile |
+| `/u/profile/edit/` | Edit profile fields |
+| `/u/resume/<slug>/open/` | Load resume into workspace |
+| `/u/resume/<slug>/delete/` | Delete resume |
+| `/u/resume/<slug>/toggle-public/` | Toggle public/private |
+| `/resume/new/` | Clear workspace (with confirmation) |
+| `/resume/save-as/` | Save current workspace as named resume |
+| `/r/<slug>/` | Public resume page |
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -143,9 +230,9 @@ code2resume/
 ## Roadmap
 
 - **Phase 2 — User Accounts:** Save multiple resumes linked to a profile, accessible via unique shareable slug URLs.
-- **Phase 3 — AI Integration:** Content recommendations, grammar polish, and ATS-optimisation checks powered by an LLM.
-- **Phase 4 — Template Library:** Pre-built HTML/CSS resume skeletons to fork and customise.
-- **Phase 5 — Live Deploy:** Turn any saved resume into a hosted public landing page with one click.
+- **Phase 3 — Template Library:** Pre-built HTML/CSS resume skeletons to fork and customise.
+- **Phase 4 — AI Integration:** Content recommendations, grammar polish, and ATS-optimization checks powered by an LLM.
+- **Phase 5 — Live Deploy:** Final preparations and all setup touches for deployment.
 
 ---
 

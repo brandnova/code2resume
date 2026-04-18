@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Code2Resume — Build Your Resume Like Code{% endblock %}
+
+{% block extra_head %}
+<!-- Google Fonts: JetBrains Mono + DM Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div x-data="landingPage()" class="lp-root">
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="lp-nav" :class="{ 'lp-nav--scrolled': scrolled }">
+    <div class="lp-nav-inner">
+      <a href="{% url 'landing' %}" class="lp-brand">
+        code<span>2</span>resume
+      </a>
+      <div class="lp-nav-actions">
+        <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme">
+          <i class="fa-solid fa-sun  theme-icon-sun"></i>
+          <i class="fa-solid fa-moon theme-icon-moon"></i>
+      </button>
+        {% if user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="lp-btn-ghost lp-nav-hide-sm">
+          <i class="fa-regular fa-id-card"></i> My Resumes
+        </a>
+        {% else %}
+        <a href="{% url 'account_login' %}" class="lp-btn-ghost lp-nav-hide-sm">Sign in</a>
+        {% endif %}
+        <a href="{% url 'builder:workspace' %}" class="lp-btn-primary">
+          Open Workspace <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="lp-hero">
+    <div class="lp-hero-inner">
+      <!-- Left: Text -->
+      <div class="lp-hero-text" data-aos="fade-right" data-aos-duration="700">
+        <div class="lp-eyebrow">v2.0 — Free to use</div>
+        <h1 class="lp-hero-title">
+          Your resume,<br>written in <em class="lp-accent-word">code</em>.
+        </h1>
+        <p class="lp-hero-sub">
+          A split-pane workspace for developers who know that the best resume
+          is one you wrote yourself in HTML and CSS, with full control over
+          every pixel.
+        </p>
+        <div class="lp-hero-cta">
+          <a href="{% url 'builder:workspace' %}" class="lp-btn-hero-primary">
+            <i class="fa-solid fa-code"></i> Start building for free
+          </a>
+          <a href="#how-it-works" class="lp-btn-hero-ghost">
+            See how it works <i class="fa-solid fa-arrow-down"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Code window -->
+      <div class="lp-hero-visual" data-aos="fade-left" data-aos-duration="700" data-aos-delay="150">
+        <div class="lp-code-window">
+          <!-- Window chrome -->
+          <div class="lp-win-bar">
+            <div class="lp-win-dots">
+              <span class="lp-dot lp-dot--red"></span>
+              <span class="lp-dot lp-dot--yellow"></span>
+              <span class="lp-dot lp-dot--green"></span>
+            </div>
+            <span class="lp-win-title">resume.html</span>
+            <div class="lp-win-tabs">
+              <span class="lp-win-tab lp-win-tab--active">HTML</span>
+              <span class="lp-win-tab">CSS</span>
+            </div>
+          </div>
+          <!-- Typed code -->
+          <div class="lp-win-body">
+            <div class="lp-typed-code" x-html="typedHtml"></div>
+            <span class="lp-cursor" :class="{ 'lp-cursor--visible': showCursor }">▌</span>
+          </div>
+          <!-- Preview strip (appears after typing) -->
+          <div class="lp-preview-strip" x-show="previewVisible" x-transition>
+            <div class="lp-preview-header">
+              <div class="lp-preview-name" x-text="previewName"></div>
+              <span class="lp-preview-badge">PREVIEW</span>
+            </div>
+            <div class="lp-preview-meta">Full-Stack Engineer · Lagos, Nigeria</div>
+            <div class="lp-preview-label">Experience</div>
+            <div class="lp-preview-bar">
+              <div class="lp-preview-bar-fill" :style="`width:${previewBarW}%`"></div>
+            </div>
+            <div class="lp-preview-bar lp-preview-bar--dim">
+              <div class="lp-preview-bar-fill" :style="`width:${previewBarW * 0.6}%`"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== STATS ===================== -->
+  <div class="lp-stats" id="lp-stats-row">
+    <div class="lp-stat" data-aos="fade-up" data-aos-delay="0">
+      <div class="lp-stat-num"><span x-text="counters.frameworks">0</span>+</div>
+      <div class="lp-stat-label">// frameworks supported</div>
+    </div>
+    <div class="lp-stat" data-aos="fade-up" data-aos-delay="80">
+      <div class="lp-stat-num"><span x-text="counters.pages">0</span></div>
+      <div class="lp-stat-label">// paper sizes</div>
+    </div>
+    <div class="lp-stat" data-aos="fade-up" data-aos-delay="160">
+      <div class="lp-stat-num">~<span x-text="counters.export">0</span>ms</div>
+      <div class="lp-stat-label">// PDF export time</div>
+    </div>
+    <div class="lp-stat" data-aos="fade-up" data-aos-delay="240">
+      <div class="lp-stat-num"><span x-text="counters.shortcuts">0</span></div>
+      <div class="lp-stat-label">// keyboard shortcuts</div>
+    </div>
+  </div>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section class="lp-section" id="features">
+    <div class="lp-section-head" data-aos="fade-up">
+      <p class="lp-eyebrow">// features</p>
+      <h2 class="lp-section-title">Everything a developer needs.<br>Nothing they don&apos;t.</h2>
+      <p class="lp-section-sub">Built with the same discipline you&apos;d bring to a production codebase. No bloat, no lock-in, no surprises.</p>
+    </div>
+
+    <div class="lp-features-grid">
+
+      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="0">
+        <div class="lp-feature-icon"><i class="fa-solid fa-code-branch"></i></div>
+        <h3 class="lp-feature-title">Split-Pane Editor</h3>
+        <p class="lp-feature-desc">HTML and CSS side-by-side with CodeJar syntax highlighting. Preview updates on every keystroke with zero latency.</p>
+      </div>
+
+      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="70">
+        <div class="lp-feature-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <h3 class="lp-feature-title">Framework Injector</h3>
+        <p class="lp-feature-desc">Drop in Tailwind CSS or Bootstrap with a single dropdown. The CDN is injected into your preview iframe instantly.</p>
+      </div>
+
+      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="140">
+        <div class="lp-feature-icon"><i class="fa-solid fa-file-pdf"></i></div>
+        <h3 class="lp-feature-title">Playwright PDF Engine</h3>
+        <p class="lp-feature-desc">Headless Chromium renders your exact HTML to PDF. What you see in the preview is exactly what you get in the file.</p>
+      </div>
+
+      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="0">
+        <div class="lp-feature-icon"><i class="fa-regular fa-file-lines"></i></div>
+        <h3 class="lp-feature-title">Page Break Guides</h3>
+        <p class="lp-feature-desc">Visual A4/Letter/Legal/A5 boundary overlays in the preview so you never clip a line of text at print time.</p>
+      </div>
+
+      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="70">
+        <div class="lp-feature-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <h3 class="lp-feature-title">Auto Session Save</h3>
+        <p class="lp-feature-desc">Your work is saved to the server every 1.5 seconds as you type. Reload the page and your resume is still there.</p>
+      </div>
+
+      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="140">
+        <div class="lp-feature-icon"><i class="fa-solid fa-user-shield"></i></div>
+        <h3 class="lp-feature-title">Account & Cloud Save</h3>
+        <p class="lp-feature-desc">Sign in with Google or GitHub. Save multiple named resumes and open them from any device at any time.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section class="lp-section lp-section--alt" id="how-it-works">
+    <div class="lp-section-head" data-aos="fade-up">
+      <p class="lp-eyebrow">// workflow</p>
+      <h2 class="lp-section-title">Four steps. One great resume.</h2>
+    </div>
+    <div class="lp-steps">
+      <div class="lp-step" data-aos="fade-up" data-aos-delay="0">
+        <div class="lp-step-num">01</div>
+        <h3 class="lp-step-title">Open the workspace</h3>
+        <p class="lp-step-desc">No signup required. Start with the default template or paste your own HTML instantly.</p>
+      </div>
+      <div class="lp-step" data-aos="fade-up" data-aos-delay="100">
+        <div class="lp-step-num">02</div>
+        <h3 class="lp-step-title">Write your HTML & CSS</h3>
+        <p class="lp-step-desc">Full control. Use utility classes, custom fonts, grid layouts — anything a browser can render.</p>
+      </div>
+      <div class="lp-step" data-aos="fade-up" data-aos-delay="200">
+        <div class="lp-step-num">03</div>
+        <h3 class="lp-step-title">Preview in real-time</h3>
+        <p class="lp-step-desc">The live iframe reflects your exact resume as you type. Toggle page guides to check boundaries.</p>
+      </div>
+      <div class="lp-step" data-aos="fade-up" data-aos-delay="300">
+        <div class="lp-step-num">04</div>
+        <h3 class="lp-step-title">Export as PDF</h3>
+        <p class="lp-step-desc">Click Export. Playwright renders your HTML in headless Chromium and returns a pixel-perfect PDF.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FRAMEWORK SHOWCASE ===================== -->
+  <section class="lp-section" id="frameworks" data-aos="fade-up">
+    <div class="lp-section-head">
+      <p class="lp-eyebrow">// framework injector</p>
+      <h2 class="lp-section-title">Your CSS framework. Your rules.</h2>
+      <p class="lp-section-sub">Switch between Tailwind, Bootstrap, or raw CSS with one click. The preview updates immediately.</p>
+    </div>
+
+    <div class="lp-fw-tabs">
+      <button class="lp-fw-tab" :class="{ 'lp-fw-tab--active': activeFw === 'none' }" @click="setFw('none')">Vanilla CSS</button>
+      <button class="lp-fw-tab" :class="{ 'lp-fw-tab--active': activeFw === 'tailwind' }" @click="setFw('tailwind')">Tailwind</button>
+      <button class="lp-fw-tab" :class="{ 'lp-fw-tab--active': activeFw === 'bootstrap' }" @click="setFw('bootstrap')">Bootstrap</button>
+    </div>
+
+    <div class="lp-fw-demo">
+      <div class="lp-fw-code">
+        <div class="lp-fw-code-header">
+          <span class="lp-fw-dot"></span>
+          <span class="lp-fw-filename">resume.html</span>
+        </div>
+        <div class="lp-fw-code-body" x-html="fwCodeSamples[activeFw]"></div>
+      </div>
+      <div class="lp-fw-preview" x-html="fwPreviewSamples[activeFw]"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA ===================== -->
+  <section class="lp-cta" data-aos="fade-up">
+    <div class="lp-cta-glow" aria-hidden="true"></div>
+    <div class="lp-cta-inner">
+      <h2 class="lp-cta-title">Stop fighting Word.<br>Start coding your career.</h2>
+      <p class="lp-cta-sub">Open the workspace, write your HTML, and export a resume that actually looks the way you intended.</p>
+      <div class="lp-cta-btns">
+        <a href="{% url 'builder:workspace' %}" class="lp-btn-hero-primary">
+          <i class="fa-solid fa-rocket"></i> Open workspace — it&apos;s free
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'account_signup' %}" class="lp-btn-hero-ghost">Create free account</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <a href="{% url 'landing' %}" class="lp-brand lp-brand--sm">code<span>2</span>resume</a>
+      <nav class="lp-footer-links">
+        <a href="{% url 'builder:workspace' %}">Workspace</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}">My Resumes</a>
+        {% else %}
+        <a href="{% url 'account_signup' %}">Sign up</a>
+        <a href="{% url 'account_login' %}">Sign in</a>
+        {% endif %}
+        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a>
+      </nav>
+      <p class="lp-footer-credit">
+        Built with <span style="color:var(--danger)">❤</span> by
+        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a>
+      </p>
+    </div>
+  </footer>
+
+</div><!-- /lp-root -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ──────────────────────────────────────────────────────────────
+   applyTheme — mirrors workspace.js; needed on the landing page
+   since workspace.js is not loaded here.
+────────────────────────────────────────────────────────────── */
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const darkLink  = document.querySelector('link[href*="highlight.min.css"]:not(#hljs-light-theme)');
+    const lightLink = document.getElementById('hljs-light-theme');
+    if (theme === 'light') {
+        if (darkLink)  darkLink.disabled  = true;
+        if (lightLink) lightLink.disabled = false;
+    } else {
+        if (darkLink)  darkLink.disabled  = false;
+        if (lightLink) lightLink.disabled = true;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Apply theme immediately on script parse to prevent flash
+────────────────────────────────────────────────────────────── */
+applyTheme((localStorage.getItem('c2r-theme') || 'dark'));
+
+/* ──────────────────────────────────────────────────────────────
+   Alpine component
+────────────────────────────────────────────────────────────── */
+function landingPage() {
+    return {
+        /* ── state ── */
+        scrolled:       false,
+        showCursor:     true,
+        typedHtml:      '',
+        previewVisible: false,
+        previewName:    '',
+        previewBarW:    0,
+        activeFw:       'none',
+        isDark:         (localStorage.getItem('c2r-theme') || 'dark') === 'dark',
+        counters:       { frameworks: 0, pages: 0, export: 0, shortcuts: 0 },
+
+        /* ── framework code samples ── */
+        fwCodeSamples: {
+            none: `<span class="t-dim">/* Vanilla CSS resume */</span>
+<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"resume"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>
+  <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"role"</span><span class="t-tag">&gt;</span>
+    <span class="t-text">Software Engineer</span>
+  <span class="t-tag">&lt;/p&gt;</span>
+<span class="t-tag">&lt;/div&gt;</span>`,
+            tailwind: `<span class="t-dim">/* Tailwind utility classes */</span>
+<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"max-w-2xl mx-auto p-8"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;h1</span> <span class="t-attr">class</span>=<span class="t-val">"text-3xl font-bold tracking-tight"</span><span class="t-tag">&gt;</span>
+    <span class="t-text">Ada Lovelace</span>
+  <span class="t-tag">&lt;/h1&gt;</span>
+  <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"text-blue-600 mt-1"</span><span class="t-tag">&gt;</span>
+    <span class="t-text">Software Engineer</span>
+  <span class="t-tag">&lt;/p&gt;</span>
+<span class="t-tag">&lt;/div&gt;</span>`,
+            bootstrap: `<span class="t-dim">/* Bootstrap components */</span>
+<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"container py-4"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;h1</span> <span class="t-attr">class</span>=<span class="t-val">"display-6 fw-bold"</span><span class="t-tag">&gt;</span>
+    <span class="t-text">Ada Lovelace</span>
+  <span class="t-tag">&lt;/h1&gt;</span>
+  <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"text-primary"</span><span class="t-tag">&gt;</span>
+    <span class="t-text">Software Engineer</span>
+  <span class="t-tag">&lt;/p&gt;</span>
+<span class="t-tag">&lt;/div&gt;</span>`,
+        },
+
+        /* ── framework preview samples ── */
+        fwPreviewSamples: {
+            none: `<div style="font-family:Georgia,serif;padding:16px;background:#fff;height:100%;">
+                     <h1 style="font-size:20px;margin:0 0 3px;color:#111;">Ada Lovelace</h1>
+                     <p style="color:#555;font-size:12px;margin:0 0 14px;">Software Engineer · London, UK</p>
+                     <hr style="border:none;border-top:2px solid #111;margin-bottom:10px;">
+                     <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:6px;">Experience</p>
+                     <p style="font-size:13px;font-weight:600;margin:0 0 2px;">Lead Engineer, Analytical Engine Co.</p>
+                     <p style="font-size:11px;color:#666;margin:0;">1843 – Present</p>
+                   </div>`,
+            tailwind: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+                       <div class="p-4 bg-white h-full">
+                         <h1 class="text-xl font-bold tracking-tight text-gray-900">Ada Lovelace</h1>
+                         <p class="text-blue-600 text-xs mt-0.5 mb-3">Software Engineer · London, UK</p>
+                         <div class="border-t border-gray-200 pt-3">
+                           <span class="text-xs font-semibold uppercase tracking-widest text-gray-400">Experience</span>
+                           <p class="text-sm font-semibold text-gray-800 mt-2">Lead Engineer, Analytical Engine Co.</p>
+                           <p class="text-xs text-gray-500">1843 – Present</p>
+                         </div>
+                       </div>`,
+            bootstrap: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+                        <div class="container-fluid p-3 bg-white h-100">
+                          <h1 class="h5 fw-bold mb-0">Ada Lovelace</h1>
+                          <p class="text-primary small mb-3">Software Engineer · London, UK</p>
+                          <hr>
+                          <p class="text-muted small text-uppercase fw-bold mb-2" style="letter-spacing:.08em;">Experience</p>
+                          <p class="small fw-semibold mb-0">Lead Engineer, Analytical Engine Co.</p>
+                          <p class="text-muted" style="font-size:11px;">1843 – Present</p>
+                        </div>`,
+        },
+
+        /* ── typing animation frames ── */
+        _typeFrames: [
+            { html: '',                                                                                                                      name: '' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span>',                                                                                name: '' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">A</span>',                                                   name: 'A' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada</span>',                                                  name: 'Ada' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span>',                                         name: 'Ada Lovelace' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>',   name: 'Ada Lovelace' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>\n<span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"role"</span><span class="t-tag">&gt;</span>', name: 'Ada Lovelace' },
+            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>\n<span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"role"</span><span class="t-tag">&gt;</span><span class="t-text">Software Engineer</span><span class="t-tag">&lt;/p&gt;</span>', name: 'Ada Lovelace' },
+        ],
+
+        /* ── init ── */
+        init() {
+            applyTheme(this.isDark ? 'dark' : 'light');
+
+            window.addEventListener('scroll', () => {
+                this.scrolled = window.scrollY > 40;
+            }, { passive: true });
+
+            /* cursor blink */
+            setInterval(() => { this.showCursor = !this.showCursor; }, 530);
+
+            /* typing */
+            this._runTypingAnimation();
+
+            /* AOS (already loaded by base.html) */
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ duration: 700, once: true, offset: 60 });
+            }
+
+            /* stat counters */
+            this._initCounters();
+        },
+
+        /* ── theme toggle ── */
+        toggleTheme() {
+            this.isDark = !this.isDark;
+            const t = this.isDark ? 'dark' : 'light';
+            applyTheme(t);
+            localStorage.setItem('c2r-theme', t);
+        },
+
+        /* ── framework tab ── */
+        setFw(fw) { this.activeFw = fw; },
+
+        /* ── typing animation ── */
+        _runTypingAnimation() {
+            let frame = 0;
+            const advance = () => {
+                if (frame < this._typeFrames.length) {
+                    const f        = this._typeFrames[frame];
+                    this.typedHtml   = f.html;
+                    this.previewName = f.name;
+                    if (frame >= 4) {
+                        this.previewVisible = true;
+                        this.previewBarW    = Math.min(frame * 18, 90);
+                    }
+                    frame++;
+                    const delay = frame < 3 ? 120 : frame < 6 ? 300 : 400;
+                    setTimeout(advance, delay);
+                } else {
+                    setTimeout(() => {
+                        frame               = 0;
+                        this.previewVisible = false;
+                        this.previewBarW    = 0;
+                        this.typedHtml      = '';
+                        this._runTypingAnimation();
+                    }, 3200);
+                }
+            };
+            advance();
+        },
+
+        /* ── counter animation ── */
+        _initCounters() {
+            const targets = { frameworks: 3, pages: 4, export: 800, shortcuts: 8 };
+            const el = document.getElementById('lp-stats-row');
+            if (!el) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                if (!entries[0].isIntersecting) return;
+                observer.disconnect();
+                Object.entries(targets).forEach(([key, target]) => {
+                    let val = 0;
+                    const step = target / 40;
+                    const tick = setInterval(() => {
+                        val = Math.min(val + step, target);
+                        this.counters[key] = Math.round(val);
+                        if (val >= target) clearInterval(tick);
+                    }, 28);
+                });
+            }, { threshold: 0.3 });
+
+            observer.observe(el);
+        },
+    };
+}
+</script>
+{% endblock %}

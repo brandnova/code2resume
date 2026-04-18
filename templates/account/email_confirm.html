@@ -1,0 +1,33 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Confirm Email — Code2Resume{% endblock %}
+{% block auth_tagline %}One last step.{% endblock %}
+
+{% block auth_content %}
+<div class="text-center py-2">
+    <div class="text-4xl mb-4">✉️</div>
+    <h1 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Confirm your email</h1>
+
+    {% if confirmation %}
+    <p class="text-sm mb-6" style="color: var(--text-muted);">
+        Please confirm that <strong style="color: var(--text-primary);">{{ confirmation.email_address.email }}</strong>
+        is your email address by clicking the button below.
+    </p>
+    <form method="POST" action="{% url 'account_confirm_email' confirmation.key %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary w-full justify-center">
+            Confirm email address
+        </button>
+    </form>
+    {% else %}
+    <p class="text-sm mb-6" style="color: var(--text-muted);">
+        This confirmation link is invalid or has expired.
+        Please request a new one from your account settings.
+    </p>
+    <a href="{% url 'account_login' %}" class="btn btn-primary w-full justify-center">
+        Back to sign in
+    </a>
+    {% endif %}
+</div>
+{% endblock %}

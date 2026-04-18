@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Not Found — Code2Resume</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #080d14;
+            color: #e8edf5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 24px;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 80px;
+            font-weight: 700;
+            color: #4f7ef7;
+            line-height: 1;
+            margin-bottom: 16px;
+            letter-spacing: -0.04em;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+        p {
+            font-size: 15px;
+            color: #7a8fa8;
+            line-height: 1.6;
+            max-width: 420px;
+            margin-bottom: 36px;
+        }
+        .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #4f7ef7;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .btn-primary:hover { background: #6b94ff; }
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: transparent;
+            color: #7a8fa8;
+            font-size: 14px;
+            border: 1px solid #1e2d45;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-ghost:hover { border-color: #4f7ef7; color: #e8edf5; }
+        .brand {
+            margin-top: 48px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #3d5168;
+            text-decoration: none;
+        }
+        .brand span { color: #4f7ef7; }
+    </style>
+</head>
+<body>
+    <div class="code">404</div>
+    <h1>This resume isn't available</h1>
+    <p>
+        This link either doesn't exist or the owner has set it to private.
+        If you're the owner, check that your resume is marked as public in your profile.
+    </p>
+    <div class="actions">
+        <a href="{% url 'builder:workspace' %}" class="btn-primary">Build your own resume</a>
+        <a href="{% url 'landing' %}" class="btn-ghost">Back to home</a>
+    </div>
+    <a href="{% url 'landing' %}" class="brand">code<span>2</span>resume</a>
+</body>
+</html>

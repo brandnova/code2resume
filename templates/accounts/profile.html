@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Resumes — Code2Resume{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background: var(--bg-base);">
+
+    {# Header bar #}
+    <header class="border-b px-6 py-4 flex items-center justify-between relative"
+            style="background: var(--bg-surface); border-color: var(--bg-border);">
+        <a href="/" class="font-mono text-lg font-bold" style="color: var(--text-primary); text-decoration:none;">
+            code<span style="color: var(--accent);">2</span>resume
+        </a>
+        
+        <div class="flex items-center gap-3">
+            <!-- Account dropdown -->
+            <div x-data="{ open: false }" class="relative">
+                <button @click="open = !open" 
+                        @click.away="open = false"
+                        class="btn btn-ghost text-sm flex items-center gap-2">
+                    <i class="fa-regular fa-circle-user"></i>
+                    <span class="hidden sm:inline">Account</span>
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+                
+                <!-- FIXED DROPDOWN: explicit positioning + layer promotion -->
+                <div x-show="open" 
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                    x-cloak
+                    class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-50"
+                    style="
+                        position: absolute;
+                        background: var(--bg-elevated); 
+                        border: 1px solid var(--bg-border);
+                        will-change: transform, opacity;
+                        white-space: nowrap;
+                    ">
+                    <a href="{% url 'account_email' %}" 
+                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
+                    style="color: var(--text-primary);">
+                        <i class="fa-regular fa-envelope w-4"></i> Email Addresses
+                    </a>
+                    <a href="{% url 'account_change_password' %}" 
+                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
+                    style="color: var(--text-primary);">
+                        <i class="fa-solid fa-key w-4"></i> Change Password
+                    </a>
+                    <a href="{% url 'socialaccount_connections' %}" 
+                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
+                    style="color: var(--text-primary);">
+                        <i class="fa-solid fa-link w-4"></i> Connected Accounts
+                    </a>
+                    <a href="{% url 'accounts:profile_edit' %}" 
+                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
+                    style="color: var(--text-primary);">
+                        <i class="fa-regular fa-user w-4"></i> Edit Profile
+                    </a>
+                    <hr style="border-color: var(--bg-border);" class="my-1">
+                    <a href="{% url 'account_logout' %}" 
+                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors text-red-400">
+                        <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+            <a href="{% url 'builder:new_resume' %}" class="btn btn-primary text-sm">
+                <i class="fa-solid fa-plus"></i>
+                New Resume
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-10">
+
+        {# User greeting #}
+        <div class="flex items-center gap-4 mb-10">
+            {% if request.user.avatar_url %}
+            <img src="{{ request.user.avatar_url }}" alt="Avatar"
+                 class="w-14 h-14 rounded-full object-cover border-2"
+                 style="border-color: var(--accent);">
+            {% else %}
+            <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+                 style="background: var(--accent-dim); color: var(--accent);">
+                {{ request.user.get_display_name|first|upper }}
+            </div>
+            {% endif %}
+            <div>
+                <h1 class="text-2xl font-bold" style="color: var(--text-primary);">
+                    {{ request.user.get_display_name }}
+                </h1>
+                <p class="text-sm" style="color: var(--text-muted);">{{ request.user.email }}</p>
+            </div>
+        </div>
+
+        {# Messages #}
+        {% for message in messages %}
+        <div class="mb-4 px-4 py-3 rounded-lg text-sm
+            {% if message.tags == 'error' %}bg-red-500/10 text-red-400 border border-red-500/20
+            {% else %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        {# Resumes section #}
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">
+                Saved Resumes
+            </h2>
+            <span class="text-xs px-2 py-1 rounded"
+                  style="background: var(--bg-elevated); color: var(--text-muted);">
+                {{ resumes.count }} resume{{ resumes.count|pluralize }}
+            </span>
+        </div>
+
+        {% if resumes %}
+        <div class="grid gap-3">
+            {% for resume in resumes %}
+            <div class="flex items-center justify-between px-5 py-4 rounded-xl border transition-colors"
+                 style="background: var(--bg-surface); border-color: var(--bg-border);"
+                 onmouseover="this.style.borderColor='var(--accent)'"
+                 onmouseout="this.style.borderColor='var(--bg-border)'">
+                <div class="min-w-0">
+                    <p class="font-semibold truncate" style="color: var(--text-primary);">{{ resume.title }}</p>
+                    <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+                        {{ resume.framework|capfirst }} &middot; {{ resume.paper_size|upper }}
+                        &middot; updated {{ resume.updated_at|timesince }} ago
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                    <a href="{% url 'accounts:resume_open' resume.slug %}"
+                       class="btn btn-ghost text-xs">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span class="hidden sm:inline">Open</span>
+                    </a>
+                    {# Public toggle #}
+                    <form method="POST" action="{% url 'accounts:resume_toggle_public' resume.slug %}">
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="btn btn-ghost text-xs"
+                            :title="resume.is_public ? 'Make private' : 'Make public'"
+                            style="{% if resume.is_public %}color: var(--success);{% endif %}"
+                            onmouseover="this.style.borderColor='var(--accent)'"
+                            onmouseout="this.style.borderColor='var(--bg-border)'"
+                        >
+                            {% if resume.is_public %}
+                            <i class="fa-solid fa-eye"></i>
+                            {% else %}
+                            <i class="fa-solid fa-eye-slash"></i>
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    {# Copy public link — only when public #}
+                    {% if resume.is_public %}
+                    <button
+                        class="btn btn-ghost text-xs"
+                        onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'builder:public_resume' resume.slug %}').then(() => this.innerHTML = '<i class=\'fa-solid fa-check\'></i>').then(() => setTimeout(() => this.innerHTML = '<i class=\'fa-solid fa-link\'></i>', 1800))"
+                        title="Copy public link"
+                    >
+                        <i class="fa-solid fa-link"></i>
+                    </button>
+                    {% endif %}
+                    <form method="POST" action="{% url 'accounts:resume_delete' resume.slug %}"
+                          onsubmit="return confirm('Delete \'{{ resume.title }}\'?')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-ghost text-xs"
+                                style="color: var(--danger);"
+                                onmouseover="this.style.borderColor='var(--danger)'"
+                                onmouseout="this.style.borderColor='var(--bg-border)'">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="text-center py-16 rounded-xl border border-dashed"
+             style="border-color: var(--bg-border);">
+            <p class="text-4xl mb-3">📄</p>
+            <p class="font-medium mb-1" style="color: var(--text-primary);">No resumes yet</p>
+            <p class="text-sm mb-5" style="color: var(--text-muted);">
+                Start building and save your first resume from the workspace.
+            </p>
+            <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                Start building
+            </a>
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+{% endblock %}

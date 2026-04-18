@@ -1,0 +1,89 @@
+{% comment %} =====================================================================
+Save Resume modal — shown when user clicks "Save".
+For authenticated users: collects a title and POSTs to save_as_resume.
+===================================================================== {% endcomment %}
+
+<div
+    x-show="showSaveModal"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    @click.self="closeSaveModal()"
+    class="shortcuts-backdrop"
+    style="display: none;"
+>
+    <div
+        class="shortcuts-card"
+        style="max-width: 420px;"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+    >
+        <div class="shortcuts-header">
+            <div>
+                <h2 class="shortcuts-title">Save Resume</h2>
+                <p class="shortcuts-subtitle" x-text="currentResumeSlug ? 'Update existing or save as new.' : 'Give your resume a name.'"></p>
+            </div>
+            <button @click="closeSaveModal()" class="shortcuts-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="shortcuts-body" style="gap: 12px;">
+
+            <div>
+                <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                       style="color: var(--text-muted);">Resume title</label>
+                <input
+                    type="text"
+                    x-model="saveTitle"
+                    @keydown.enter="confirmSave()"
+                    placeholder="e.g. Senior Django Developer Resume"
+                    class="w-full"
+                    style="background: var(--bg-elevated); border: 1px solid var(--bg-border);
+                           color: var(--text-primary); padding: 9px 13px; border-radius: var(--radius-sm);
+                           font-size: 14px; outline: none; width: 100%; box-sizing: border-box;"
+                    x-ref="saveTitleInput"
+                >
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                    style="color: var(--text-muted);">
+                    Profile photo URL
+                    <span style="color: var(--text-muted); font-weight:400; text-transform:none;"> — optional</span>
+                </label>
+                <input
+                    type="url"
+                    x-model="photoUrl"
+                    placeholder="https://avatars.githubusercontent.com/u/..."
+                    style="background: var(--bg-elevated); border: 1px solid var(--bg-border);
+                        color: var(--text-primary); padding: 9px 13px; border-radius: var(--radius-sm);
+                        font-size: 14px; outline: none; width: 100%; box-sizing: border-box;"
+                >
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                    Shown on your public resume page alongside your name.
+                </p>
+            </div>
+
+            <div x-show="saveError" class="text-xs text-red-400 px-1" x-text="saveError"></div>
+
+        </div>
+
+        <div class="shortcuts-footer" style="display: flex; gap: 8px; justify-content: flex-end; padding: 16px 24px;">
+            <button @click="closeSaveModal()" class="btn btn-ghost">Cancel</button>
+            <button
+                @click="confirmSave()"
+                class="btn btn-primary"
+                :disabled="isSaving"
+            >
+                <i class="fa-solid fa-floppy-disk" x-show="!isSaving"></i>
+                <i class="fa-solid fa-circle-notch fa-spin" x-show="isSaving"></i>
+                <span x-text="isSaving ? 'Saving…' : (currentResumeSlug ? 'Update' : 'Save')"></span>
+            </button>
+        </div>
+    </div>
+</div>

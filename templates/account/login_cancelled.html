@@ -1,0 +1,39 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Sign In Cancelled — Code2Resume{% endblock %}
+{% block auth_tagline %}You cancelled the authentication process.{% endblock %}
+
+{% block auth_content %}
+<div class="text-center py-4">
+    <div class="w-16 h-16 rounded-full bg-gray-500/10 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-ban text-3xl text-gray-400"></i>
+    </div>
+    <h1 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Sign in cancelled</h1>
+    <p class="text-sm mb-3" style="color: var(--text-muted);">
+        You chose to cancel the sign-in process using your social account.
+    </p>
+    <p class="text-xs mb-6" style="color: var(--text-muted);">
+        No changes have been made to your account.
+    </p>
+    
+    <div class="flex flex-col gap-3">
+        <a href="{% url 'account_login' %}" class="btn btn-primary w-full justify-center">
+            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
+            Try again
+        </a>
+        <a href="/" class="btn btn-ghost w-full justify-center">
+            <i class="fa-solid fa-house mr-2"></i>
+            Go to homepage
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-sm" style="color: var(--text-muted);">
+    <a href="{% url 'account_signup' %}" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-user-plus mr-1"></i> Create an account instead
+    </a>
+</p>
+{% endblock %}

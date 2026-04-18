@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12" style="background: var(--bg-base);">
+    
+    <div class="w-full max-w-md">
+
+        {# Brand #}
+        <div class="text-center mb-8">
+            <a href="/" class="inline-block">
+                <span class="font-mono text-2xl font-bold tracking-tight" style="color: var(--text-primary);">
+                    code<span style="color: var(--accent);">2</span>resume
+                </span>
+            </a>
+            <p class="mt-2 text-sm" style="color: var(--text-muted);">{% block auth_tagline %}{% endblock %}</p>
+        </div>
+
+        {# Card #}
+        <div class="rounded-xl border p-8" style="background: var(--bg-surface); border-color: var(--bg-border);">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="mb-4 px-4 py-3 rounded-lg text-sm
+                    {% if message.tags == 'error' %}bg-red-500/10 text-red-400 border border-red-500/20
+                    {% else %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block auth_content %}{% endblock %}
+        </div>
+
+        {% block auth_footer %}{% endblock %}
+
+    </div>
+</div>
+{% endblock %}

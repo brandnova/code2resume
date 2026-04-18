@@ -1,0 +1,23 @@
+{% extends "account/base.html" %}
+
+{% block title %}Signed Out — Code2Resume{% endblock %}
+{% block auth_tagline %}You've been signed out.{% endblock %}
+
+{% block auth_content %}
+<div class="text-center py-4">
+    <div class="text-4xl mb-4">👋</div>
+    <h1 class="text-xl font-bold mb-2" style="color: var(--text-primary);">See you next time</h1>
+    <p class="text-sm mb-6" style="color: var(--text-muted);">
+        Your work is saved and waiting for you whenever you're back.
+    </p>
+    <a href="{% url 'account_login' %}" class="btn btn-primary w-full justify-center">
+        Sign back in
+    </a>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-sm" style="color: var(--text-muted);">
+    <a href="/" style="color: var(--accent);" class="hover:underline">← Back to workspace</a>
+</p>
+{% endblock %}

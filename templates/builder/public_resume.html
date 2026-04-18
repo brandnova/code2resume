@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>{{ resume.title }} — Code2Resume</title>
+
+    <meta name="robots" content="noindex, nofollow">
+
+    {# Framework CDN — only injected if user chose one #}
+    {% if framework_css %}
+    {{ framework_css|safe }}
+    {% endif %}
+
+    <style>
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #d0d5e0;
+            min-height: 100vh;
+        }
+
+        /* Mobile scrollable container for desktop layout preview */
+        .resume-scroll-container {
+            width: 100%;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        @media (max-width: 768px) {
+            .resume-scroll-container {
+                max-height: calc(100vh - 120px);
+                position: relative;
+                border-radius: 8px 8px 0 0;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .resume-scroll-container {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            }
+        }
+
+        /* Paper container */
+        .resume-paper {
+            width: {{ paper_w }}px;
+            min-height: {{ paper_h }}px;
+            background: #ffffff;
+            margin: 32px auto 80px;
+            box-shadow:
+                0 4px 6px rgba(0,0,0,0.07),
+                0 20px 60px rgba(0,0,0,0.18);
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .resume-paper {
+                margin: 16px 16px 80px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        }
+
+        /* User resume styles scoped below */
+        .resume-paper .resume-content {
+            width: 100%;
+        }
+
+        /* Mobile zoom controls */
+        .zoom-controls {
+            display: none;
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 200;
+            gap: 5px;
+            background: rgba(8, 13, 20, 0.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+            padding: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .zoom-controls {
+                display: flex;
+            }
+        }
+
+        .zoom-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(79,126,247,0.2);
+            color: #9eb8ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.15s;
+            font-family: system-ui, sans-serif;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(79,126,247,0.4);
+            color: #fff;
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        .zoom-display {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            height: 36px;
+            padding: 0 8px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            font-family: system-ui, sans-serif;
+            font-weight: 500;
+        }
+
+        /* ---- Attribution bar ---- */
+        .attribution {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: rgba(8, 13, 20, 0.88);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+            gap: 12px;
+        }
+
+        .attribution-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .attribution-owner {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            overflow: hidden;
+        }
+
+        .owner-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .owner-avatar-initial {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(79,126,247,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            font-family: system-ui, sans-serif;
+        }
+
+        .owner-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: system-ui, sans-serif;
+        }
+
+        .attribution-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            flex-shrink: 0;
+        }
+
+        .attribution-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .attribution-brand {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color 0.15s;
+        }
+
+        .attribution-brand:hover {
+            color: #ffffff;
+        }
+
+        .attribution-brand strong {
+            color: #6b94ff;
+        }
+
+        .attribution-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 5px;
+            background: rgba(79,126,247,0.25);
+            color: #9eb8ff;
+            text-decoration: none;
+            border: 1px solid rgba(79,126,247,0.3);
+            transition: all 0.15s;
+            white-space: nowrap;
+            font-family: system-ui, sans-serif;
+        }
+
+        .attribution-cta:hover {
+            background: rgba(79,126,247,0.4);
+            color: #fff;
+        }
+
+        /* User-defined resume CSS */
+        {{ safe_css|safe }}
+    </style>
+</head>
+<body>
+
+    {# Mobile zoom controls #}
+    <div class="zoom-controls" id="zoomControls">
+        <button class="zoom-btn" id="zoomOut" title="Zoom out">−</button>
+        <div class="zoom-display" id="zoomLevel">100%</div>
+        <button class="zoom-btn" id="zoomIn" title="Zoom in">+</button>
+        <button class="zoom-btn" id="zoomReset" title="Reset zoom">↺</button>
+    </div>
+
+    {# Scrollable container for desktop layout on mobile #}
+    <div class="resume-scroll-container">
+        <div class="resume-paper">
+            <div class="resume-content">
+                {{ safe_html|safe }}
+            </div>
+        </div>
+    </div>
+
+    {# ---- Attribution bar ---- #}
+    <div class="attribution">
+        <div class="attribution-left">
+            <div class="attribution-owner">
+                {% if resume.photo_url %}
+                <img src="{{ resume.photo_url }}" alt="{{ owner.get_display_name }}"
+                     class="owner-avatar"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="owner-avatar-initial" style="display:none;">
+                    {{ owner.get_display_name|first|upper }}
+                </div>
+                {% else %}
+                <div class="owner-avatar-initial">
+                    {{ owner.get_display_name|first|upper }}
+                </div>
+                {% endif %}
+                <span class="owner-name">{{ owner.get_display_name }}</span>
+            </div>
+        </div>
+
+        <div class="attribution-right">
+            <a href="{% url 'landing' %}" class="attribution-brand">
+                code<strong>2</strong>resume
+            </a>
+            <a href="{% url 'builder:workspace' %}" class="attribution-cta">
+                Build yours free ↗
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile zoom functionality for resume preview
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || window.innerWidth <= 768;
+
+        if (isMobile) {
+            const resumePaper = document.querySelector('.resume-paper');
+            const zoomOut = document.getElementById('zoomOut');
+            const zoomIn = document.getElementById('zoomIn');
+            const zoomReset = document.getElementById('zoomReset');
+            const zoomDisplay = document.getElementById('zoomLevel');
+            const scrollContainer = document.querySelector('.resume-scroll-container');
+
+            let currentZoom = 100;
+            const MIN_ZOOM = 50;
+            const MAX_ZOOM = 200;
+            const ZOOM_STEP = 10;
+
+            function updateZoom(newZoom) {
+                currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+                const scale = currentZoom / 100;
+                resumePaper.style.transform = `scale(${scale})`;
+                resumePaper.style.transformOrigin = 'top center';
+                zoomDisplay.textContent = `${currentZoom}%`;
+
+                // Store preference in sessionStorage
+                sessionStorage.setItem('resumeZoom', currentZoom);
+            }
+
+            zoomOut.addEventListener('click', () => {
+                updateZoom(currentZoom - ZOOM_STEP);
+            });
+
+            zoomIn.addEventListener('click', () => {
+                updateZoom(currentZoom + ZOOM_STEP);
+            });
+
+            zoomReset.addEventListener('click', () => {
+                updateZoom(100);
+            });
+
+            // Restore previous zoom level if available
+            const savedZoom = sessionStorage.getItem('resumeZoom');
+            if (savedZoom) {
+                updateZoom(parseInt(savedZoom, 10));
+            }
+
+            // Optional: Enable pinch zoom on touch devices
+            let lastDistance = 0;
+
+            scrollContainer.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2) {
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const distance = Math.hypot(
+                        touch1.clientX - touch2.clientX,
+                        touch1.clientY - touch2.clientY
+                    );
+
+                    if (lastDistance > 0) {
+                        const delta = distance - lastDistance;
+                        if (Math.abs(delta) > 5) {
+                            updateZoom(currentZoom + (delta > 0 ? ZOOM_STEP : -ZOOM_STEP));
+                            e.preventDefault();
+                        }
+                    }
+                    lastDistance = distance;
+                }
+            }, { passive: false });
+
+            scrollContainer.addEventListener('touchend', () => {
+                lastDistance = 0;
+            });
+        }
+    </script>
+
+</body>
+</html>

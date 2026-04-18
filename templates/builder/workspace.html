@@ -1,25 +1,59 @@
 {% extends "base.html" %}
-{% load static builder_extras %}
+{% load static %}
 
 {% block title %}Workspace — Code2Resume{% endblock %}
 
 {% block extra_head %}
 <script id="c2r-data" type="application/json">
 {
-    "html":    {{ default_html|tojson|safe }},
-    "css":     {{ default_css|tojson|safe }},
-    "fw":      "{{ default_fw }}",
-    "paper":   "{{ default_paper }}",
-    "saveUrl": "{% url 'builder:save_session' %}"
+    "html":               {{ default_html|tojson|safe }},
+    "css":                {{ default_css|tojson|safe }},
+    "fw":                 "{{ default_fw }}",
+    "paper":              "{{ default_paper }}",
+    "saveUrl":            "{% url 'builder:save_session' %}",
+    "saveAsUrl":          "{% url 'builder:save_as_resume' %}",
+    "updateUrl":          "{% url 'builder:update_resume' %}",
+    "newResumeUrl":       "{% url 'builder:new_resume' %}",
+    "resumeSlug":         "{{ resume_slug }}",
+    "resumeTitle":        "{{ resume_title }}",
+    "photoUrl":           "{{ default_photo|escapejs }}",
+    "newResumeRequested": {{ new_resume_requested|yesno:"true,false" }},
+    "sessionHasContent":  {{ session_has_content|yesno:"true,false" }},
+    "sessionIsSaved":     {{ session_is_saved|yesno:"true,false" }},
+    "sessionResumeTitle": "{{ session_resume_title|escapejs }}",
+    "defaultHtml":        {{ default_html|tojson|safe }},
+    "defaultCss":         {{ default_css|tojson|safe }}
 }
 </script>
 <script>
-    const _d                = JSON.parse(document.getElementById('c2r-data').textContent);
-    window.__C2R_HTML__     = _d.html;
-    window.__C2R_CSS__      = _d.css;
-    window.__C2R_FW__       = _d.fw;
-    window.__C2R_PAPER__    = _d.paper;
-    window.__C2R_SAVE_URL__ = _d.saveUrl;
+(function () {
+    var raw = document.getElementById('c2r-data').textContent;
+    var d;
+    try {
+        d = JSON.parse(raw);
+    } catch (e) {
+        console.error('[C2R] JSON parse failed. Raw data:', raw);
+        console.error('[C2R] Error:', e.message);
+        d = {};
+    }
+    window.__C2R_HTML__                = d.html                ?? '';
+    window.__C2R_CSS__                 = d.css                 ?? '';
+    window.__C2R_FW__                  = d.fw                  ?? 'none';
+    window.__C2R_PAPER__               = d.paper               ?? 'a4';
+    window.__C2R_SAVE_URL__            = d.saveUrl             ?? '';
+    window.__C2R_SAVE_AS_URL__         = d.saveAsUrl           ?? '';
+    window.__C2R_UPDATE_URL__          = d.updateUrl           ?? '';
+    window.__C2R_NEW_RESUME_URL__      = d.newResumeUrl        ?? '';
+    window.__C2R_RESUME_SLUG__         = d.resumeSlug          ?? '';
+    window.__C2R_RESUME_TITLE__        = d.resumeTitle         ?? '';
+    window.__C2R_PHOTO_URL__           = d.photoUrl            ?? '';
+    window.__C2R_NEW_REQUESTED__       = d.newResumeRequested  ?? false;
+    window.__C2R_SESSION_HAS_CONTENT__ = d.sessionHasContent   ?? false;
+    window.__C2R_SESSION_IS_SAVED__    = d.sessionIsSaved      ?? false;
+    window.__C2R_SESSION_TITLE__       = d.sessionResumeTitle  ?? '';
+    window.__C2R_DEFAULT_HTML__        = d.defaultHtml         ?? '';
+    window.__C2R_DEFAULT_CSS__         = d.defaultCss          ?? '';
+}());
 </script>
 {% endblock %}
 
@@ -36,8 +70,7 @@
 
         <a href="#" class="navbar-brand">
             <span class="brand-wordmark">code<span>2</span>resume</span>
-            <span class="brand-badge">Beta</span>
-
+            <span class="brand-badge">V2.0</span>
             <span
                 class="session-indicator"
                 :class="sessionSaved ? 'saved' : 'unsaved'"
@@ -46,76 +79,21 @@
                 <i class="fa-solid fa-circle" style="font-size:7px;"></i>
                 <span x-text="sessionSaved ? 'Saved' : 'Saving…'"></span>
             </span>
-
         </a>
 
         {# ---- Desktop controls ---- #}
         <div class="navbar-controls navbar-desktop-controls">
 
-            <div class="fw-group">
-                <span class="control-label">Framework</span>
-                <select x-model="framework" @change="onFrameworkChange()" class="select-control">
-                    {% for fw in frameworks %}
-                    <option value="{{ fw }}">{{ fw|capfirst }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="fw-group">
-                <span class="control-label">Paper</span>
-                <select x-model="paper" @change="onPaperChange()" class="select-control">
-                    {% for ps in paper_sizes %}
-                    <option value="{{ ps }}">{{ ps|upper }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <button
-                @click="showPageBreaks = !showPageBreaks"
-                :class="showPageBreaks ? 'active' : ''"
-                class="btn btn-ghost"
-                title="Toggle page break guides"
-            >
-                <i class="fa-regular fa-file-lines"></i>
-                <span>Guides</span>
-            </button>
-
-            <button
-                @click="toggleTheme()"
-                class="btn btn-ghost btn-theme"
-                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-            >
-                <i x-show="isDark"  class="fa-solid fa-sun"></i>
-                <i x-show="!isDark" class="fa-solid fa-moon"></i>
-            </button>
-
-            <form
-                method="POST"
-                action="{% url 'builder:export_pdf' %}"
-                @submit.prevent="prepareExport($el); $el.submit()"
-            >
-                {% csrf_token %}
-                <input type="hidden" name="html">
-                <input type="hidden" name="css">
-                <input type="hidden" name="framework">
-                <input type="hidden" name="paper">
-                <button type="submit" class="btn btn-primary" :disabled="isExporting">
-                    <i class="fa-solid fa-download"            x-show="!isExporting"></i>
-                    <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
-                    <span x-text="isExporting ? 'Generating…' : 'Export PDF'"></span>
-                </button>
-            </form>
+            {# Navbar menu — desktop #}
+            {% include "builder/partials/desktop_nav_menu.html" %}
 
         </div>
 
         {# ---- Mobile: always-visible right side ---- #}
         <div class="navbar-always-visible">
-            <button
-                @click="toggleTheme()"
-                class="btn btn-ghost btn-theme"
-            >
-                <i x-show="isDark"  class="fa-solid fa-sun"></i>
-                <i x-show="!isDark" class="fa-solid fa-moon"></i>
+            <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme">
+                <i class="fa-solid fa-sun  theme-icon-sun"></i>
+                <i class="fa-solid fa-moon theme-icon-moon"></i>
             </button>
 
             <button
@@ -127,14 +105,11 @@
                 <i x-show="!mobileMenuOpen" class="fa-solid fa-bars"></i>
                 <i x-show="mobileMenuOpen"  class="fa-solid fa-xmark"></i>
             </button>
-
         </div>
 
         {# ---- Mobile dropdown panel ---- #}
-        <div
-            class="navbar-dropdown"
-            :class="mobileMenuOpen ? 'open' : ''"
-        >
+        <div class="navbar-dropdown" :class="mobileMenuOpen ? 'open' : ''">
+
             <div class="dropdown-row">
                 <span class="control-label">Framework</span>
                 <select x-model="framework" @change="onFrameworkChange(); closeMobileMenu()" class="select-control">
@@ -165,18 +140,12 @@
                     <span x-text="showPageBreaks ? 'Hide Guides' : 'Show Guides'"></span>
                 </button>
 
-                <button
-                    @click="openShortcuts()"
-                    class="btn btn-ghost"
-                >
+                <button @click="openShortcuts()" class="btn btn-ghost">
                     <i class="fa-solid fa-keyboard"></i>
                     <span>Shortcuts</span>
                 </button>
 
-                <button
-                    @click="toggleMobileView()"
-                    class="btn btn-ghost"
-                >
+                <button @click="toggleMobileView()" class="btn btn-ghost">
                     <i class="fa-solid fa-eye"></i>
                     <span x-text="mobileView === 'editor' ? 'Preview' : 'Editor'"></span>
                 </button>
@@ -184,23 +153,59 @@
 
             <div class="dropdown-divider"></div>
 
-            <form
-                method="POST"
-                action="{% url 'builder:export_pdf' %}"
-                @submit.prevent="prepareExport($el); $el.submit()"
-                class="dropdown-export-form"
-            >
-                {% csrf_token %}
-                <input type="hidden" name="html">
-                <input type="hidden" name="css">
-                <input type="hidden" name="framework">
-                <input type="hidden" name="paper">
-                <button type="submit" class="btn btn-primary" :disabled="isExporting">
-                    <i class="fa-solid fa-download"            x-show="!isExporting"></i>
-                    <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
-                    <span x-text="isExporting ? 'Generating PDF…' : 'Export PDF'"></span>
+            {# Auth + save in mobile dropdown #}
+            <div class="dropdown-actions">
+                {% if user.is_authenticated %}
+                <button @click="openSaveModal(); closeMobileMenu()" class="btn btn-ghost" style="flex: 1; justify-content: center;">
+                    <i class="fa-regular fa-floppy-disk"></i>
+                    <span>Save Resume</span>
                 </button>
-            </form>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-ghost" style="flex: 1; justify-content: center;">
+                    <i class="fa-regular fa-id-card"></i>
+                    <span>My Resumes</span>
+                </a>
+                <a href="{% url 'account_logout' %}" class="btn btn-ghost" style="color: var(--danger); flex: 1; justify-content: center;">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sign out</span>
+                </a>
+                {% else %}
+                <a href="{% url 'account_login' %}?next=/?save=1" class="btn btn-ghost" style="flex: 1; justify-content: center;">
+                    <i class="fa-regular fa-floppy-disk"></i>
+                    <span>Save Resume</span>
+                </a>
+                <a href="{% url 'account_login' %}" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Sign in</span>
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            {# Export and New Resume buttons - 2 column layout #}
+            <div class="dropdown-button-row">
+                <form
+                    method="POST"
+                    action="{% url 'builder:export_pdf' %}"
+                    @submit.prevent="prepareExport($el); $el.submit()"
+                    class="dropdown-export-form"
+                >
+                    {% csrf_token %}
+                    <input type="hidden" name="html">
+                    <input type="hidden" name="css">
+                    <input type="hidden" name="framework">
+                    <input type="hidden" name="paper">
+                    <button type="submit" class="btn btn-primary" :disabled="isExporting">
+                        <i class="fa-solid fa-download"            x-show="!isExporting"></i>
+                        <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
+                        <span x-text="isExporting ? 'Generating…' : 'Export PDF'"></span>
+                    </button>
+                </form>
+                <a href="{% url 'builder:new_resume' %}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New Resume</span>
+                </a>
+            </div>
         </div>
 
     </header>
@@ -401,7 +406,8 @@
             </div>
         </div>
     </div>
-
+    {% include "builder/partials/save_modal.html" %}
+    {% include "builder/partials/new_resume_modal.html" %}
 </div>
 {% endblock %}
 

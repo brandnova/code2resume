@@ -1,0 +1,87 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load allauth %}
+
+{% block title %}Email Addresses — Code2Resume{% endblock %}
+{% block auth_tagline %}Manage your email addresses.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary);">Email Addresses</h1>
+        <a href="{% url 'account_change_password' %}" class="text-xs hover:underline" style="color: var(--accent);">Change password <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    {% if user.emailaddress_set.all %}
+    <div class="space-y-3">
+        <p class="text-sm" style="color: var(--text-muted);">The following email addresses are associated with your account:</p>
+        
+        {% for emailaddress in user.emailaddress_set.all %}
+        <div class="p-3 rounded-lg border" style="background: var(--bg-elevated); border-color: var(--bg-border);">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-3">
+                    <span class="font-mono text-sm" style="color: var(--text-primary);">{{ emailaddress.email }}</span>
+                    {% if emailaddress.verified %}
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-500">Verified</span>
+                    {% else %}
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-500">Unverified</span>
+                    {% endif %}
+                    {% if emailaddress.primary %}
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-500">Primary</span>
+                    {% endif %}
+                </div>
+                
+                <div class="flex gap-2">
+                    {% if not emailaddress.primary %}
+                    <form method="post" action="{% url 'account_email' %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                        <button type="submit" name="action_primary" class="text-xs px-2 py-1 rounded transition-colors hover:bg-white/10">Set Primary</button>
+                    </form>
+                    {% endif %}
+                    
+                    {% if not emailaddress.verified %}
+                    <form method="post" action="{% url 'account_email' %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                        <button type="submit" name="action_send" class="text-xs px-2 py-1 rounded transition-colors hover:bg-white/10">Re-send Verification</button>
+                    </form>
+                    {% endif %}
+                    
+                    {% if not emailaddress.primary %}
+                    <form method="post" action="{% url 'account_email' %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                        <button type="submit" name="action_remove" class="text-xs px-2 py-1 rounded text-red-400 hover:bg-red-500/10 transition-colors">Remove</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Add new email -->
+    <div class="mt-6 pt-4 border-t" style="border-color: var(--bg-border);">
+        <h2 class="text-sm font-semibold mb-3" style="color: var(--text-primary);">Add a new email address</h2>
+        <form method="post" action="{% url 'account_email' %}" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <input type="email" name="email" placeholder="new@example.com" required
+                       class="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-1 transition-all"
+                       style="background: var(--bg-surface); border-color: var(--bg-border); color: var(--text-primary);">
+            </div>
+            <button type="submit" name="action_add" class="btn btn-primary px-4 py-2 text-sm">
+                Add Email
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
+    <a href="{% url 'accounts:profile' %}" style="color: var(--accent);" class="hover:underline"><i class="fa-solid fa-arrow-left"></i> Back to profile</a>
+</p>
+{% endblock %}

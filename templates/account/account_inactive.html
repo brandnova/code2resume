@@ -1,0 +1,35 @@
+{% extends "account/base.html" %}
+
+{% block title %}Account Inactive — Code2Resume{% endblock %}
+{% block auth_tagline %}Your account needs attention.{% endblock %}
+
+{% block auth_content %}
+<div class="text-center py-4">
+    <div class="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-circle-exclamation text-3xl text-yellow-500"></i>
+    </div>
+    <h1 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Account inactive</h1>
+    <p class="text-sm mb-3" style="color: var(--text-muted);">
+        This account has been deactivated and cannot be used at this time.
+    </p>
+    <p class="text-xs mb-6" style="color: var(--text-muted);">
+        If you believe this is an error, please 
+        <a href="#" style="color: var(--accent);" class="hover:underline">contact support</a> 
+        to restore access.
+    </p>
+    
+    <a href="/" class="btn btn-primary w-full justify-center">
+        <i class="fa-solid fa-house mr-2"></i>
+        Return to homepage
+    </a>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-sm" style="color: var(--text-muted);">
+    Need help? 
+    <a href="#" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-regular fa-envelope mr-1"></i> Contact support
+    </a>
+</p>
+{% endblock %}
