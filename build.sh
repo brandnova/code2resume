@@ -9,12 +9,12 @@ echo ""
 
 # ---- Python dependencies ----
 echo "==> [1/6] Installing Python dependencies..."
+pip install --upgrade pip
 pip install -r requirements.txt
 
 # ---- Playwright ----
 echo "==> [2/6] Installing Playwright Chromium..."
 playwright install chromium
-playwright install-deps chromium
 
 # ---- Static files ----
 echo "==> [3/6] Collecting static files..."
