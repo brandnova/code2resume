@@ -231,6 +231,7 @@ code2resume/
 
 - **Phase 2 — User Accounts:** Save multiple resumes linked to a profile, accessible via unique shareable slug URLs.
 - **Phase 3 — Template Library:** Pre-built HTML/CSS resume skeletons to fork and customise.
+  - **Phase 3.5 — Site management dashboard** Administrative dashboard for tracking site access, usage, and managing templates
 - **Phase 4 — AI Integration:** Content recommendations, grammar polish, and ATS-optimization checks powered by an LLM.
 - **Phase 5 — Live Deploy:** Final preparations and all setup touches for deployment.
 

@@ -88,79 +88,78 @@ ul { margin: 0.4rem 0 0 1rem; padding: 0; }
 li { margin-bottom: 0.25rem; }"""
 
 
-@ensure_csrf_cookie
 def workspace(request):
-    session_state        = request.session.get('resume_state', {})
-    new_resume_requested = request.session.pop('new_resume_requested', False)
-    request.session.modified = True
-
-    # Defensive: never pass None or empty string when we have a default
-    html = session_state.get('html') or DEFAULT_HTML
-    css  = session_state.get('css')  or DEFAULT_CSS
-
+    session_state = request.session.get('resume_state', {})
     context = {
-        'default_html':         html,
-        'default_css':          css,
-        'default_fw':           session_state.get('framework',    'none'),
-        'default_paper':        session_state.get('paper',        'a4'),
-        'resume_title':         session_state.get('resume_title', ''),
-        'resume_slug':          session_state.get('resume_slug',  ''),
-        'default_photo':        session_state.get('photo_url',    ''),
-        'frameworks':           list(FRAMEWORK_CDN_MAP.keys()),
-        'paper_sizes':          list(PAPER_SIZES.keys()),
-        'new_resume_requested': new_resume_requested,
-        'session_has_content':  bool((session_state.get('html') or '').strip()),
-        'session_is_saved':     bool(session_state.get('resume_slug', '')),
-        'session_resume_title': session_state.get('resume_title', ''),
+        "default_html":  session_state.get('html',          DEFAULT_HTML),
+        "default_css":   session_state.get('css',           DEFAULT_CSS),
+        "default_fw":    session_state.get('framework',     'none'),
+        "default_paper": session_state.get('paper',         'a4'),
+        "resume_title":  session_state.get('resume_title',  ''),
+        "resume_slug":   session_state.get('resume_slug',   ''),
+        "default_photo": session_state.get('photo_url',     ''),
+        "frameworks":    list(FRAMEWORK_CDN_MAP.keys()),
+        "paper_sizes":   list(PAPER_SIZES.keys()),
+        # Hardcoded defaults for the JS reset function
+        "raw_default_html": DEFAULT_HTML,
+        "raw_default_css":  DEFAULT_CSS,
     }
-    return render(request, 'builder/workspace.html', context)
+    return render(request, "builder/workspace.html", context)
 
 
 @require_POST
 def save_session(request):
     """
-    Receives editor state and persists it to the Django session.
-    Saves to user account if authenticated.
-    Called by the frontend on a debounced interval.
+    Auto-save endpoint. Persists editor state to session.
+    If user is authenticated and a resume slug is tracked, syncs to DB.
     """
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
+    # Carry forward slug/title from existing session — never overwrite from client
+    existing = request.session.get('resume_state', {})
     state = {
-        'html':      data.get('html',      ''),
-        'css':       data.get('css',       ''),
-        'framework': data.get('framework', 'none'),
-        'paper':     data.get('paper',     'a4'),
+        'html':         data.get('html',      ''),
+        'css':          data.get('css',       ''),
+        'framework':    data.get('framework', 'none'),
+        'paper':        data.get('paper',     'a4'),
+        'resume_slug':  existing.get('resume_slug',  ''),
+        'resume_title': existing.get('resume_title', ''),
+        'photo_url':    data.get('photo_url', ''),
     }
 
-    # Persist to session for anonymous and authenticated users alike
-    resume_slug  = request.session.get('resume_state', {}).get('resume_slug')
-    resume_title = request.session.get('resume_state', {}).get('resume_title', 'Untitled Resume')
-    state['resume_slug']  = resume_slug
-    state['resume_title'] = resume_title
     request.session['resume_state'] = state
     request.session.modified = True
 
-    # If authenticated and a resume slug is in session, sync to the DB
-    if request.user.is_authenticated and resume_slug:
+    # Sync to DB if authenticated and tracking a resume
+    if request.user.is_authenticated and state['resume_slug']:
         from accounts.models import Resume
         try:
-            resume = Resume.objects.get(slug=resume_slug, user=request.user)
+            resume = Resume.objects.get(slug=state['resume_slug'], user=request.user)
             resume.html_content = state['html']
             resume.css_content  = state['css']
             resume.framework    = state['framework']
             resume.paper_size   = state['paper']
+            resume.photo_url    = state['photo_url']
             resume.save()
         except Resume.DoesNotExist:
-            pass
+            # Slug in session no longer exists — clear it silently
+            state['resume_slug']  = ''
+            state['resume_title'] = ''
+            request.session['resume_state'] = state
+            request.session.modified = True
 
     return JsonResponse({"status": "ok"})
 
 
 @require_POST
 def save_as_resume(request):
+    """
+    Manual save. Creates a new Resume record or updates an existing one
+    if a slug is provided. Updates session to track the saved resume.
+    """
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Login required"}, status=401)
 
@@ -170,19 +169,36 @@ def save_as_resume(request):
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    title = data.get('title', 'Untitled Resume').strip() or 'Untitled Resume'
+    title     = data.get('title', '').strip() or 'Untitled Resume'
+    slug      = data.get('slug',  '').strip()
+    photo_url = data.get('photo_url', '').strip()
 
-    resume = Resume.objects.create(
-        user         = request.user,
-        title        = title,
-        html_content = data.get('html',      ''),
-        css_content  = data.get('css',       ''),
-        framework    = data.get('framework', 'none'),
-        paper_size   = data.get('paper',     'a4'),
-        photo_url    = data.get('photo_url', ''),
-    )
+    if slug:
+        # Update existing
+        try:
+            resume = Resume.objects.get(slug=slug, user=request.user)
+            resume.title        = title
+            resume.html_content = data.get('html',      '')
+            resume.css_content  = data.get('css',       '')
+            resume.framework    = data.get('framework', 'none')
+            resume.paper_size   = data.get('paper',     'a4')
+            resume.photo_url    = photo_url
+            resume.save()
+        except Resume.DoesNotExist:
+            return JsonResponse({"error": "Resume not found"}, status=404)
+    else:
+        # Create new
+        resume = Resume.objects.create(
+            user         = request.user,
+            title        = title,
+            html_content = data.get('html',      ''),
+            css_content  = data.get('css',       ''),
+            framework    = data.get('framework', 'none'),
+            paper_size   = data.get('paper',     'a4'),
+            photo_url    = photo_url,
+        )
 
-    # Update session to track this resume going forward
+    # Update session to track this resume
     state = request.session.get('resume_state', {})
     state['resume_slug']  = resume.slug
     state['resume_title'] = resume.title
@@ -193,63 +209,14 @@ def save_as_resume(request):
 
 
 @require_POST
-def update_resume(request):
+def clear_session(request):
     """
-    Updates an existing resume. Called from the save modal when editing.
-    Requires the resume slug to be passed in the request body.
+    Clears resume state from session. Called by the New Resume confirm button.
+    Returns JSON — the frontend handles the page reload.
     """
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Login required"}, status=401)
-
-    from accounts.models import Resume
-    try:
-        data = json.loads(request.body)
-    except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-
-    slug = data.get('slug', '').strip()
-    if not slug:
-        return JsonResponse({"error": "Slug is required"}, status=400)
-
-    try:
-        resume = Resume.objects.get(slug=slug, user=request.user)
-    except Resume.DoesNotExist:
-        return JsonResponse({"error": "Resume not found"}, status=404)
-
-    title = data.get('title', '').strip() or resume.title
-    resume.title        = title
-    resume.html_content = data.get('html', '')
-    resume.css_content  = data.get('css', '')
-    resume.framework    = data.get('framework', 'none')
-    resume.paper_size   = data.get('paper', 'a4')
-    resume.photo_url    = data.get('photo_url', '')
-    resume.save()
-
-    # Update session to reflect the changed title (if it changed)
-    state = request.session.get('resume_state', {})
-    state['resume_title'] = resume.title
-    request.session['resume_state'] = state
+    request.session.pop('resume_state', None)
     request.session.modified = True
-
-    return JsonResponse({"status": "ok", "slug": resume.slug, "title": resume.title})
-
-
-def new_resume(request):
-    """
-    GET: Marks the session with a 'wants_new' flag and redirects
-         to the workspace. The workspace JS reads this flag on load
-         and shows the confirmation modal if there is existing work.
-    POST: Actually clears the session state (called by the discard button confirm).
-    """
-    if request.method == 'POST':
-        request.session.pop('resume_state', None)
-        request.session.modified = True
-        return JsonResponse({'status': 'cleared'})
-
-    # GET — set a flag and send the user to the workspace
-    request.session['new_resume_requested'] = True
-    request.session.modified = True
-    return redirect('builder:workspace')
+    return JsonResponse({"status": "cleared"})
 
 
 @require_POST

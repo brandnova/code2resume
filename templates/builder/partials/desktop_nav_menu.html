@@ -71,8 +71,8 @@
 </form>
 
 {# ---------- Theme toggle ---------- #}
-<button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme">
-    <i class="fa-solid fa-sun  theme-icon-sun"></i>
+<button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme" title="Toggle theme">
+    <i class="fa-solid fa-sun theme-icon-sun"></i>
     <i class="fa-solid fa-moon theme-icon-moon"></i>
 </button>
 
@@ -123,7 +123,7 @@
 
         <div class="user-dropdown-divider"></div>
 
-        <a href="{% url 'builder:new_resume' %}" class="user-dropdown-item">
+        <a href="/?new=1" class="user-dropdown-item">
             <i class="fa-solid fa-plus"></i>
             New Resume
         </a>
@@ -148,6 +148,13 @@
         <div class="user-dropdown-header">
             <p class="text-sm" style="color: var(--text-muted);">Save your resumes and access them anywhere.</p>
         </div>
+
+        <div class="user-dropdown-divider"></div>
+
+        <a href="/?new=1" class="user-dropdown-item">
+            <i class="fa-solid fa-plus"></i>
+            New Resume
+        </a>
 
         <div class="user-dropdown-divider"></div>
 

@@ -25,7 +25,10 @@ For authenticated users: collects a title and POSTs to save_as_resume.
         <div class="shortcuts-header">
             <div>
                 <h2 class="shortcuts-title">Save Resume</h2>
-                <p class="shortcuts-subtitle" x-text="currentResumeSlug ? 'Update existing or save as new.' : 'Give your resume a name.'"></p>
+                <p class="shortcuts-subtitle">
+                    <span x-show="currentResumeSlug">Saving will update the existing record.</span>
+                    <span x-show="!currentResumeSlug">Give your resume a name to save it to your profile.</span>
+                </p>
             </div>
             <button @click="closeSaveModal()" class="shortcuts-close">
                 <i class="fa-solid fa-xmark"></i>
@@ -82,7 +85,7 @@ For authenticated users: collects a title and POSTs to save_as_resume.
             >
                 <i class="fa-solid fa-floppy-disk" x-show="!isSaving"></i>
                 <i class="fa-solid fa-circle-notch fa-spin" x-show="isSaving"></i>
-                <span x-text="isSaving ? 'Saving…' : (currentResumeSlug ? 'Update' : 'Save')"></span>
+                <span x-text="isSaving ? 'Saving…' : (currentResumeSlug ? 'Update' : 'Save to profile')"></span>
             </button>
         </div>
     </div>

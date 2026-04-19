@@ -6,7 +6,7 @@
     x-transition:leave="transition ease-in duration-150"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    @click.self="showNewResumeModal = false"
+    @click.self="cancelNewResume()"
     class="shortcuts-backdrop"
     style="display: none;"
 >
@@ -19,68 +19,26 @@
     >
         <div class="shortcuts-header">
             <div>
-                <h2 class="shortcuts-title"
-                    x-text="newResumeWarning ? 'Unsaved work detected' : 'Start a new resume'">
-                </h2>
-                <p class="shortcuts-subtitle"
-                   x-text="newResumeWarning ? 'You have work that hasn\'t been saved to your profile.' : 'Your current workspace will be cleared.'">
-                </p>
-            </div>
-            <button @click="showNewResumeModal = false" class="shortcuts-close">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="shortcuts-body" style="gap: 10px; padding: 20px 24px;">
-            <div x-show="newResumeWarning">
-                <div style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
-                            border-radius: 8px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start;">
-                    <i class="fa-solid fa-triangle-exclamation"
-                       style="color: var(--warning); flex-shrink: 0; margin-top: 2px;"></i>
-                    <div>
-                        <p style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0 0 4px;">
-                            Unsaved work:
-                            <span x-show="newResumeTitle"
-                                  :textContent="'\"' + newResumeTitle + '\"'"
-                                  style="color: var(--accent);"></span>
-                        </p>
-                        <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
-                            This work hasn't been saved to your profile.
-                            Save it first or discard and start fresh.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div x-show="!newResumeWarning">
-                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
-                    Ready to start fresh? Your current workspace content will be cleared.
-                </p>
+                <h2 class="shortcuts-title">Start a new resume?</h2>
+                <p class="shortcuts-subtitle">Your current workspace will be cleared.</p>
             </div>
         </div>
 
-        <div class="shortcuts-footer"
-             style="display: flex; gap: 8px; justify-content: flex-end; padding: 16px 24px;">
-            <button @click="showNewResumeModal = false" class="btn btn-ghost">
+        <div class="shortcuts-body" style="gap: 10px;">
+            <p class="text-sm" style="color: var(--text-secondary); line-height: 1.6;">
+                Any unsaved changes in the editor will be permanently lost.
+                Make sure you've saved your work to your profile before continuing.
+            </p>
+        </div>
+
+        <div class="shortcuts-footer" style="display: flex; gap: 8px; justify-content: flex-end; padding: 16px 24px;">
+            <button @click="cancelNewResume()" class="btn btn-ghost">
                 Cancel
             </button>
-            <button
-                x-show="newResumeWarning"
-                @click="openSaveModal(); showNewResumeModal = false"
-                class="btn btn-ghost"
-                style="border-color: var(--accent); color: var(--accent);"
-            >
-                <i class="fa-regular fa-floppy-disk"></i>
-                Save first
-            </button>
-            <button
-                @click="executeNewResume()"
-                class="btn"
-                :class="newResumeWarning ? 'btn-ghost' : 'btn-primary'"
-                :style="newResumeWarning ? 'border-color: var(--danger); color: var(--danger);' : ''"
-            >
-                <i class="fa-solid fa-file-circle-plus"></i>
-                <span x-text="newResumeWarning ? 'Discard & start new' : 'Start new'"></span>
+            <button @click="executeNewResume()" class="btn btn-primary"
+                    style="background: var(--danger); border-color: var(--danger);">
+                <i class="fa-solid fa-trash-can"></i>
+                Discard &amp; start new
             </button>
         </div>
     </div>

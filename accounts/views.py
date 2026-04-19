@@ -44,11 +44,10 @@ def resume_open(request, slug):
         'css':          resume.css_content,
         'framework':    resume.framework,
         'paper':        resume.paper_size,
-        'photo_url':    getattr(resume, 'photo_url', ''),
+        'photo_url':    resume.photo_url,
         'resume_slug':  resume.slug,
         'resume_title': resume.title,
     }
-    request.session.pop('new_resume_requested', None)
     request.session.modified = True
     return redirect('builder:workspace')
 

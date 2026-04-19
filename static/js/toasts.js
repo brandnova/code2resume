@@ -1,6 +1,13 @@
 /* ============================================================
-   Global theme management — available on all pages
+   toasts.js — Global theme management + Django message toasts
+   Loaded on every page via base.html
    ============================================================ */
+
+/* ---- Theme ---- */
+
+function getSavedTheme() {
+    return localStorage.getItem('c2r-theme') || 'dark';
+}
 
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
@@ -15,26 +22,12 @@ function applyTheme(theme) {
     }
 }
 
-function getSavedTheme() {
-    return localStorage.getItem('c2r-theme') || 'dark';
-}
-
-function toggleGlobalTheme() {
-    var current = getSavedTheme();
-    var next    = current === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('c2r-theme', next);
-    applyTheme(next);
-}
-
-/* Apply immediately on every page load to prevent flash */
-applyTheme(getSavedTheme());
-
 function updateThemeIcons() {
-    var theme   = getSavedTheme();
+    var theme     = getSavedTheme();
     var sunIcons  = document.querySelectorAll('.theme-icon-sun');
     var moonIcons = document.querySelectorAll('.theme-icon-moon');
     sunIcons.forEach(function(el) {
-        el.style.display = theme === 'light' ? 'none' : 'inline-block';
+        el.style.display = theme === 'dark' ? 'inline-block' : 'none';
     });
     moonIcons.forEach(function(el) {
         el.style.display = theme === 'light' ? 'inline-block' : 'none';
@@ -42,82 +35,77 @@ function updateThemeIcons() {
 }
 
 function toggleGlobalTheme() {
-    var current = getSavedTheme();
-    var next    = current === 'dark' ? 'light' : 'dark';
+    var next = getSavedTheme() === 'dark' ? 'light' : 'dark';
     localStorage.setItem('c2r-theme', next);
     applyTheme(next);
     updateThemeIcons();
 }
 
-/* Run on page load */
+/* Apply immediately to prevent flash — runs before DOM is ready */
 applyTheme(getSavedTheme());
+
+/* Update icons once DOM is available */
 document.addEventListener('DOMContentLoaded', updateThemeIcons);
 
 
-/* ============================================================
-   Toast notifications — available on all pages
-   ============================================================ */
+/* ---- Toast manager ---- */
+
 function toastManager() {
     return {
-        toasts: [],
+        toasts:   [],
         _counter: 0,
 
         init() {
-            // ✅ Guard against double initialization (window-level)
             if (window.__TOASTS_INITIALIZED__) return;
             window.__TOASTS_INITIALIZED__ = true;
 
-            // ✅ Safety check for Django messages
             if (typeof __DJANGO_MESSAGES__ === 'undefined') return;
-
-            // ✅ Add messages with staggered delay to avoid visual clutter
-            __DJANGO_MESSAGES__.forEach((msg, i) => {
-                setTimeout(() => this.add(msg.message, msg.tags), i * 150);
-            });
+            __DJANGO_MESSAGES__.forEach(function(msg, i) {
+                setTimeout(function() {
+                    this.add(msg.message, msg.tags);
+                }.bind(this), i * 150);
+            }.bind(this));
         },
 
         add(message, tags) {
-            const id = ++this._counter;
-            const type = this._resolveType(tags);
-            const duration = 6000;
-
+            var id       = ++this._counter;
+            var type     = this._resolveType(tags);
+            var duration = 6000;
             this.toasts.push({
-                id,
-                message,
-                type,
-                icon: this._resolveIcon(type),
-                visible: true,
-                duration,
+                id:       id,
+                message:  message,
+                type:     type,
+                icon:     this._resolveIcon(type),
+                visible:  true,
+                duration: duration,
             });
-
-            setTimeout(() => this.dismiss(id), duration);
+            setTimeout(function() { this.dismiss(id); }.bind(this), duration);
         },
 
         dismiss(id) {
-            const toast = this.toasts.find(t => t.id === id);
+            var toast = this.toasts.find(function(t) { return t.id === id; });
             if (toast) toast.visible = false;
-            // Wait for leave transition to finish before removing from array
-            setTimeout(() => {
-                this.toasts = this.toasts.filter(t => t.id !== id);
-            }, 400); // Match this to your CSS transition duration
+            setTimeout(function() {
+                this.toasts = this.toasts.filter(function(t) { return t.id !== id; });
+            }.bind(this), 400);
         },
 
         _resolveType(tags) {
-            if (!tags) return 'info';
-            if (tags.includes('error')) return 'error';
+            if (!tags)                    return 'info';
+            if (tags.includes('error'))   return 'error';
             if (tags.includes('success')) return 'success';
             if (tags.includes('warning')) return 'warning';
             return 'info';
         },
 
         _resolveIcon(type) {
-            return {
+            var icons = {
                 success: 'fa-solid fa-circle-check',
-                error: 'fa-solid fa-circle-exclamation',
+                error:   'fa-solid fa-circle-exclamation',
                 warning: 'fa-solid fa-triangle-exclamation',
-                info: 'fa-solid fa-circle-info',
-            }[type] || 'fa-solid fa-circle-info';
+                info:    'fa-solid fa-circle-info',
+            };
+            return icons[type] || icons.info;
         },
     };
 }
-

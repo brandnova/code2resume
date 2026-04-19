@@ -6,53 +6,38 @@
 {% block extra_head %}
 <script id="c2r-data" type="application/json">
 {
-    "html":               {{ default_html|tojson|safe }},
-    "css":                {{ default_css|tojson|safe }},
-    "fw":                 "{{ default_fw }}",
-    "paper":              "{{ default_paper }}",
-    "saveUrl":            "{% url 'builder:save_session' %}",
-    "saveAsUrl":          "{% url 'builder:save_as_resume' %}",
-    "updateUrl":          "{% url 'builder:update_resume' %}",
-    "newResumeUrl":       "{% url 'builder:new_resume' %}",
-    "resumeSlug":         "{{ resume_slug }}",
-    "resumeTitle":        "{{ resume_title }}",
-    "photoUrl":           "{{ default_photo|escapejs }}",
-    "newResumeRequested": {{ new_resume_requested|yesno:"true,false" }},
-    "sessionHasContent":  {{ session_has_content|yesno:"true,false" }},
-    "sessionIsSaved":     {{ session_is_saved|yesno:"true,false" }},
-    "sessionResumeTitle": "{{ session_resume_title|escapejs }}",
-    "defaultHtml":        {{ default_html|tojson|safe }},
-    "defaultCss":         {{ default_css|tojson|safe }}
+    "html":         {{ default_html|tojson|safe }},
+    "css":          {{ default_css|tojson|safe }},
+    "defaultHtml":  {{ raw_default_html|tojson|safe }},
+    "defaultCss":   {{ raw_default_css|tojson|safe }},
+    "fw":           "{{ default_fw }}",
+    "paper":        "{{ default_paper }}",
+    "saveUrl":      "{% url 'builder:save_session' %}",
+    "saveAsUrl":    "{% url 'builder:save_as_resume' %}",
+    "clearUrl":     "{% url 'builder:clear_session' %}",
+    "resumeSlug":   "{{ resume_slug }}",
+    "resumeTitle":  "{{ resume_title }}",
+    "photoUrl":     "{{ default_photo|escapejs }}"
 }
 </script>
 <script>
-(function () {
-    var raw = document.getElementById('c2r-data').textContent;
-    var d;
-    try {
-        d = JSON.parse(raw);
-    } catch (e) {
-        console.error('[C2R] JSON parse failed. Raw data:', raw);
-        console.error('[C2R] Error:', e.message);
-        d = {};
-    }
-    window.__C2R_HTML__                = d.html                ?? '';
-    window.__C2R_CSS__                 = d.css                 ?? '';
-    window.__C2R_FW__                  = d.fw                  ?? 'none';
-    window.__C2R_PAPER__               = d.paper               ?? 'a4';
-    window.__C2R_SAVE_URL__            = d.saveUrl             ?? '';
-    window.__C2R_SAVE_AS_URL__         = d.saveAsUrl           ?? '';
-    window.__C2R_UPDATE_URL__          = d.updateUrl           ?? '';
-    window.__C2R_NEW_RESUME_URL__      = d.newResumeUrl        ?? '';
-    window.__C2R_RESUME_SLUG__         = d.resumeSlug          ?? '';
-    window.__C2R_RESUME_TITLE__        = d.resumeTitle         ?? '';
-    window.__C2R_PHOTO_URL__           = d.photoUrl            ?? '';
-    window.__C2R_NEW_REQUESTED__       = d.newResumeRequested  ?? false;
-    window.__C2R_SESSION_HAS_CONTENT__ = d.sessionHasContent   ?? false;
-    window.__C2R_SESSION_IS_SAVED__    = d.sessionIsSaved      ?? false;
-    window.__C2R_SESSION_TITLE__       = d.sessionResumeTitle  ?? '';
-    window.__C2R_DEFAULT_HTML__        = d.defaultHtml         ?? '';
-    window.__C2R_DEFAULT_CSS__         = d.defaultCss          ?? '';
+(function() {
+    var d = {};
+    try { d = JSON.parse(document.getElementById('c2r-data').textContent); }
+    catch(e) { console.error('[C2R] data parse failed:', e); }
+
+    window.__C2R_HTML__          = d.html         ?? '';
+    window.__C2R_CSS__           = d.css          ?? '';
+    window.__C2R_DEFAULT_HTML__  = d.defaultHtml  ?? '';
+    window.__C2R_DEFAULT_CSS__   = d.defaultCss   ?? '';
+    window.__C2R_FW__            = d.fw           ?? 'none';
+    window.__C2R_PAPER__         = d.paper        ?? 'a4';
+    window.__C2R_SAVE_URL__      = d.saveUrl      ?? '';
+    window.__C2R_SAVE_AS_URL__   = d.saveAsUrl    ?? '';
+    window.__C2R_CLEAR_URL__     = d.clearUrl     ?? '';
+    window.__C2R_RESUME_SLUG__   = d.resumeSlug   ?? '';
+    window.__C2R_RESUME_TITLE__  = d.resumeTitle  ?? '';
+    window.__C2R_PHOTO_URL__     = d.photoUrl     ?? '';
 }());
 </script>
 {% endblock %}
@@ -76,7 +61,7 @@
                 :class="sessionSaved ? 'saved' : 'unsaved'"
                 :title="sessionSaved ? 'All changes saved' : 'Unsaved changes'"
             >
-                <i class="fa-solid fa-circle" style="font-size:7px;"></i>
+                <i class="fa-solid fa-circle" style="font-size:5px;"></i>
                 <span x-text="sessionSaved ? 'Saved' : 'Saving…'"></span>
             </span>
         </a>
@@ -131,6 +116,11 @@
             <div class="dropdown-divider"></div>
 
             <div class="dropdown-actions">
+                <button @click="openShortcuts()" class="btn btn-ghost">
+                    <i class="fa-solid fa-keyboard"></i>
+                    <span>Shortcuts</span>
+                </button>
+
                 <button
                     @click="showPageBreaks = !showPageBreaks; closeMobileMenu()"
                     :class="showPageBreaks ? 'active' : ''"
@@ -140,50 +130,30 @@
                     <span x-text="showPageBreaks ? 'Hide Guides' : 'Show Guides'"></span>
                 </button>
 
-                <button @click="openShortcuts()" class="btn btn-ghost">
-                    <i class="fa-solid fa-keyboard"></i>
-                    <span>Shortcuts</span>
-                </button>
-
-                <button @click="toggleMobileView()" class="btn btn-ghost">
-                    <i class="fa-solid fa-eye"></i>
-                    <span x-text="mobileView === 'editor' ? 'Preview' : 'Editor'"></span>
-                </button>
-            </div>
-
-            <div class="dropdown-divider"></div>
-
-            {# Auth + save in mobile dropdown #}
-            <div class="dropdown-actions">
                 {% if user.is_authenticated %}
                 <button @click="openSaveModal(); closeMobileMenu()" class="btn btn-ghost" style="flex: 1; justify-content: center;">
                     <i class="fa-regular fa-floppy-disk"></i>
                     <span>Save Resume</span>
                 </button>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-ghost" style="flex: 1; justify-content: center;">
-                    <i class="fa-regular fa-id-card"></i>
-                    <span>My Resumes</span>
-                </a>
-                <a href="{% url 'account_logout' %}" class="btn btn-ghost" style="color: var(--danger); flex: 1; justify-content: center;">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span>Sign out</span>
-                </a>
                 {% else %}
                 <a href="{% url 'account_login' %}?next=/?save=1" class="btn btn-ghost" style="flex: 1; justify-content: center;">
                     <i class="fa-regular fa-floppy-disk"></i>
                     <span>Save Resume</span>
-                </a>
-                <a href="{% url 'account_login' %}" class="btn btn-primary" style="flex: 1; justify-content: center;">
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    <span>Sign in</span>
                 </a>
                 {% endif %}
             </div>
 
             <div class="dropdown-divider"></div>
 
-            {# Export and New Resume buttons - 2 column layout #}
-            <div class="dropdown-button-row">
+            {# Export, Templates, New Resume - 3 column layout #}
+            <div class="dropdown-actions">
+                {# New Resume #}
+                <a href="/?new=1" @click="closeMobileMenu()" class="btn btn-ghost">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New</span>
+                </a>
+
+                {# Export PDF #}
                 <form
                     method="POST"
                     action="{% url 'builder:export_pdf' %}"
@@ -195,17 +165,45 @@
                     <input type="hidden" name="css">
                     <input type="hidden" name="framework">
                     <input type="hidden" name="paper">
-                    <button type="submit" class="btn btn-primary" :disabled="isExporting">
-                        <i class="fa-solid fa-download"            x-show="!isExporting"></i>
+                    <button type="submit" class="btn btn-ghost" :disabled="isExporting">
+                        <i class="fa-solid fa-download" x-show="!isExporting"></i>
                         <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
-                        <span x-text="isExporting ? 'Generating…' : 'Export PDF'"></span>
+                        <span x-text="isExporting ? 'Generating…' : 'Export'"></span>
                     </button>
                 </form>
-                <a href="{% url 'builder:new_resume' %}" class="btn btn-primary">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>New Resume</span>
+
+                {# Templates button #}
+                <a href="#" class="btn btn-ghost">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <span>Templates</span>
                 </a>
             </div>
+
+            <div class="dropdown-divider"></div>
+            
+            {# Auth buttons - 2 column layout #}
+            <div class="dropdown-button-row">
+                {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}" @click="closeMobileMenu()" class="btn btn-ghost">
+                    <i class="fa-regular fa-id-card"></i>
+                    <span>My Resumes</span>
+                </a>
+                <a href="{% url 'account_logout' %}" class="btn btn-ghost" style="color: var(--danger);">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sign out</span>
+                </a>
+                {% else %}
+                <a href="{% url 'account_login' %}" class="btn btn-primary">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Sign in</span>
+                </a>
+                <a href="{% url 'account_signup' %}" class="btn btn-primary">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Sign up</span>
+                </a>
+                {% endif %}
+            </div>
+
         </div>
 
     </header>
@@ -240,9 +238,11 @@
                 <button @click="switchTab('css')"  :class="{ active: activeTab === 'css'  }" class="tab-btn">
                     <span class="tab-dot"></span>CSS
                 </button>
-                <div class="live-indicator">
-                    <span class="live-dot"></span>
-                    <span>Live</span>
+                <div class="ml-auto mr-3">
+                    <button @click="toggleMobileView()" class="btn btn-ghost">
+                        <i class="fa-solid fa-eye"></i>
+                        <span x-text="mobileView === 'editor' ? 'Preview' : 'Editor'"></span>
+                    </button>
                 </div>
             </div>
 
@@ -266,6 +266,10 @@
             <div class="pane-header">
                 <span class="pane-label">Preview</span>
                 <span class="pane-meta" x-text="`${paper.toUpperCase()} · ${paperDims.w} × ${paperDims.h}px`"></span>
+                <button @click="toggleMobileView()" class="btn-preview">
+                    <i class="fa-solid fa-eye"></i>
+                    <span x-text="mobileView === 'editor' ? 'Preview' : 'Editor'"></span>
+                </button>
             </div>
 
             <div class="preview-scroll">
