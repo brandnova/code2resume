@@ -10,4 +10,6 @@ urlpatterns = [
     path('session/clear/',   views.clear_session,  name='clear_session'),
     path('resume/save/',     views.save_as_resume, name='save_as_resume'),
     path('r/<slug:slug>/',   views.public_resume,  name='public_resume'),
+    path('templates/',                   views.template_library, name='template_library'),
+    path('templates/<slug:slug>/load/',  views.load_template,    name='load_template'),
 ]

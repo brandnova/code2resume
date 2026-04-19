@@ -278,3 +278,45 @@ def public_resume(request, slug):
     }
     return render(request, 'builder/public_resume.html', context)
 
+
+def template_library(request):
+    """
+    Public browse page. Shows all active templates.
+    Premium templates are visible but marked locked for free users.
+    """
+    from accounts.models import ResumeTemplate
+    templates = ResumeTemplate.objects.filter(is_active=True)
+    return render(request, 'builder/template_library.html', {
+        'templates': templates,
+    })
+
+
+@require_POST
+def load_template(request, slug):
+    """
+    Loads a template into the workspace session and redirects.
+    Premium check hook is here — currently passes all users through.
+    """
+    from accounts.models import ResumeTemplate
+    try:
+        template = ResumeTemplate.objects.get(slug=slug, is_active=True)
+    except ResumeTemplate.DoesNotExist:
+        from django.http import Http404
+        raise Http404
+
+    # Premium enforcement hook — uncomment when subscriptions are live:
+    # if template.is_premium and not getattr(request.user, 'is_premium', False):
+    #     return JsonResponse({"error": "Premium template"}, status=403)
+
+    # Load template content into session as a fresh unsaved state
+    request.session['resume_state'] = {
+        'html':         template.html_content,
+        'css':          template.css_content,
+        'framework':    template.framework,
+        'paper':        template.paper_size,
+        'photo_url':    '',
+        'resume_slug':  '',   # not saved yet — user starts fresh
+        'resume_title': '',
+    }
+    request.session.modified = True
+    return redirect('builder:workspace')

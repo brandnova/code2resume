@@ -13,6 +13,7 @@ gunicorn==25.3.0
 idna==3.11
 jwt==1.4.0
 packaging==26.1
+pillow==12.2.0
 playwright==1.58.0
 psycopg2-binary==2.9.11
 pycparser==3.0

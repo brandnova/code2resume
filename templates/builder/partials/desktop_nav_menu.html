@@ -131,6 +131,10 @@
             <i class="fa-regular fa-id-card"></i>
             My Resumes
         </a>
+         <a href="{% url 'builder:template_library' %}" class="user-dropdown-item">
+            <i class="fa-regular fa-folder-open"></i>
+            Templates
+        </a>
         <a href="{% url 'accounts:profile_edit' %}" class="user-dropdown-item">
             <i class="fa-regular fa-pen-to-square"></i>
             Edit Profile
@@ -154,6 +158,10 @@
         <a href="/?new=1" class="user-dropdown-item">
             <i class="fa-solid fa-plus"></i>
             New Resume
+        </a>
+        <a href="{% url 'builder:template_library' %}" class="user-dropdown-item">
+            <i class="fa-regular fa-folder-open"></i>
+            Templates
         </a>
 
         <div class="user-dropdown-divider"></div>

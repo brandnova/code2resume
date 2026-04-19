@@ -156,6 +156,61 @@ Saved resumes can be published at `/r/<slug>/`.
 
 ---
 
+## Phase 3: Template Library
+
+A browsable collection of pre-built resume skeletons that users can load
+directly into the workspace as a starting point.
+
+### How it works
+
+Templates are created and managed exclusively through the Django admin panel.
+Each template has an HTML body, optional CSS, a framework choice, paper size,
+a preview image, and a free/premium flag.
+
+The browse page (`/templates/`) displays all active templates as cards with
+their preview image, title, description, framework, and paper size. Hovering
+a card reveals a "Use this template" button. Clicking it shows a lightweight
+confirmation modal (warning that unsaved workspace content will be replaced),
+and on confirm, POSTs to load the template content into the session and
+redirects to the workspace. The editor opens with the template's content ready
+to edit, with no resume slug tracked — it is a clean starting point, not a
+saved resume.
+
+### Free vs Premium
+
+Templates have an `is_premium` boolean field. Premium templates are visible on
+the browse page but display a lock badge and a disabled action button for free
+users. The enforcement hook is in `builder/views.py:load_template` and is
+commented out, ready to be activated when the subscription system is live.
+
+### Admin workflow
+
+1. Go to `/admin/` → Resume Templates → Add
+2. Fill in title, description (optional), HTML content, CSS content
+3. Select framework and paper size
+4. Upload a preview image (recommended: screenshot at A4 aspect ratio)
+5. Set `is_premium` and `is_active` as needed
+6. Set `order` to control display position (lower = appears first)
+7. Save
+
+### Fields
+
+| Field | Purpose |
+|---|---|
+| `title` | Display name on browse page |
+| `slug` | Auto-generated URL identifier |
+| `description` | Optional subtitle shown on card |
+| `html_content` | Resume body HTML |
+| `css_content` | Template-specific styles |
+| `framework` | CDN injected into preview and PDF |
+| `paper_size` | Default paper format |
+| `preview_image` | Static screenshot shown on card |
+| `is_premium` | Locks template behind future paywall |
+| `is_active` | Controls visibility on browse page |
+| `order` | Manual sort order |
+
+---
+
 ## Getting Started
 
 ### Prerequisites

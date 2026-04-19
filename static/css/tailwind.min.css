@@ -9045,8 +9045,16 @@ video {
   position:relative
 }
 
+.sticky{
+  position:sticky
+}
+
 .right-0{
   right:0px
+}
+
+.top-0{
+  top:0px
 }
 
 .z-50{
@@ -9106,6 +9114,10 @@ video {
 
 .mb-8{
   margin-bottom:2rem
+}
+
+.ml-3{
+  margin-left:0.75rem
 }
 
 .ml-4{
@@ -9240,6 +9252,10 @@ video {
   max-width:56rem
 }
 
+.max-w-6xl{
+  max-width:72rem
+}
+
 .max-w-lg{
   max-width:32rem
 }
@@ -9311,6 +9327,10 @@ video {
   resize:both
 }
 
+.grid-cols-1{
+  grid-template-columns:repeat(1, minmax(0, 1fr))
+}
+
 .flex-col{
   flex-direction:column
 }
@@ -9331,6 +9351,10 @@ video {
   justify-content:space-between
 }
 
+.gap-1\.5{
+  gap:0.375rem
+}
+
 .gap-2{
   gap:0.5rem
 }
@@ -9341,6 +9365,10 @@ video {
 
 .gap-4{
   gap:1rem
+}
+
+.gap-6{
+  gap:1.5rem
 }
 
 .space-y-2 > :not([hidden]) ~ :not([hidden]){
@@ -9554,6 +9582,11 @@ video {
 .py-2\.5{
   padding-top:0.625rem;
   padding-bottom:0.625rem
+}
+
+.py-24{
+  padding-top:6rem;
+  padding-bottom:6rem
 }
 
 .py-3{
@@ -9829,5 +9862,15 @@ video {
 @media (min-width: 640px){
   .sm\:inline{
     display:inline
+  }
+
+  .sm\:grid-cols-2{
+    grid-template-columns:repeat(2, minmax(0, 1fr))
+  }
+}
+
+@media (min-width: 1024px){
+  .lg\:grid-cols-3{
+    grid-template-columns:repeat(3, minmax(0, 1fr))
   }
 }

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Template Library — Code2Resume{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background: var(--bg-base);">
+
+    {# ---- Header ---- #}
+    <header class="border-b px-6 py-4 flex items-center justify-between sticky top-0 z-50"
+            style="background: var(--bg-surface); border-color: var(--bg-border);">
+        <a href="/" class="font-mono text-lg font-bold" style="color:var(--text-primary); text-decoration:none;">
+            code<span style="color:var(--accent);">2</span>resume
+        </a>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme">
+                <i class="fa-solid fa-sun theme-icon-sun"></i>
+                <i class="fa-solid fa-moon theme-icon-moon"></i>
+            </button>
+            <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-pen-to-square"></i>
+                Open Workspace
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-12">
+
+        {# ---- Page heading ---- #}
+        <div class="mb-10">
+            <h1 class="text-3xl font-bold tracking-tight mb-2" style="color:var(--text-primary);">
+                Resume Templates
+            </h1>
+            <p class="text-sm" style="color:var(--text-muted);">
+                Choose a starting point. All templates are fully editable in the workspace.
+            </p>
+        </div>
+
+        {% if templates %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for tpl in templates %}
+            <div
+                class="template-card group"
+                x-data="{ confirmOpen: false }"
+            >
+                {# ---- Preview image ---- #}
+                <div class="template-preview-wrap">
+                    {% if tpl.preview_image %}
+                    <img src="{{ tpl.preview_image.url }}" alt="{{ tpl.title }} preview"
+                         class="template-preview-img">
+                    {% else %}
+                    <div class="template-preview-placeholder">
+                        <i class="fa-regular fa-file-lines" style="font-size: 2rem; color:var(--text-muted);"></i>
+                        <span style="font-size:11px; color:var(--text-muted); margin-top:6px;">No preview</span>
+                    </div>
+                    {% endif %}
+
+                    {# Premium badge overlay #}
+                    {% if tpl.is_premium %}
+                    <div class="template-premium-badge">
+                        <i class="fa-solid fa-lock" style="font-size:10px;"></i>
+                        Premium
+                    </div>
+                    {% endif %}
+
+                    {# Hover overlay with action button #}
+                    <div class="template-hover-overlay">
+                        {% if tpl.is_premium %}
+                        <span class="btn btn-ghost" style="cursor:default; opacity:0.7;">
+                            <i class="fa-solid fa-lock"></i>
+                            Premium only
+                        </span>
+                        {% else %}
+                        <button
+                            @click.stop="confirmOpen = true"
+                            class="btn btn-primary"
+                        >
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            Use this template
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# ---- Card footer ---- #}
+                <div class="template-card-footer">
+                    <div class="min-w-0">
+                        <p class="font-semibold text-sm truncate" style="color:var(--text-primary);">
+                            {{ tpl.title }}
+                        </p>
+                        {% if tpl.description %}
+                        <p class="text-xs mt-0.5 truncate" style="color:var(--text-muted);">
+                            {{ tpl.description }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0 ml-3">
+                        <span class="template-meta-pill">{{ tpl.framework|capfirst }}</span>
+                        <span class="template-meta-pill">{{ tpl.paper_size|upper }}</span>
+                    </div>
+                </div>
+
+                {# ---- Confirmation modal (per card, lightweight) ---- #}
+                <div
+                    x-show="confirmOpen"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    @click.self="confirmOpen = false"
+                    class="shortcuts-backdrop"
+                    style="display:none;"
+                >
+                    <div
+                        class="shortcuts-card"
+                        style="max-width:400px;"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                    >
+                        <div class="shortcuts-header">
+                            <div>
+                                <h2 class="shortcuts-title">Load "{{ tpl.title }}"?</h2>
+                                <p class="shortcuts-subtitle">
+                                    This will replace your current workspace content.
+                                </p>
+                            </div>
+                            <button @click="confirmOpen = false" class="shortcuts-close">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="shortcuts-body" style="gap:8px;">
+                            <p class="text-sm" style="color:var(--text-secondary); line-height:1.6;">
+                                Any unsaved changes in your editor will be lost.
+                                Save your current work first if you need it.
+                            </p>
+                        </div>
+                        <div class="shortcuts-footer"
+                             style="display:flex; gap:8px; justify-content:flex-end; padding:16px 24px;">
+                            <button @click="confirmOpen = false" class="btn btn-ghost">Cancel</button>
+                            <form method="POST" action="{% url 'builder:load_template' tpl.slug %}" style="margin:0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    Load template
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="text-center py-24 rounded-xl border border-dashed"
+             style="border-color:var(--bg-border);">
+            <p class="text-4xl mb-3">📂</p>
+            <p class="font-medium mb-1" style="color:var(--text-primary);">No templates yet</p>
+            <p class="text-sm" style="color:var(--text-muted);">
+                Templates are added by the Code2Resume team. Check back soon.
+            </p>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <footer class="text-center py-6 text-xs" style="color:var(--text-muted);">
+        Built with <span style="color:var(--danger);">❤</span> by
+        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener"
+           style="color:var(--accent);">Brand Nova</a>
+    </footer>
+
+</div>
+{% endblock %}
