@@ -1,0 +1,73 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load allauth %}
+
+{% block title %}Email Confirmed — Code2Resume{% endblock %}
+{% block auth_tagline %}Your email has been verified.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary);">Email Confirmed</h1>
+        <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-500">
+            Verified
+        </span>
+    </div>
+
+    <div class="p-4 rounded-lg border border-green-500/30" 
+         style="background: var(--bg-elevated); border-color: rgba(34, 197, 94, 0.3);">
+        <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm" style="color: var(--text-primary);">
+                    You have successfully confirmed your email address.
+                </p>
+                <p class="text-xs mt-2" style="color: var(--text-muted);">
+                    Your account is now fully verified. You can now access all features of Code2Resume.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">What's next?</h2>
+        <div class="flex gap-3 flex-col sm:flex-row pt-2">
+            <a href="{% url 'accounts:profile' %}" 
+               class="btn btn-primary flex-1 justify-center text-center">
+                <i class="fa-solid fa-user mr-2"></i>
+                Go to Profile
+            </a>
+            <a href="{% url 'account_email' %}" 
+               class="btn btn-secondary flex-1 justify-center text-center">
+                <i class="fa-solid fa-envelope mr-2"></i>
+                Manage Emails
+            </a>
+        </div>
+    </div>
+
+    {% if request.resume_builder_enabled %}
+    <div class="text-center pt-4">
+        <a href="{% url 'resume:builder' %}" 
+           class="inline-flex items-center gap-2 text-sm hover:underline"
+           style="color: var(--accent);">
+            <i class="fa-solid fa-code"></i>
+            Start building your resume
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
+    <a href="/" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-home"></i> Back to Home
+    </a>
+</p>
+{% endblock %}

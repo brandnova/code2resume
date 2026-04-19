@@ -1,0 +1,67 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load allauth %}
+
+{% block title %}Verification Email Sent — Code2Resume{% endblock %}
+{% block auth_tagline %}Check your inbox.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary);">Verification Email Sent</h1>
+        <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-500">
+            Pending
+        </span>
+    </div>
+
+    <div class="p-4 rounded-lg border" style="background: var(--bg-elevated); border-color: var(--bg-border);">
+        <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm" style="color: var(--text-primary);">
+                    We have sent an email verification link to your email address.
+                </p>
+                <p class="text-xs mt-2" style="color: var(--text-muted);">
+                    Please check your inbox and click the link to verify your email address.
+                    If you don't see the email, check your spam folder.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">Didn't receive the email?</h2>
+        <div class="flex gap-3 flex-col sm:flex-row">
+            <a href="{% url 'account_email' %}" 
+               class="btn btn-secondary flex-1 justify-center text-center">
+                <i class="fa-solid fa-paper-plane mr-2"></i>
+                Request another
+            </a>
+            <a href="{% url 'account_email' %}" 
+               class="btn btn-secondary flex-1 justify-center text-center">
+                <i class="fa-solid fa-envelope mr-2"></i>
+                Change email address
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center pt-4">
+        <p class="text-xs" style="color: var(--text-muted);">
+            <i class="fa-solid fa-clock"></i> The verification link expires in 24 hours.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
+    <a href="{% url 'accounts:profile' %}" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-arrow-left"></i> Back to profile
+    </a>
+</p>
+{% endblock %}
