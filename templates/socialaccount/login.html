@@ -1,0 +1,65 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load allauth socialaccount %}
+
+{% block title %}Sign In — Code2Resume{% endblock %}
+{% block auth_tagline %}Continue with your social account.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary);">Sign In</h1>
+        <a href="{% url 'account_login' %}" class="text-xs hover:underline" style="color: var(--accent);">
+            Use email <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    {% if process == "connect" %}
+    <div class="p-4 rounded-lg border" style="background: var(--bg-elevated); border-color: var(--bg-border);">
+        <p class="text-sm" style="color: var(--text-primary);">
+            You are about to connect a new third-party account from 
+            <strong class="font-semibold">{{ provider.name }}</strong>.
+        </p>
+    </div>
+    {% else %}
+    <div class="p-4 rounded-lg border" style="background: var(--bg-elevated); border-color: var(--bg-border);">
+        <p class="text-sm" style="color: var(--text-primary);">
+            You are about to sign in using a third-party account from 
+            <strong class="font-semibold">{{ provider.name }}</strong>.
+        </p>
+    </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="flex gap-3 flex-col sm:flex-row">
+            <button type="submit" class="btn btn-primary flex-1 justify-center">
+                <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
+                Continue
+            </button>
+            <a href="{% url 'account_login' %}" 
+               class="btn btn-secondary flex-1 justify-center text-center">
+                <i class="fa-solid fa-times mr-2"></i>
+                Cancel
+            </a>
+        </div>
+    </form>
+
+    <div class="text-center pt-2">
+        <p class="text-xs" style="color: var(--text-muted);">
+            By continuing, you agree to our 
+            <a href="#" class="hover:underline" style="color: var(--accent);">Terms</a> and 
+            <a href="#" class="hover:underline" style="color: var(--accent);">Privacy Policy</a>.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
+    <a href="{% url 'account_login' %}" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-arrow-left"></i> Back to sign in
+    </a>
+</p>
+{% endblock %}

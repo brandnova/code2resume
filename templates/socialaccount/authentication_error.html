@@ -1,0 +1,80 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load allauth socialaccount %}
+
+{% block title %}Authentication Error — Code2Resume{% endblock %}
+{% block auth_tagline %}Something went wrong.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary);">Authentication Error</h1>
+        <span class="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400">
+            Error
+        </span>
+    </div>
+
+    <div class="p-4 rounded-lg border border-red-500/30" 
+         style="background: var(--bg-elevated); border-color: rgba(239, 68, 68, 0.3);">
+        <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm" style="color: var(--text-primary);">
+                    We encountered an error while trying to authenticate with your social account.
+                </p>
+                <p class="text-xs mt-2" style="color: var(--text-muted);">
+                    This could happen if you denied access, or if there's a temporary issue with the service.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">What you can do:</h2>
+        <ul class="space-y-2 text-sm" style="color: var(--text-muted);">
+            <li class="flex items-center gap-2">
+                <span class="text-accent">•</span>
+                Try signing in again using the same account
+            </li>
+            <li class="flex items-center gap-2">
+                <span class="text-accent">•</span>
+                Use email and password to sign in instead
+            </li>
+            <li class="flex items-center gap-2">
+                <span class="text-accent">•</span>
+                Contact support if the problem persists
+            </li>
+        </ul>
+    </div>
+
+    <div class="flex gap-3 flex-col sm:flex-row pt-4">
+        <a href="{% url 'account_login' %}" 
+           class="btn btn-primary flex-1 justify-center text-center">
+            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
+            Try Again
+        </a>
+        <a href="{% url 'account_signup' %}" 
+           class="btn btn-secondary flex-1 justify-center text-center">
+            <i class="fa-solid fa-user-plus mr-2"></i>
+            Create Account
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<div class="flex flex-col sm:flex-row justify-center gap-3 mt-4 text-xs" style="color: var(--text-muted);">
+    <a href="/" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-home"></i> Home
+    </a>
+    <span class="hidden sm:inline">•</span>
+    <a href="#" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-envelope"></i> Contact Support
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load allauth socialaccount %}
+
+{% block title %}Login Cancelled — Code2Resume{% endblock %}
+{% block auth_tagline %}You cancelled the social login.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary);">Login Cancelled</h1>
+        <span class="text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500">
+            Cancelled
+        </span>
+    </div>
+
+    <div class="p-4 rounded-lg border" style="background: var(--bg-elevated); border-color: var(--bg-border);">
+        <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm" style="color: var(--text-primary);">
+                    You decided to cancel the social login process.
+                </p>
+                <p class="text-xs mt-2" style="color: var(--text-muted);">
+                    No changes have been made to your account. You can try signing in again or use email login instead.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">What would you like to do?</h2>
+        <div class="flex gap-3 flex-col sm:flex-row pt-2">
+            <a href="{% url 'account_login' %}" 
+               class="btn btn-primary flex-1 justify-center text-center">
+                <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
+                Try Again
+            </a>
+            <a href="{% url 'account_signup' %}" 
+               class="btn btn-secondary flex-1 justify-center text-center">
+                <i class="fa-solid fa-user-plus mr-2"></i>
+                Create New Account
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center pt-4">
+        <p class="text-xs" style="color: var(--text-muted);">
+            <i class="fa-solid fa-shield-alt"></i> Your privacy is important to us. No data was shared.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}
+<p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
+    <a href="{% url 'account_login' %}" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-arrow-left"></i> Back to sign in
+    </a>
+    <span class="mx-2">•</span>
+    <a href="/" style="color: var(--accent);" class="hover:underline">
+        <i class="fa-solid fa-home"></i> Home
+    </a>
+</p>
+{% endblock %}
