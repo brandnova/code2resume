@@ -29,11 +29,14 @@ def daterange(start: date, end: date):
 
 
 def fill_series(stat_qs, start: date, end: date, field: str):
-    """
-    Given a queryset of DailyStat rows, return two parallel lists:
-    labels (ISO date strings) and values — with 0 for missing days.
-    """
+    from django.utils import timezone
+    today = timezone.localdate()
     lookup = {row.date: getattr(row, field) for row in stat_qs}
+
+    # Patch today with live raw count if today is in range
+    if start <= today <= end and today not in lookup:
+        lookup[today] = _get_today_raw(field)
+
     labels, values = [], []
     for d in daterange(start, end):
         labels.append(d.strftime('%b %d'))
@@ -41,32 +44,90 @@ def fill_series(stat_qs, start: date, end: date, field: str):
     return labels, values
 
 
+def _get_today_raw(field: str) -> int:
+    """Get today's count directly from raw tables for fields not yet aggregated."""
+    from django.utils import timezone
+    today = timezone.localdate()
+    try:
+        if field == 'unique_visitors':
+            from dashboard.models import SiteVisit
+            return SiteVisit.objects.filter(date=today).count()
+        elif field == 'new_users':
+            from accounts.models import User
+            return User.objects.filter(date_joined__date=today).count()
+        elif field == 'resumes_created':
+            from accounts.models import Resume
+            return Resume.objects.filter(created_at__date=today).count()
+        elif field == 'pdfs_exported':
+            from dashboard.models import PDFExport
+            return PDFExport.objects.filter(created_at__date=today, success=True).count()
+        elif field == 'pdf_failures':
+            from dashboard.models import PDFExport
+            return PDFExport.objects.filter(created_at__date=today, success=False).count()
+        elif field == 'template_loads':
+            from dashboard.models import TemplateLoad
+            return TemplateLoad.objects.filter(created_at__date=today).count()
+    except Exception:
+        pass
+    return 0
+
+
 # ------------------------------------------------------------------ #
 # Overview cards
 # ------------------------------------------------------------------ #
 
 def overview_cards(start: date, end: date) -> dict:
-    from dashboard.models import DailyStat, PDFExport
+    from dashboard.models import DailyStat, PDFExport, SiteVisit, TemplateLoad
     from accounts.models import User, Resume
+    from django.utils import timezone
 
+    today = timezone.localdate()
+
+    # For historical days use DailyStat (fast aggregates)
+    # For today use raw tables directly (DailyStat for today won't exist until the cron runs)
     stats = DailyStat.objects.filter(date__range=(start, end))
 
-    total_visitors   = stats.aggregate(s=Sum('unique_visitors'))['s'] or 0
-    total_new_users  = stats.aggregate(s=Sum('new_users'))['s'] or 0
-    total_resumes    = stats.aggregate(s=Sum('resumes_created'))['s'] or 0
-    total_pdfs       = stats.aggregate(s=Sum('pdfs_exported'))['s'] or 0
-    total_failures   = stats.aggregate(s=Sum('pdf_failures'))['s'] or 0
-    total_tpl_loads  = stats.aggregate(s=Sum('template_loads'))['s'] or 0
+    # Aggregate from DailyStat for days that have been processed
+    from django.db.models import Sum
+    agg = stats.aggregate(
+        s_visitors  = Sum('unique_visitors'),
+        s_new_users = Sum('new_users'),
+        s_resumes   = Sum('resumes_created'),
+        s_pdfs      = Sum('pdfs_exported'),
+        s_failures  = Sum('pdf_failures'),
+        s_tpls      = Sum('template_loads'),
+    )
 
-    # All-time totals (independent of date filter)
-    alltime_users    = User.objects.count()
-    alltime_resumes  = Resume.objects.count()
+    # Add today's raw counts on top if today falls within the range
+    today_visitors  = 0
+    today_new_users = 0
+    today_resumes   = 0
+    today_pdfs      = 0
+    today_failures  = 0
+    today_tpls      = 0
 
-    # Export success rate
-    total_attempts   = total_pdfs + total_failures
-    success_rate     = round((total_pdfs / total_attempts * 100), 1) if total_attempts else 100.0
+    if start <= today <= end:
+        today_visitors  = SiteVisit.objects.filter(date=today).count()
+        today_new_users = User.objects.filter(date_joined__date=today).count()
+        today_resumes   = Resume.objects.filter(created_at__date=today).count()
+        today_pdfs      = PDFExport.objects.filter(created_at__date=today, success=True).count()
+        today_failures  = PDFExport.objects.filter(created_at__date=today, success=False).count()
+        today_tpls      = TemplateLoad.objects.filter(created_at__date=today).count()
 
-    # Avg PDF duration in the period
+    total_visitors  = (agg['s_visitors']  or 0) + today_visitors
+    total_new_users = (agg['s_new_users'] or 0) + today_new_users
+    total_resumes   = (agg['s_resumes']   or 0) + today_resumes
+    total_pdfs      = (agg['s_pdfs']      or 0) + today_pdfs
+    total_failures  = (agg['s_failures']  or 0) + today_failures
+    total_tpl_loads = (agg['s_tpls']      or 0) + today_tpls
+
+    alltime_users   = User.objects.count()
+    alltime_resumes = Resume.objects.count()
+
+    total_attempts = total_pdfs + total_failures
+    success_rate   = round((total_pdfs / total_attempts * 100), 1) if total_attempts else 100.0
+
+    from django.db.models import Avg
     avg_duration = PDFExport.objects.filter(
         created_at__date__range=(start, end),
         success=True,
@@ -166,11 +227,23 @@ def export_detail(start: date, end: date):
 
 
 def export_failure_rate_series(start: date, end: date):
-    from dashboard.models import DailyStat
+    from dashboard.models import DailyStat, PDFExport
+    from django.utils import timezone
+    today = timezone.localdate()
+
     qs = DailyStat.objects.filter(date__range=(start, end))
-    labels = []
-    success_vals, failure_vals = [], []
     lookup = {row.date: row for row in qs}
+
+    # Patch today
+    if start <= today <= end and today not in lookup:
+        class _TodayRow:
+            pdfs_exported = PDFExport.objects.filter(
+                created_at__date=today, success=True).count()
+            pdf_failures  = PDFExport.objects.filter(
+                created_at__date=today, success=False).count()
+        lookup[today] = _TodayRow()
+
+    labels, success_vals, failure_vals = [], [], []
     for d in daterange(start, end):
         labels.append(d.strftime('%b %d'))
         row = lookup.get(d)

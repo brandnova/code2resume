@@ -1,6 +1,7 @@
 import json
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
+from django.core.paginator import Paginator
 from .utils import (
     get_date_range, overview_cards,
     visitors_series, resumes_series, pdfs_series, new_users_series,
@@ -72,7 +73,13 @@ def overview(request):
 def exports(request):
     period, start, end = _period_ctx(request)
     exp_labels, exp_success, exp_failures = export_failure_rate_series(start, end)
-    rows = export_detail(start, end)
+    
+    # Paginate the exports detail
+    all_rows = export_detail(start, end)
+    paginator = Paginator(all_rows, 20)  # 20 items per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
     pp   = paper_breakdown(start, end)
     fw   = framework_breakdown(start, end)
 
@@ -83,7 +90,8 @@ def exports(request):
         'period_labels': PERIOD_LABELS,
         'start':         start,
         'end':           end,
-        'rows':          rows,
+        'page_obj':      page_obj,  # Use page_obj instead of rows
+        'rows':          page_obj.object_list,  # Keep for compatibility
 
         'exp_labels':    json.dumps(exp_labels),
         'exp_success':   json.dumps(exp_success),
@@ -102,7 +110,12 @@ def templates(request):
     tpl = template_breakdown(start, end)
 
     from accounts.models import ResumeTemplate
-    all_templates = ResumeTemplate.objects.all()
+    
+    # Paginate the all_templates table
+    all_templates_list = ResumeTemplate.objects.all().order_by('order', 'title')
+    paginator = Paginator(all_templates_list, 15)  # 15 templates per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
     context = {
         'page':          'templates',
@@ -112,7 +125,8 @@ def templates(request):
         'start':         start,
         'end':           end,
         'tpl_breakdown': tpl,
-        'all_templates': all_templates,
+        'page_obj':      page_obj,
+        'all_templates': page_obj.object_list,  # Keep for compatibility
         'tpl_labels':    json.dumps([r['template__title'] or 'Deleted' for r in tpl]),
         'tpl_data':      json.dumps([r['count'] for r in tpl]),
     }

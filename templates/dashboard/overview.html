@@ -4,102 +4,94 @@
 
 {% block dash_content %}
 
-{# ---- Stat cards ---- #}
-<div class="stat-grid">
+{# Stat cards - 2 columns on mobile, responsive grid #}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+    
     <div class="stat-card">
-        <div class="stat-card-icon"><i class="fa-solid fa-eye"></i></div>
-        <div class="stat-card-label">Unique Visitors</div>
-        <div class="stat-card-value">{{ total_visitors|default:"0" }}</div>
-        <div class="stat-card-sub">{{ period_label }}</div>
+        <div class="text-lg text-[var(--accent)] mb-2"><i class="fa-solid fa-eye"></i></div>
+        <div class="text-[10px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-1.5">Unique Visitors</div>
+        <div class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">{{ total_visitors }}</div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1">{{ period_label }}</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
-        <div class="stat-card-label">New Users</div>
-        <div class="stat-card-value">{{ total_new_users|default:"0" }}</div>
-        <div class="stat-card-sub">{{ alltime_users|default:"0" }} total registered</div>
+        <div class="text-lg text-[var(--accent)] mb-2"><i class="fa-solid fa-users"></i></div>
+        <div class="text-[10px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-1.5">New Users</div>
+        <div class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">{{ total_new_users }}</div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1">{{ alltime_users }} total</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-card-icon"><i class="fa-solid fa-file-lines"></i></div>
-        <div class="stat-card-label">Resumes Created</div>
-        <div class="stat-card-value">{{ total_resumes|default:"0" }}</div>
-        <div class="stat-card-sub">{{ alltime_resumes|default:"0" }} total in DB</div>
+        <div class="text-lg text-[var(--accent)] mb-2"><i class="fa-solid fa-file-lines"></i></div>
+        <div class="text-[10px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-1.5">Resumes Created</div>
+        <div class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">{{ total_resumes }}</div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1">{{ alltime_resumes }} total</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-card-icon"><i class="fa-solid fa-file-arrow-down"></i></div>
-        <div class="stat-card-label">PDFs Exported</div>
-        <div class="stat-card-value">{{ total_pdfs|default:"0" }}</div>
-        <div class="stat-card-sub">{{ success_rate|default:"100" }}% success rate</div>
+        <div class="text-lg text-[var(--accent)] mb-2"><i class="fa-solid fa-file-arrow-down"></i></div>
+        <div class="text-[10px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-1.5">PDFs Exported</div>
+        <div class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">{{ total_pdfs }}</div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1">{{ success_rate }}% success</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-card-icon"><i class="fa-solid fa-layer-group"></i></div>
-        <div class="stat-card-label">Template Loads</div>
-        <div class="stat-card-value">{{ total_tpl_loads|default:"0" }}</div>
-        <div class="stat-card-sub">{{ period_label }}</div>
+        <div class="text-lg text-[var(--accent)] mb-2"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="text-[10px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-1.5">Template Loads</div>
+        <div class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">{{ total_tpl_loads }}</div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1">{{ period_label }}</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-card-icon"><i class="fa-solid fa-stopwatch"></i></div>
-        <div class="stat-card-label">Avg Export Time</div>
-        <div class="stat-card-value">{{ avg_duration_ms|default:"0" }}</div>
-        <div class="stat-card-sub">milliseconds</div>
+        <div class="text-lg text-[var(--accent)] mb-2"><i class="fa-solid fa-stopwatch"></i></div>
+        <div class="text-[10px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-1.5">Avg Export Time</div>
+        <div class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">{{ avg_duration_ms }}</div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1">milliseconds</div>
+    </div>
+
+</div>
+
+{# Line charts - stack on mobile, side by side on larger screens #}
+<div class="flex flex-col lg:flex-row gap-3 md:gap-4 mb-4">
+    <div class="flex-1 chart-panel">
+        <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3.5">Unique Visitors</div>
+        <div class="h-[190px]"><canvas id="chartVisitors"></canvas></div>
+    </div>
+    <div class="flex-1 chart-panel">
+        <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3.5">New Users</div>
+        <div class="h-[190px]"><canvas id="chartUsers"></canvas></div>
     </div>
 </div>
 
-{# ---- Line charts row ---- #}
-<div class="chart-grid">
-    <div class="chart-panel">
-        <div class="chart-panel-title">Unique Visitors</div>
-        <div class="chart-wrap">
-            <canvas id="chartVisitors" style="width:100%; height:200px;"></canvas>
-        </div>
+<div class="flex flex-col lg:flex-row gap-3 md:gap-4 mb-4">
+    <div class="flex-1 chart-panel">
+        <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3.5">Resumes Created</div>
+        <div class="h-[190px]"><canvas id="chartResumes"></canvas></div>
     </div>
-    <div class="chart-panel">
-        <div class="chart-panel-title">New Users</div>
-        <div class="chart-wrap">
-            <canvas id="chartUsers" style="width:100%; height:200px;"></canvas>
-        </div>
+    <div class="flex-1 chart-panel">
+        <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3.5">PDF Exports</div>
+        <div class="h-[190px]"><canvas id="chartPdfs"></canvas></div>
     </div>
 </div>
 
-<div class="chart-grid">
-    <div class="chart-panel">
-        <div class="chart-panel-title">Resumes Created</div>
-        <div class="chart-wrap">
-            <canvas id="chartResumes" style="width:100%; height:200px;"></canvas>
-        </div>
-    </div>
-    <div class="chart-panel">
-        <div class="chart-panel-title">PDF Exports</div>
-        <div class="chart-wrap">
-            <canvas id="chartPdfs" style="width:100%; height:200px;"></canvas>
-        </div>
-    </div>
-</div>
+{# Breakdown section - stack on mobile #}
+<div class="flex flex-col lg:flex-row gap-3 md:gap-4">
 
-{# ---- Breakdown row ---- #}
-<div class="chart-grid wide">
-    <div class="chart-panel">
-        <div class="chart-panel-title">Top Templates</div>
+    <div class="flex-1 table-panel">
+        <div class="px-4 py-3 border-b border-[var(--bg-border)]">
+            <span class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)]">Top Templates</span>
+        </div>
         {% if tpl_breakdown %}
         <table class="dash-table">
-            <thead>
-                <tr>
-                    <th>Template</th>
-                    <th>Loads</th>
-                    <th>Type</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Template</th><th>Loads</th><th>Type</th></tr></thead>
             <tbody>
                 {% for row in tpl_breakdown %}
                 <tr>
-                    <td style="color:var(--text-primary);">
-                        {{ row.template__title|default:"Deleted template" }}
-                    </td>
+                    <td class="text-[var(--text-primary)]">{{ row.template__title|default:"Deleted" }}</td>
                     <td><strong>{{ row.count }}</strong></td>
                     <td>
                         {% if row.template__is_premium %}
-                        <span class="badge badge-warning">
-                            <i class="fa-solid fa-lock"></i> Premium
-                        </span>
+                        <span class="badge badge-warning"><i class="fa-solid fa-lock"></i> Premium</span>
                         {% else %}
                         <span class="badge badge-muted">Free</span>
                         {% endif %}
@@ -113,34 +105,27 @@
         {% endif %}
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:16px;">
+    <div class="flex-1 flex flex-col gap-3 md:gap-4">
         <div class="chart-panel">
-            <div class="chart-panel-title">Framework Split</div>
-            <div class="chart-wrap">
-                <canvas id="chartFw" style="width:100%; height:160px;"></canvas>
-            </div>
+            <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3">Framework Split</div>
+            <div class="h-[140px]"><canvas id="chartFw"></canvas></div>
         </div>
         <div class="chart-panel">
-            <div class="chart-panel-title">Paper Size Split</div>
-            <div class="chart-wrap">
-                <canvas id="chartPp" style="width:100%; height:160px;"></canvas>
-            </div>
+            <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3">Paper Size Split</div>
+            <div class="h-[140px]"><canvas id="chartPp"></canvas></div>
         </div>
     </div>
+
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        if (typeof lineChart !== 'undefined') {
-            lineChart('chartVisitors', {{ vis_labels|safe }}, {{ vis_data|safe }}, 'Visitors', ACCENT);
-            lineChart('chartUsers', {{ usr_labels|safe }}, {{ usr_data|safe }}, 'New Users', SUCCESS);
-            lineChart('chartResumes', {{ res_labels|safe }}, {{ res_data|safe }}, 'Resumes', WARNING);
-            lineChart('chartPdfs', {{ pdf_labels|safe }}, {{ pdf_data|safe }}, 'PDFs', ACCENT);
-            donutChart('chartFw', {{ fw_labels|safe }}, {{ fw_data|safe }});
-            donutChart('chartPp', {{ pp_labels|safe }}, {{ pp_data|safe }});
-        }
-    }, 100);
+    lineChart('chartVisitors', {{ vis_labels|safe }}, {{ vis_data|safe }}, 'Visitors',  C_ACCENT);
+    lineChart('chartUsers',    {{ usr_labels|safe }}, {{ usr_data|safe }}, 'New Users', C_SUCCESS);
+    lineChart('chartResumes',  {{ res_labels|safe }}, {{ res_data|safe }}, 'Resumes',   C_WARNING);
+    lineChart('chartPdfs',     {{ pdf_labels|safe }}, {{ pdf_data|safe }}, 'PDFs',      C_ACCENT);
+    donutChart('chartFw', {{ fw_labels|safe }}, {{ fw_data|safe }});
+    donutChart('chartPp', {{ pp_labels|safe }}, {{ pp_data|safe }});
 });
 </script>
 

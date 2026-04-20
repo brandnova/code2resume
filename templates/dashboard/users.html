@@ -1,88 +1,91 @@
 {% extends "dashboard/base.html" %}
-
 {% block page_title %}Users{% endblock %}
-
 {% block dash_content %}
 
-<div class="chart-grid single" style="margin-bottom:28px;">
+{# New Signups chart - full width #}
+<div class="mb-4">
     <div class="chart-panel">
-        <div class="chart-panel-title">New Signups per Day</div>
-        <div class="chart-wrap">
-            <canvas id="chartUsers" style="width:100%; height:200px;"></canvas>
-        </div>
+        <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3.5">New Signups per Day</div>
+        <div class="h-[190px]"><canvas id="chartUsers"></canvas></div>
     </div>
 </div>
 
-<div class="chart-grid">
-    <div class="table-panel">
-        <div class="table-panel-header">
-            <span class="table-panel-title">Recent Signups</span>
+{# Two tables - stack on mobile, side by side on desktop #}
+<div class="flex flex-col lg:flex-row gap-3 md:gap-4">
+
+    <div class="flex-1 table-panel flex flex-col">
+        <div class="px-4 py-3 border-b border-[var(--bg-border)]">
+            <span class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)]">Recent Signups</span>
         </div>
         {% if recent_users %}
-        <div style="overflow-x: auto;">
-            <table class="dash-table">
-                <thead>
+        <div class="overflow-y-auto" style="max-height: 400px;">
+            <table class="dash-table w-full">
+                <thead class="sticky top-0 bg-[var(--bg-elevated)]">
                     <tr>
-                        <th>Email</th>
-                        <th>Name</th>
-                        <th>Joined</th>
+                        <th class="sticky top-0 bg-[var(--bg-elevated)]">Email</th>
+                        <th class="sticky top-0 bg-[var(--bg-elevated)]">Name</th>
+                        <th class="sticky top-0 bg-[var(--bg-elevated)]">Joined</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for u in recent_users %}
                     <tr>
-                        <td style="color:var(--text-primary);">{{ u.email }}</td>
-                        <td>{{ u.get_display_name|default:"—" }}</td>
-                        <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                        <td class="text-[var(--text-primary)] break-all md:whitespace-nowrap">{{ u.email }}</td>
+                        <td class="whitespace-nowrap">{{ u.get_display_name|default:"—" }}</td>
+                        <td class="whitespace-nowrap">{{ u.date_joined|date:"M d, Y" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+        <div class="px-4 py-2 border-t border-[var(--bg-border)] bg-[var(--bg-elevated)]">
+            <div class="text-[11px] text-[var(--text-muted)]">
+                Showing {{ recent_users|length }} users
+            </div>
         </div>
         {% else %}
         <div class="dash-empty">No users yet.</div>
         {% endif %}
     </div>
 
-    <div class="table-panel">
-        <div class="table-panel-header">
-            <span class="table-panel-title">Top Users by Resume Count</span>
+    <div class="flex-1 table-panel flex flex-col">
+        <div class="px-4 py-3 border-b border-[var(--bg-border)]">
+            <span class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)]">Top by Resume Count</span>
         </div>
         {% if top_users %}
-        <div style="overflow-x: auto;">
-            <table class="dash-table">
-                <thead>
+        <div class="overflow-y-auto" style="max-height: 400px;">
+            <table class="dash-table w-full">
+                <thead class="sticky top-0 bg-[var(--bg-elevated)]">
                     <tr>
-                        <th>Email</th>
-                        <th>Resumes</th>
+                        <th class="sticky top-0 bg-[var(--bg-elevated)]">Email</th>
+                        <th class="sticky top-0 bg-[var(--bg-elevated)]">Resumes</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for u in top_users %}
                     <tr>
-                        <td style="color:var(--text-primary);">{{ u.email }}</td>
-                        <td>
-                            <span class="badge badge-accent">{{ u.resume_count }}</span>
-                        </td>
+                        <td class="text-[var(--text-primary)] break-all md:whitespace-nowrap">{{ u.email }}</td>
+                        <td class="whitespace-nowrap"><span class="badge badge-accent">{{ u.resume_count }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <div class="px-4 py-2 border-t border-[var(--bg-border)] bg-[var(--bg-elevated)]">
+            <div class="text-[11px] text-[var(--text-muted)]">
+                Showing {{ top_users|length }} users
+            </div>
+        </div>
         {% else %}
         <div class="dash-empty">No resume data yet.</div>
         {% endif %}
     </div>
+
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        if (typeof lineChart !== 'undefined') {
-            lineChart('chartUsers', {{ usr_labels|safe }}, {{ usr_data|safe }}, 'New Users', SUCCESS);
-        }
-    }, 100);
+    lineChart('chartUsers', {{ usr_labels|safe }}, {{ usr_data|safe }}, 'New Users', C_SUCCESS);
 });
 </script>
-
 {% endblock %}

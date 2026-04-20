@@ -7,6 +7,14 @@
 <!-- Google Fonts: JetBrains Mono + DM Sans -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+<style>
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -15,14 +23,10 @@
   <!-- ===================== NAV ===================== -->
   <nav class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-4 sm:px-8 transition-all duration-300 border-b border-transparent" :class="{ 'bg-gray-950/88 backdrop-blur-lg border-gray-800': scrolled }">
     <div class="w-full flex items-center justify-between gap-4">
-      <a href="{% url 'landing' %}" class="flex items-center gap-2 font-mono text-sm font-bold text-gray-100 no-underline whitespace-nowrap flex-shrink-0">
+      <a href="{% url 'landing' %}" class="flex items-center font-mono text-sm font-bold text-gray-100 no-underline whitespace-nowrap flex-shrink-0">
         code<span class="text-blue-500">2</span>resume
       </a>
       <div class="flex items-center gap-2 flex-shrink-0">
-        <button @click="toggleTheme()" class="w-9 h-9 p-0 inline-flex items-center justify-center rounded-md border-0 cursor-pointer bg-gray-900 hover:bg-gray-800 transition-colors">
-          <i class="fas fa-sun theme-icon-sun hidden" :class="{ 'hidden': isDark }"></i>
-          <i class="fas fa-moon theme-icon-moon" :class="{ 'hidden': !isDark }"></i>
-        </button>
         {% if user.is_authenticated %}
         <a href="{% url 'accounts:profile' %}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-400 no-underline hover:text-gray-100 hover:bg-gray-900 transition-colors">
           <i class="far fa-id-card"></i> <span class="hidden md:inline">My Resumes</span>
@@ -30,9 +34,10 @@
         {% else %}
         <a href="{% url 'account_login' %}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-400 no-underline hover:text-gray-100 hover:bg-gray-900 transition-colors">Sign in</a>
         {% endif %}
-        <a href="{% url 'builder:workspace' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-semibold no-underline hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25 transition-all">
-          <span class="hidden sm:inline">Open</span> Workspace <i class="fas fa-arrow-right"></i>
-        </a>
+        <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme" title="Toggle theme">
+          <i class="fas fa-sun theme-icon-sun"></i>
+          <i class="fas fa-moon theme-icon-moon"></i>
+      </button>
       </div>
     </div>
   </nav>
@@ -183,7 +188,9 @@
   <!-- ===================== FEATURES ===================== -->
   <section class="py-16 sm:py-20 px-4 sm:px-8 w-full" id="features">
     <div class="w-full max-w-4xl mx-auto mb-12 sm:mb-16 text-center" data-aos="fade-up">
-      <p class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4">features</p>
+      <div class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4 flex w-full items-center justify-center gap-2 before:content-[''] before:w-6 before:h-px before:bg-current">
+        Features
+      </div>
       <h2 class="font-sans text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-gray-100 mb-6">Everything a developer needs.<br class="hidden sm:block">Nothing they don&apos;t.</h2>
       <p class="text-base sm:text-lg leading-relaxed text-gray-400">Built with the same discipline you&apos;d bring to a production codebase. No bloat, no lock-in.</p>
     </div>
@@ -230,7 +237,9 @@
   <!-- ===================== HOW IT WORKS ===================== -->
   <section class="py-16 sm:py-20 px-4 sm:px-8 bg-gray-900 border-y border-gray-800 w-full" id="how-it-works">
     <div class="w-full max-w-4xl mx-auto mb-12 sm:mb-16 text-center" data-aos="fade-up">
-      <p class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4">workflow</p>
+      <div class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4 flex w-full items-center justify-center gap-2 before:content-[''] before:w-6 before:h-px before:bg-current">
+        workflow
+      </div>
       <h2 class="font-sans text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-gray-100">Four steps. One great resume.</h2>
     </div>
     
@@ -243,7 +252,7 @@
       <div class="relative" data-aos="fade-up" data-aos-delay="100">
         <div class="font-mono text-4xl font-bold text-gray-800 leading-tight mb-4 transition-colors duration-200 hover:text-blue-500">02</div>
         <h3 class="text-base font-semibold text-gray-100 mb-2">Write HTML & CSS</h3>
-        <p class="text-sm leading-relaxed text-gray-400">Full control. Use utility classes, custom fonts, grid layouts — anything a browser can render.</p>
+        <p class="text-sm leading-relaxed text-gray-400">Full control. Use utility classes, custom fonts, grid layouts, anything a browser can render.</p>
       </div>
       <div class="relative" data-aos="fade-up" data-aos-delay="200">
         <div class="font-mono text-4xl font-bold text-gray-800 leading-tight mb-4 transition-colors duration-200 hover:text-blue-500">03</div>
@@ -261,7 +270,9 @@
   <!-- ===================== FRAMEWORK SHOWCASE ===================== -->
   <section class="py-16 sm:py-20 px-4 sm:px-8 w-full" id="frameworks" data-aos="fade-up">
     <div class="w-full max-w-4xl mx-auto mb-8 sm:mb-12 text-center">
-      <p class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4">framework injector</p>
+      <div class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4 flex w-full items-center justify-center gap-2 before:content-[''] before:w-6 before:h-px before:bg-current">
+        framework injector
+      </div>
       <h2 class="font-sans text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-gray-100 mb-4">Your CSS framework. Your rules.</h2>
       <p class="text-base sm:text-lg leading-relaxed text-gray-400">Switch between Tailwind, Bootstrap, or raw CSS with one click.</p>
     </div>
@@ -366,11 +377,7 @@ function landingPage() {
             none: `<span class="tw-dim">/* Vanilla CSS */</span>
 <span class="tw-tag">&lt;div</span> <span class="tw-attr">class</span>=<span class="tw-val">"resume"</span><span class="tw-tag">&gt;</span>
   <span class="tw-tag">&lt;h1&gt;</span><span class="tw-text">Ada Lovelace</span><span class="tw-tag">&lt;/h1&gt;</span>
-  <span class="tw-tag">&lt;span&gt;</span><span class="tw-text">Software Engineer</span><span class="tw-tag">&lt;/span&gt;</span>
-  <span class="tw-tag">&lt;hr&gt;</span>
-  <span class="tw-tag">&lt;section&gt;</span>
-    <span class="tw-tag">&lt;h3&gt;</span><span class="tw-text">Experience</span><span class="tw-tag">&lt;/h3&gt;</span>
-  <span class="tw-tag">&lt;/section&gt;</span>
+  <span class="tw-tag">&lt;span&gt;</span><span class="tw-text">Software Engineer · London, UK</span><span class="tw-tag">&lt;/span&gt;</span>
 <span class="tw-tag">&lt;/div&gt;</span>`,
 
             tailwind: `<span class="tw-dim">/* Tailwind utilities */</span>
@@ -379,7 +386,7 @@ function landingPage() {
     <span class="tw-text">Ada Lovelace</span>
   <span class="tw-tag">&lt;/h1&gt;</span>
   <span class="tw-tag">&lt;p</span> <span class="tw-attr">class</span>=<span class="tw-val">"text-gray-600 mt-1"</span><span class="tw-tag">&gt;</span>
-    <span class="tw-text">Software Engineer</span>
+    <span class="tw-text">Software Engineer · London, UK</span>
   <span class="tw-tag">&lt;/p&gt;</span>
 <span class="tw-tag">&lt;/div&gt;</span>`,
 
@@ -389,7 +396,7 @@ function landingPage() {
     <span class="tw-text">Ada Lovelace</span>
   <span class="tw-tag">&lt;/h1&gt;</span>
   <span class="tw-tag">&lt;p</span> <span class="tw-attr">class</span>=<span class="tw-val">"text-muted"</span><span class="tw-tag">&gt;</span>
-    <span class="tw-text">Software Engineer</span>
+    <span class="tw-text">Software Engineer · London, UK</span>
   <span class="tw-tag">&lt;/p&gt;</span>
 <span class="tw-tag">&lt;/div&gt;</span>`,
         },
@@ -426,13 +433,6 @@ function landingPage() {
             }
 
             this._initCounters();
-        },
-
-        toggleTheme() {
-            this.isDark = !this.isDark;
-            const t = this.isDark ? 'dark' : 'light';
-            applyTheme(t);
-            localStorage.setItem('c2r-theme', t);
         },
 
         setFw(fw) { this.activeFw = fw; },

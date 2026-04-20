@@ -50,41 +50,41 @@
         </div>
         {% endfor %}
 
-        {# Account Actions - Improved mobile layout #}
+        {# Account Actions - Improved with compact Tailwind buttons #}
         <div class="mb-8">
             <h2 class="text-sm font-bold uppercase tracking-widest mb-3" style="color: var(--text-muted);">
                 Account Settings
             </h2>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                 <a href="{% url 'account_email' %}" 
-                   class="btn btn-ghost text-sm py-2 px-3"
-                   style="color: var(--text-primary);">
-                    <i class="far fa-envelope w-4"></i>
-                    <span class="truncate">Email</span>
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
+                   style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--bg-border);">
+                    <i class="far fa-envelope text-xs"></i>
+                    <span>Email</span>
                 </a>
                 <a href="{% url 'account_change_password' %}" 
-                   class="btn btn-ghost text-sm py-2 px-3"
-                   style="color: var(--text-primary);">
-                    <i class="fas fa-key w-4"></i>
-                    <span class="truncate">Password</span>
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
+                   style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--bg-border);">
+                    <i class="fas fa-key text-xs"></i>
+                    <span>Password</span>
                 </a>
                 <a href="{% url 'account_reset_password' %}" 
-                   class="btn btn-ghost text-sm py-2 px-3"
-                   style="color: var(--text-primary);">
-                    <i class="fas fa-lock-open w-4"></i>
-                    <span class="truncate">Reset</span>
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
+                   style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--bg-border);">
+                    <i class="fas fa-lock-open text-xs"></i>
+                    <span>Reset</span>
                 </a>
                 <a href="{% url 'socialaccount_connections' %}" 
-                   class="btn btn-ghost text-sm py-2 px-3"
-                   style="color: var(--text-primary);">
-                    <i class="fas fa-link w-4"></i>
-                    <span class="truncate">Social</span>
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
+                   style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--bg-border);">
+                    <i class="fas fa-link text-xs"></i>
+                    <span>Social</span>
                 </a>
                 <a href="{% url 'accounts:profile_edit' %}" 
-                   class="btn btn-ghost text-sm py-2 px-3"
-                   style="color: var(--text-primary);">
-                    <i class="far fa-user w-4"></i>
-                    <span class="truncate">Profile</span>
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
+                   style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--bg-border);">
+                    <i class="far fa-user text-xs"></i>
+                    <span>Profile</span>
                 </a>
             </div>
         </div>
@@ -103,12 +103,12 @@
         {% if resumes %}
         <div class="grid gap-3">
             {% for resume in resumes %}
-            <div class="p-4 rounded-xl border transition-colors"
+            <div class="p-4 rounded-xl border transition-all duration-200 hover:shadow-lg"
                  style="background: var(--bg-surface); border-color: var(--bg-border);"
                  onmouseover="this.style.borderColor='var(--accent)'"
                  onmouseout="this.style.borderColor='var(--bg-border)'">
                 
-                {# Resume info - full width on mobile #}
+                {# Resume info #}
                 <div class="mb-3">
                     <p class="font-semibold truncate" style="color: var(--text-primary);">{{ resume.title }}</p>
                     <p class="text-xs mt-1" style="color: var(--text-muted);">
@@ -117,11 +117,12 @@
                     </p>
                 </div>
                 
-                {# Action buttons - wrap properly on mobile #}
-                <div class="flex flex-wrap items-center gap-2">
+                {# Action buttons - compact Tailwind styling #}
+                <div class="flex flex-wrap items-center gap-1.5">
                     <a href="{% url 'accounts:resume_open' resume.slug %}"
-                       class="btn btn-ghost text-sm py-1.5 px-3 flex-1 sm:flex-none">
-                        <i class="fas fa-pen-to-square"></i>
+                       class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02] flex-1 sm:flex-none"
+                       style="background: var(--accent); color: white;">
+                        <i class="fas fa-pen-to-square text-xs"></i>
                         <span>Open</span>
                     </a>
                     
@@ -129,26 +130,27 @@
                     <form method="POST" action="{% url 'accounts:resume_toggle_public' resume.slug %}" class="inline">
                         {% csrf_token %}
                         <button type="submit" 
-                                class="btn btn-ghost text-sm py-1.5 px-3"
-                                title="{% if resume.is_public %}Make private{% else %}Make public{% endif %}"
-                                style="{% if resume.is_public %}color: var(--success);{% endif %}">
+                                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
+                                style="background: var(--bg-elevated); color: {% if resume.is_public %}var(--success){% else %}var(--text-primary){% endif %}; border: 1px solid var(--bg-border);"
+                                title="{% if resume.is_public %}Make private{% else %}Make public{% endif %}">
                             {% if resume.is_public %}
-                            <i class="fas fa-eye"></i>
-                            <span class="inline">Public</span>
+                            <i class="fas fa-eye text-xs"></i>
+                            <span>Public</span>
                             {% else %}
-                            <i class="fas fa-eye-slash"></i>
-                            <span class="inline">Private</span>
+                            <i class="fas fa-eye-slash text-xs"></i>
+                            <span>Private</span>
                             {% endif %}
                         </button>
                     </form>
 
-                    {# Copy public link #}
+                    {# Copy public link - only show when public #}
                     {% if resume.is_public %}
-                    <button class="btn btn-ghost text-sm py-1.5 px-3"
+                    <button class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
                             onclick="copyLink(this, '{{ request.scheme }}://{{ request.get_host }}{% url 'builder:public_resume' resume.slug %}')"
+                            style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--bg-border);"
                             title="Copy public link">
-                        <i class="fas fa-link"></i>
-                        <span class="inline">Copy Link</span>
+                        <i class="fas fa-link text-xs"></i>
+                        <span>Copy Link</span>
                     </button>
                     {% endif %}
                     
@@ -157,10 +159,11 @@
                           onsubmit="return confirm('Delete \'{{ resume.title }}\'?')"
                           class="inline">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-ghost text-sm py-1.5 px-3"
-                                style="color: var(--danger);">
-                            <i class="fas fa-trash-can"></i>
-                            <span class="inline">Delete</span>
+                        <button type="submit" 
+                                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02] hover:bg-red-500/10"
+                                style="background: var(--bg-elevated); color: var(--danger); border: 1px solid var(--bg-border);">
+                            <i class="fas fa-trash-can text-xs"></i>
+                            <span>Delete</span>
                         </button>
                     </form>
                 </div>
@@ -176,8 +179,9 @@
             <p class="text-sm mb-5" style="color: var(--text-muted);">
                 Start building and save your first resume from the workspace.
             </p>
-            <a href="/" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
+            <a href="/" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+               style="background: var(--accent); color: white;">
+                <i class="fas fa-plus text-xs"></i>
                 Start building
             </a>
         </div>
@@ -191,15 +195,23 @@
 function copyLink(button, url) {
     navigator.clipboard.writeText(url).then(() => {
         const originalHTML = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-check"></i><span class="inline">Copied!</span>';
+        button.innerHTML = '<i class="fas fa-check text-xs"></i><span>Copied!</span>';
+        button.style.background = 'var(--success)';
+        button.style.color = 'white';
         setTimeout(() => {
             button.innerHTML = originalHTML;
+            button.style.background = '';
+            button.style.color = '';
         }, 2000);
     }).catch(() => {
         const originalHTML = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-times"></i><span class="inline">Failed</span>';
+        button.innerHTML = '<i class="fas fa-times text-xs"></i><span>Failed</span>';
+        button.style.background = 'var(--danger)';
+        button.style.color = 'white';
         setTimeout(() => {
             button.innerHTML = originalHTML;
+            button.style.background = '';
+            button.style.color = '';
         }, 2000);
     });
 }

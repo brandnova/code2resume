@@ -13,10 +13,6 @@
             code<span style="color:var(--accent);">2</span>resume
         </a>
         <div class="flex items-center gap-3">
-            <a href="/" class="btn btn-primary">
-                <i class="fas fa-pen-to-square"></i>
-                Open Workspace
-            </a>
             {# Theme toggle and auth dropdown #}
             {% include "partials/theme_and_auth_dropdown.html" %}
         </div>
@@ -50,7 +46,7 @@
                     <div class="template-preview-placeholder">
                         <i class="far fa-file-lines" style="font-size: 3rem; color:var(--text-muted);"></i>
                         <span style="font-size:12px; color:var(--text-muted); margin-top:6px;">Preview is temporarily unavailable.</span>
-                        <button class="btn btn-ghost my-2"><i class="fas fa-edit"></i>Load template to workspace</button>
+                        <button class="btn btn-ghost my-2"><i class="fas fa-external-link"></i>Load template to workspace</button>
                     </div>
                     {% endif %}
 

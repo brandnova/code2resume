@@ -1,36 +1,31 @@
 {% extends "dashboard/base.html" %}
-
 {% block page_title %}Templates{% endblock %}
-
 {% block dash_content %}
 
-<div class="chart-grid wide" style="margin-bottom:28px;">
-    <div class="chart-panel">
-        <div class="chart-panel-title">Loads per Template</div>
-        <div class="chart-wrap">
-            <canvas id="chartTpl" style="width:100%; height:220px;"></canvas>
-        </div>
+{# Loads per Template chart + Breakdown table - stack on mobile #}
+<div class="flex flex-col lg:flex-row gap-3 md:gap-4 mb-4">
+    <div class="flex-1 chart-panel">
+        <div class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)] mb-3.5">Loads per Template</div>
+        <div class="h-[210px]"><canvas id="chartTpl"></canvas></div>
     </div>
-    <div class="chart-panel">
-        <div class="chart-panel-title">Breakdown</div>
+    <div class="flex-1 table-panel">
+        <div class="px-4 py-3 border-b border-[var(--bg-border)]">
+            <span class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)]">Breakdown</span>
+        </div>
         {% if tpl_breakdown %}
-        <div style="overflow-x: auto;">
+        <div class="overflow-x-auto">
             <table class="dash-table">
-                <thead>
-                    <tr><th>Template</th><th>Loads</th></tr>
-                </thead>
+                <thead><tr><th>Template</th><th>Loads</th></tr></thead>
                 <tbody>
                     {% for row in tpl_breakdown %}
                     <tr>
-                        <td style="color:var(--text-primary);">
+                        <td class="text-[var(--text-primary)] whitespace-nowrap">
                             {{ row.template__title|default:"Deleted" }}
                             {% if row.template__is_premium %}
-                            <span class="badge badge-warning" style="margin-left:4px;">
-                                <i class="fa-solid fa-lock"></i>
-                            </span>
+                            <span class="badge badge-warning ml-1"><i class="fa-solid fa-lock"></i></span>
                             {% endif %}
                         </td>
-                        <td><strong>{{ row.count }}</strong></td>
+                        <td class="whitespace-nowrap"><strong>{{ row.count }}</strong></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -42,61 +37,45 @@
     </div>
 </div>
 
+{# All Templates table with pagination #}
 <div class="table-panel">
-    <div class="table-panel-header">
-        <span class="table-panel-title">All Templates</span>
-        <a href="/admin/accounts/resumetemplate/" class="btn-ghost" style="font-size:12px;">
+    <div class="px-4 py-3 border-b border-[var(--bg-border)] flex items-center justify-between flex-wrap gap-2">
+        <span class="text-[11px] font-bold tracking-wide uppercase text-[var(--text-muted)]">All Templates</span>
+        <a href="/admin/accounts/resumetemplate/add/" class="btn btn-ghost text-[11px]">
             <i class="fa-solid fa-plus"></i> Add in Admin
         </a>
     </div>
-    <div style="overflow-x: auto;">
-        <table class="dash-table">
+    <div class="overflow-x-auto">
+        <table class="dash-table min-w-[600px]">
             <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Framework</th>
-                    <th>Paper</th>
-                    <th>Type</th>
-                    <th>Active</th>
-                    <th>Order</th>
-                </tr>
+                <tr><th>Title</th><th>Framework</th><th>Paper</th><th>Type</th><th>Active</th><th>Order</th></tr>
             </thead>
             <tbody>
                 {% for tpl in all_templates %}
                 <tr>
-                    <td style="color:var(--text-primary); font-weight:500;">{{ tpl.title }}</td>
-                    <td>{{ tpl.framework|capfirst }}</td>
-                    <td>{{ tpl.paper_size|upper }}</td>
-                    <td>
-                        {% if tpl.is_premium %}
-                        <span class="badge badge-warning"><i class="fa-solid fa-lock"></i> Premium</span>
-                        {% else %}
-                        <span class="badge badge-muted">Free</span>
-                        {% endif %}
+                    <td class="text-[var(--text-primary)] font-medium whitespace-nowrap">{{ tpl.title }}</td>
+                    <td class="whitespace-nowrap">{{ tpl.framework|capfirst }}</td>
+                    <td class="whitespace-nowrap">{{ tpl.paper_size|upper }}</td>
+                    <td class="whitespace-nowrap">
+                        {% if tpl.is_premium %}<span class="badge badge-warning"><i class="fa-solid fa-lock"></i> Premium</span>
+                        {% else %}<span class="badge badge-muted">Free</span>{% endif %}
                     </td>
-                    <td>
-                        {% if tpl.is_active %}
-                        <span class="badge badge-success">Active</span>
-                        {% else %}
-                        <span class="badge badge-danger">Hidden</span>
-                        {% endif %}
+                    <td class="whitespace-nowrap">
+                        {% if tpl.is_active %}<span class="badge badge-success">Active</span>
+                        {% else %}<span class="badge badge-danger">Hidden</span>{% endif %}
                     </td>
-                    <td>{{ tpl.order }}</td>
+                    <td class="whitespace-nowrap">{{ tpl.order }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% include "dashboard/partials/pagination.html" %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        if (typeof barChart !== 'undefined') {
-            barChart('chartTpl', {{ tpl_labels|safe }}, {{ tpl_data|safe }}, 'Loads', ACCENT);
-        }
-    }, 100);
+    barChart('chartTpl', {{ tpl_labels|safe }}, {{ tpl_data|safe }}, 'Loads', C_ACCENT);
 });
 </script>
-
 {% endblock %}
