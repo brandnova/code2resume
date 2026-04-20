@@ -100,10 +100,10 @@ function toastManager() {
 
         _resolveIcon(type) {
             var icons = {
-                success: 'fa-solid fa-circle-check',
-                error:   'fa-solid fa-circle-exclamation',
-                warning: 'fa-solid fa-triangle-exclamation',
-                info:    'fa-solid fa-circle-info',
+                success: 'fas fa-circle-check',
+                error:   'fas fa-circle-exclamation',
+                warning: 'fas fa-triangle-exclamation',
+                info:    'fas fa-circle-info',
             };
             return icons[type] || icons.info;
         },

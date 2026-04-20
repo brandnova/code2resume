@@ -1,0 +1,102 @@
+{% extends "dashboard/base.html" %}
+
+{% block page_title %}PDF Exports{% endblock %}
+
+{% block dash_content %}
+
+<div class="chart-grid single" style="margin-bottom:28px;">
+    <div class="chart-panel">
+        <div class="chart-panel-title">Exports: Success vs Failures</div>
+        <div class="chart-wrap">
+            <canvas id="chartExports" style="width:100%; height:220px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="chart-grid" style="margin-bottom:28px;">
+    <div class="chart-panel">
+        <div class="chart-panel-title">By Paper Size</div>
+        <div class="chart-wrap">
+            <canvas id="chartPp" style="width:100%; height:180px;"></canvas>
+        </div>
+    </div>
+    <div class="chart-panel">
+        <div class="chart-panel-title">By Framework</div>
+        <div class="chart-wrap">
+            <canvas id="chartFw" style="width:100%; height:180px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="table-panel">
+    <div class="table-panel-header">
+        <span class="table-panel-title">Recent Exports (last 200)</span>
+    </div>
+    {% if rows %}
+    <div style="overflow-x: auto;">
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Paper</th>
+                    <th>Framework</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>User</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row.created_at|date:"M d, H:i" }}</td>
+                    <td>{{ row.paper_size|upper }}</td>
+                    <td>{{ row.framework|capfirst }}</td>
+                    <td>{{ row.duration_ms }} ms</td>
+                    <td>
+                        {% if row.success %}
+                        <span class="badge badge-success">OK</span>
+                        {% else %}
+                        <span class="badge badge-danger">Fail</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--text-muted);">
+                        {{ row.user.email|default:"Anonymous" }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="dash-empty">No exports in this period.</div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        if (typeof stackedBarChart !== 'undefined') {
+            stackedBarChart('chartExports', {{ exp_labels|safe }}, [
+                {
+                    label: 'Success',
+                    data: {{ exp_success|safe }},
+                    backgroundColor: SUCCESS,
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Failures',
+                    data: {{ exp_failures|safe }},
+                    backgroundColor: DANGER,
+                    borderRadius: 4,
+                },
+            ]);
+        }
+        if (typeof donutChart !== 'undefined') {
+            donutChart('chartPp', {{ pp_labels|safe }}, {{ pp_data|safe }});
+            donutChart('chartFw', {{ fw_labels|safe }}, {{ fw_data|safe }});
+        }
+    }, 100);
+});
+</script>
+
+{% endblock %}

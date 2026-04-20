@@ -39,12 +39,12 @@
         <div class="flex gap-3 flex-col sm:flex-row">
             <a href="{% url 'account_email' %}" 
                class="btn btn-secondary flex-1 justify-center text-center">
-                <i class="fa-solid fa-paper-plane mr-2"></i>
+                <i class="fas fa-paper-plane mr-2"></i>
                 Request another
             </a>
             <a href="{% url 'account_email' %}" 
                class="btn btn-secondary flex-1 justify-center text-center">
-                <i class="fa-solid fa-envelope mr-2"></i>
+                <i class="fas fa-envelope mr-2"></i>
                 Change email address
             </a>
         </div>
@@ -52,7 +52,7 @@
 
     <div class="text-center pt-4">
         <p class="text-xs" style="color: var(--text-muted);">
-            <i class="fa-solid fa-clock"></i> The verification link expires in 24 hours.
+            <i class="fas fa-clock"></i> The verification link expires in 24 hours.
         </p>
     </div>
 </div>
@@ -61,7 +61,7 @@
 {% block auth_footer %}
 <p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
     <a href="{% url 'accounts:profile' %}" style="color: var(--accent);" class="hover:underline">
-        <i class="fa-solid fa-arrow-left"></i> Back to profile
+        <i class="fas fa-arrow-left"></i> Back to profile
     </a>
 </p>
 {% endblock %}

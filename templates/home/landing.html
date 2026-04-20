@@ -10,76 +10,80 @@
 {% endblock %}
 
 {% block content %}
-<div x-data="landingPage()" class="lp-root">
+<div x-data="landingPage()" class="bg-gray-950 text-gray-100 overflow-x-hidden" :class="{ 'light-theme': !isDark }">
 
   <!-- ===================== NAV ===================== -->
-  <nav class="lp-nav" :class="{ 'lp-nav--scrolled': scrolled }">
-    <div class="lp-nav-inner">
-      <a href="{% url 'landing' %}" class="lp-brand">
-        code<span>2</span>resume
+  <nav class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-4 sm:px-8 transition-all duration-300 border-b border-transparent" :class="{ 'bg-gray-950/88 backdrop-blur-lg border-gray-800': scrolled }">
+    <div class="w-full flex items-center justify-between gap-4">
+      <a href="{% url 'landing' %}" class="flex items-center gap-2 font-mono text-sm font-bold text-gray-100 no-underline whitespace-nowrap flex-shrink-0">
+        code<span class="text-blue-500">2</span>resume
       </a>
-      <div class="lp-nav-actions">
-        <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme">
-          <i class="fa-solid fa-sun  theme-icon-sun"></i>
-          <i class="fa-solid fa-moon theme-icon-moon"></i>
-      </button>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button @click="toggleTheme()" class="w-9 h-9 p-0 inline-flex items-center justify-center rounded-md border-0 cursor-pointer bg-gray-900 hover:bg-gray-800 transition-colors">
+          <i class="fas fa-sun theme-icon-sun hidden" :class="{ 'hidden': isDark }"></i>
+          <i class="fas fa-moon theme-icon-moon" :class="{ 'hidden': !isDark }"></i>
+        </button>
         {% if user.is_authenticated %}
-        <a href="{% url 'accounts:profile' %}" class="lp-btn-ghost lp-nav-hide-sm">
-          <i class="fa-regular fa-id-card"></i> My Resumes
+        <a href="{% url 'accounts:profile' %}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-400 no-underline hover:text-gray-100 hover:bg-gray-900 transition-colors">
+          <i class="far fa-id-card"></i> <span class="hidden md:inline">My Resumes</span>
         </a>
         {% else %}
-        <a href="{% url 'account_login' %}" class="lp-btn-ghost lp-nav-hide-sm">Sign in</a>
+        <a href="{% url 'account_login' %}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-400 no-underline hover:text-gray-100 hover:bg-gray-900 transition-colors">Sign in</a>
         {% endif %}
-        <a href="{% url 'builder:workspace' %}" class="lp-btn-primary">
-          Open Workspace <i class="fa-solid fa-arrow-right"></i>
+        <a href="{% url 'builder:workspace' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-semibold no-underline hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25 transition-all">
+          <span class="hidden sm:inline">Open</span> Workspace <i class="fas fa-arrow-right"></i>
         </a>
       </div>
     </div>
   </nav>
 
   <!-- ===================== HERO ===================== -->
-  <section class="lp-hero">
-    <div class="lp-hero-inner">
-      <!-- Left: Text -->
-      <div class="lp-hero-text" data-aos="fade-right" data-aos-duration="700">
-        <div class="lp-eyebrow">v2.0 — Free to use</div>
-        <h1 class="lp-hero-title">
-          Your resume,<br>written in <em class="lp-accent-word">code</em>.
-        </h1>
-        <p class="lp-hero-sub">
-          A split-pane workspace for developers who know that the best resume
-          is one you wrote yourself in HTML and CSS, with full control over
-          every pixel.
-        </p>
-        <div class="lp-hero-cta">
-          <a href="{% url 'builder:workspace' %}" class="lp-btn-hero-primary">
-            <i class="fa-solid fa-code"></i> Start building for free
-          </a>
-          <a href="#how-it-works" class="lp-btn-hero-ghost">
-            See how it works <i class="fa-solid fa-arrow-down"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Right: Code window -->
-      <div class="lp-hero-visual" data-aos="fade-left" data-aos-duration="700" data-aos-delay="150">
-        <div class="lp-code-window">
-          <!-- Window chrome -->
-          <div class="lp-win-bar">
-            <div class="lp-win-dots">
-              <span class="lp-dot lp-dot--red"></span>
-              <span class="lp-dot lp-dot--yellow"></span>
-              <span class="lp-dot lp-dot--green"></span>
-            </div>
-            <span class="lp-win-title">resume.html</span>
-            <div class="lp-win-tabs">
-              <span class="lp-win-tab lp-win-tab--active">HTML</span>
-              <span class="lp-win-tab">CSS</span>
-            </div>
+  <section class="relative w-full pt-20 px-4 sm:px-8 pb-12 sm:pb-16 md:pb-20 md:pt-24">
+    <div class="w-full max-w-6xl mx-auto">
+      <!-- Desktop: 2-column grid | Mobile: Single column -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-center">
+        
+        <!-- LEFT: Text Content -->
+        <div class="order-2 md:order-1 flex flex-col justify-center py-8 md:py-0" data-aos="fade-right" data-aos-duration="700">
+          <div class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-6 flex items-center gap-2 before:content-[''] before:w-6 before:h-px before:bg-current">
+            v2.0 — Free to use
           </div>
-          <!-- Typed code -->
-          <div class="lp-win-body">
-            <pre id="hero-typewriter" data-code='&lt;section class="resume"&gt;
+          <h1 class="font-sans text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight text-gray-100 mb-6">
+            Your resume,<br>written in <em class="text-blue-500 not-italic">code</em>.
+          </h1>
+          <p class="text-base sm:text-lg leading-relaxed text-gray-400 mb-8 max-w-md">
+            A split-pane workspace for developers who know that the best resume is one you wrote yourself in HTML and CSS, with full control over every pixel.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <a href="{% url 'builder:workspace' %}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-blue-600 text-white font-semibold no-underline hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95">
+              <i class="fas fa-code"></i> Start building
+            </a>
+            <a href="#how-it-works" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-gray-900 text-gray-300 font-medium border border-gray-800 no-underline hover:text-gray-100 hover:border-blue-500 transition-colors">
+              See how <i class="fas fa-arrow-down text-xs"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- RIGHT: Code Window (Hidden on mobile, shown on desktop) -->
+        <div class="order-1 md:order-2 hidden md:block" data-aos="fade-left" data-aos-duration="700" data-aos-delay="150">
+          <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden shadow-2xl shadow-blue-500/10">
+            <!-- Window chrome -->
+            <div class="flex items-center gap-2 px-4 py-3 bg-gray-950 border-b border-gray-800">
+              <div class="flex gap-1.5 flex-shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+              </div>
+              <span class="font-mono text-xs text-gray-500 flex-1 text-center">resume.html</span>
+              <div class="flex gap-1">
+                <span class="font-mono text-xs px-2.5 py-0.5 rounded bg-blue-500/15 text-blue-400">HTML</span>
+                <span class="font-mono text-xs px-2.5 py-0.5 text-gray-500">CSS</span>
+              </div>
+            </div>
+            
+            <!-- Typed code with proper overflow handling -->
+            <div class="relative overflow-hidden">
+              <pre id="hero-typewriter" class="font-mono text-sm leading-relaxed min-h-80 max-h-80 overflow-x-auto overflow-y-auto p-5 text-gray-100 whitespace-pre m-0 lp-code-block" data-code='&lt;section class="resume"&gt;
   &lt;header&gt;
     &lt;h1&gt;&lt;span class="name"&gt;Full-Stack Engineer&lt;/span&gt;&lt;/h1&gt;
     &lt;p class="location"&gt;Lagos, Nigeria&lt;/p&gt;
@@ -89,29 +93,67 @@
     &lt;!-- Work entries --&gt;
   &lt;/div&gt;
 &lt;/section&gt;'></pre>
+            </div>
+
+            <!-- Preview strip -->
+            <div class="px-5 py-4 border-t border-gray-800 bg-gray-950" :class="{ 'block': previewVisible, 'hidden': !previewVisible }">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-mono text-sm font-bold text-gray-100">resume.html</span>
+                <span class="font-mono text-xs px-2 py-1 rounded-full bg-blue-500/15 text-blue-400 uppercase tracking-wider border border-blue-500/25">Live</span>
+              </div>
+              <p class="text-xs text-gray-500 mb-3">Preview updates as you type</p>
+              
+              <div class="space-y-2">
+                <div>
+                  <div class="text-xs uppercase tracking-wider text-gray-500 mb-1.5">Name</div>
+                  <div class="h-1.5 bg-gray-800 rounded overflow-hidden">
+                    <div id="preview-name-fill" class="h-full bg-blue-500 lp-preview-bar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wider text-gray-500 mb-1.5 opacity-50">Location</div>
+                  <div class="h-1.5 bg-gray-800 rounded overflow-hidden opacity-50">
+                    <div id="preview-location-fill" class="h-full bg-blue-500 lp-preview-bar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wider text-gray-500 mb-1.5 opacity-50">Experience</div>
+                  <div class="h-1.5 bg-gray-800 rounded overflow-hidden opacity-50">
+                    <div id="preview-exp-fill" class="h-full bg-blue-500 lp-preview-bar" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <!-- Preview strip (appears after typing) -->
-          <div class="lp-preview-strip">
-            <div class="lp-preview-header">
-              <span class="lp-preview-name">resume.html</span>
-              <span class="lp-preview-badge">LIVE</span>
+        </div>
+      </div>
+
+      <!-- Mobile: Code window moved below on small screens -->
+      <div class="mt-12 md:hidden" data-aos="fade-up" data-aos-delay="300">
+        <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden shadow-2xl shadow-blue-500/10">
+          <div class="flex items-center gap-2 px-4 py-3 bg-gray-950 border-b border-gray-800">
+            <div class="flex gap-1.5 flex-shrink-0">
+              <span class="w-3 h-3 rounded-full bg-red-500"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500"></span>
             </div>
-            <p class="lp-preview-meta">Preview updates as you type</p>
-            
-            <div class="lp-preview-label">Name</div>
-            <div class="lp-preview-bar">
-              <div class="lp-preview-bar-fill" id="preview-name-fill" style="width: 0%"></div>
+            <span class="font-mono text-xs text-gray-500 flex-1 text-center">resume.html</span>
+            <div class="flex gap-1">
+              <span class="font-mono text-xs px-2.5 py-0.5 rounded bg-blue-500/15 text-blue-400">HTML</span>
+              <span class="font-mono text-xs px-2.5 py-0.5 text-gray-500">CSS</span>
             </div>
-            
-            <div class="lp-preview-label">Location</div>
-            <div class="lp-preview-bar lp-preview-bar--dim">
-              <div class="lp-preview-bar-fill" id="preview-location-fill" style="width: 0%"></div>
-            </div>
-            
-            <div class="lp-preview-label">Experience Section</div>
-            <div class="lp-preview-bar lp-preview-bar--dim">
-              <div class="lp-preview-bar-fill" id="preview-exp-fill" style="width: 0%"></div>
-            </div>
+          </div>
+          
+          <div class="relative overflow-hidden">
+            <pre id="hero-typewriter-mobile" class="font-mono text-xs sm:text-sm leading-relaxed min-h-64 max-h-64 overflow-x-auto overflow-y-auto p-4 sm:p-5 text-gray-100 whitespace-pre m-0 lp-code-block" data-code='&lt;section class="resume"&gt;
+  &lt;header&gt;
+    &lt;h1&gt;&lt;span class="name"&gt;Full-Stack Engineer&lt;/span&gt;&lt;/h1&gt;
+    &lt;p class="location"&gt;Lagos, Nigeria&lt;/p&gt;
+  &lt;/header&gt;
+  &lt;div class="experience"&gt;
+    &lt;h2&gt;Experience&lt;/h2&gt;
+  &lt;/div&gt;
+&lt;/section&gt;'></pre>
           </div>
         </div>
       </div>
@@ -119,179 +161,186 @@
   </section>
 
   <!-- ===================== STATS ===================== -->
-  <div class="lp-stats" id="lp-stats-row">
-    <div class="lp-stat" data-aos="fade-up" data-aos-delay="0">
-      <div class="lp-stat-num"><span x-text="counters.frameworks">0</span>+</div>
-      <div class="lp-stat-label">// frameworks supported</div>
+  <div id="lp-stats-row" class="grid grid-cols-2 lg:grid-cols-4 bg-gray-900 border-y border-gray-800 w-full">
+    <div class="px-4 sm:px-6 py-8 sm:py-10 text-center border-b lg:border-b-0 border-gray-800 first:border-l-0 even:border-l even:lg:border-l even:border-gray-800" data-aos="fade-up" data-aos-delay="0">
+      <div class="font-mono text-3xl sm:text-4xl font-bold text-blue-500 leading-tight mb-2"><span x-text="counters.frameworks">0</span>+</div>
+      <div class="font-mono text-xs text-gray-500">frameworks</div>
     </div>
-    <div class="lp-stat" data-aos="fade-up" data-aos-delay="80">
-      <div class="lp-stat-num"><span x-text="counters.pages">0</span></div>
-      <div class="lp-stat-label">// paper sizes</div>
+    <div class="px-4 sm:px-6 py-8 sm:py-10 text-center border-b lg:border-b-0 border-gray-800 odd:lg:border-l odd:lg:border-gray-800" data-aos="fade-up" data-aos-delay="80">
+      <div class="font-mono text-3xl sm:text-4xl font-bold text-blue-500 leading-tight mb-2"><span x-text="counters.pages">0</span></div>
+      <div class="font-mono text-xs text-gray-500">paper sizes</div>
     </div>
-    <div class="lp-stat" data-aos="fade-up" data-aos-delay="160">
-      <div class="lp-stat-num">~<span x-text="counters.export">0</span>ms</div>
-      <div class="lp-stat-label">// PDF export time</div>
+    <div class="px-4 sm:px-6 py-8 sm:py-10 text-center border-b lg:border-b-0 border-gray-800 even:lg:border-l even:lg:border-gray-800" data-aos="fade-up" data-aos-delay="160">
+      <div class="font-mono text-3xl sm:text-4xl font-bold text-blue-500 leading-tight mb-2">~<span x-text="counters.export">0</span>ms</div>
+      <div class="font-mono text-xs text-gray-500">export time</div>
     </div>
-    <div class="lp-stat" data-aos="fade-up" data-aos-delay="240">
-      <div class="lp-stat-num"><span x-text="counters.shortcuts">0</span></div>
-      <div class="lp-stat-label">// keyboard shortcuts</div>
+    <div class="px-4 sm:px-6 py-8 sm:py-10 text-center border-gray-800 odd:lg:border-l odd:lg:border-gray-800" data-aos="fade-up" data-aos-delay="240">
+      <div class="font-mono text-3xl sm:text-4xl font-bold text-blue-500 leading-tight mb-2"><span x-text="counters.shortcuts">0</span></div>
+      <div class="font-mono text-xs text-gray-500">shortcuts</div>
     </div>
   </div>
 
   <!-- ===================== FEATURES ===================== -->
-  <section class="lp-section" id="features">
-    <div class="lp-section-head" data-aos="fade-up">
-      <p class="lp-eyebrow">// features</p>
-      <h2 class="lp-section-title">Everything a developer needs.<br>Nothing they don&apos;t.</h2>
-      <p class="lp-section-sub">Built with the same discipline you&apos;d bring to a production codebase. No bloat, no lock-in, no surprises.</p>
+  <section class="py-16 sm:py-20 px-4 sm:px-8 w-full" id="features">
+    <div class="w-full max-w-4xl mx-auto mb-12 sm:mb-16 text-center" data-aos="fade-up">
+      <p class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4">features</p>
+      <h2 class="font-sans text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-gray-100 mb-6">Everything a developer needs.<br class="hidden sm:block">Nothing they don&apos;t.</h2>
+      <p class="text-base sm:text-lg leading-relaxed text-gray-400">Built with the same discipline you&apos;d bring to a production codebase. No bloat, no lock-in.</p>
     </div>
 
-    <div class="lp-features-grid">
-
-      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="0">
-        <div class="lp-feature-icon"><i class="fa-solid fa-code-branch"></i></div>
-        <h3 class="lp-feature-title">Split-Pane Editor</h3>
-        <p class="lp-feature-desc">HTML and CSS side-by-side with CodeJar syntax highlighting. Preview updates on every keystroke with zero latency.</p>
+    <div class="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-7 transition-all duration-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="0">
+        <div class="w-10 h-10 rounded-md bg-blue-500/15 text-blue-400 flex items-center justify-center text-base mb-4"><i class="fas fa-code-branch"></i></div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Split-Pane Editor</h3>
+        <p class="text-sm leading-relaxed text-gray-400">HTML and CSS side-by-side with CodeJar syntax highlighting. Preview updates on every keystroke.</p>
       </div>
 
-      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="70">
-        <div class="lp-feature-icon"><i class="fa-solid fa-layer-group"></i></div>
-        <h3 class="lp-feature-title">Framework Injector</h3>
-        <p class="lp-feature-desc">Drop in Tailwind CSS or Bootstrap with a single dropdown. The CDN is injected into your preview iframe instantly.</p>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-7 transition-all duration-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="70">
+        <div class="w-10 h-10 rounded-md bg-blue-500/15 text-blue-400 flex items-center justify-center text-base mb-4"><i class="fas fa-layer-group"></i></div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Framework Injector</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Drop in Tailwind CSS or Bootstrap with a single dropdown. The CDN is injected instantly.</p>
       </div>
 
-      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="140">
-        <div class="lp-feature-icon"><i class="fa-solid fa-file-pdf"></i></div>
-        <h3 class="lp-feature-title">Playwright PDF Engine</h3>
-        <p class="lp-feature-desc">Headless Chromium renders your exact HTML to PDF. What you see in the preview is exactly what you get in the file.</p>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-7 transition-all duration-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="140">
+        <div class="w-10 h-10 rounded-md bg-blue-500/15 text-blue-400 flex items-center justify-center text-base mb-4"><i class="fas fa-file-pdf"></i></div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Playwright PDF Engine</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Headless Chromium renders your exact HTML to PDF. What you see is what you get.</p>
       </div>
 
-      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="0">
-        <div class="lp-feature-icon"><i class="fa-regular fa-file-lines"></i></div>
-        <h3 class="lp-feature-title">Page Break Guides</h3>
-        <p class="lp-feature-desc">Visual A4/Letter/Legal/A5 boundary overlays in the preview so you never clip a line of text at print time.</p>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-7 transition-all duration-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="0">
+        <div class="w-10 h-10 rounded-md bg-blue-500/15 text-blue-400 flex items-center justify-center text-base mb-4"><i class="far fa-file-lines"></i></div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Page Break Guides</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Visual A4/Letter/Legal/A5 boundary overlays in the preview so you never clip text at print time.</p>
       </div>
 
-      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="70">
-        <div class="lp-feature-icon"><i class="fa-solid fa-rotate-left"></i></div>
-        <h3 class="lp-feature-title">Auto Session Save</h3>
-        <p class="lp-feature-desc">Your work is saved to the server every 1.5 seconds as you type. Reload the page and your resume is still there.</p>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-7 transition-all duration-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="70">
+        <div class="w-10 h-10 rounded-md bg-blue-500/15 text-blue-400 flex items-center justify-center text-base mb-4"><i class="fas fa-rotate-left"></i></div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Auto Session Save</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Your work is saved to the server every 1.5 seconds. Reload the page and your resume is still there.</p>
       </div>
 
-      <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="140">
-        <div class="lp-feature-icon"><i class="fa-solid fa-user-shield"></i></div>
-        <h3 class="lp-feature-title">Account & Cloud Save</h3>
-        <p class="lp-feature-desc">Sign in with Google or GitHub. Save multiple named resumes and open them from any device at any time.</p>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 sm:p-7 transition-all duration-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="140">
+        <div class="w-10 h-10 rounded-md bg-blue-500/15 text-blue-400 flex items-center justify-center text-base mb-4"><i class="fas fa-user-shield"></i></div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Cloud Save</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Sign in with Google or GitHub. Save multiple resumes and open them from any device.</p>
       </div>
-
     </div>
   </section>
 
   <!-- ===================== HOW IT WORKS ===================== -->
-  <section class="lp-section lp-section--alt" id="how-it-works">
-    <div class="lp-section-head" data-aos="fade-up">
-      <p class="lp-eyebrow">// workflow</p>
-      <h2 class="lp-section-title">Four steps. One great resume.</h2>
+  <section class="py-16 sm:py-20 px-4 sm:px-8 bg-gray-900 border-y border-gray-800 w-full" id="how-it-works">
+    <div class="w-full max-w-4xl mx-auto mb-12 sm:mb-16 text-center" data-aos="fade-up">
+      <p class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4">workflow</p>
+      <h2 class="font-sans text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-gray-100">Four steps. One great resume.</h2>
     </div>
-    <div class="lp-steps">
-      <div class="lp-step" data-aos="fade-up" data-aos-delay="0">
-        <div class="lp-step-num">01</div>
-        <h3 class="lp-step-title">Open the workspace</h3>
-        <p class="lp-step-desc">No signup required. Start with the default template or paste your own HTML instantly.</p>
+    
+    <div class="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+      <div class="relative" data-aos="fade-up" data-aos-delay="0">
+        <div class="font-mono text-4xl font-bold text-gray-800 leading-tight mb-4 transition-colors duration-200 hover:text-blue-500">01</div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Open workspace</h3>
+        <p class="text-sm leading-relaxed text-gray-400">No signup required. Start with the default template or paste your own HTML.</p>
       </div>
-      <div class="lp-step" data-aos="fade-up" data-aos-delay="100">
-        <div class="lp-step-num">02</div>
-        <h3 class="lp-step-title">Write your HTML & CSS</h3>
-        <p class="lp-step-desc">Full control. Use utility classes, custom fonts, grid layouts — anything a browser can render.</p>
+      <div class="relative" data-aos="fade-up" data-aos-delay="100">
+        <div class="font-mono text-4xl font-bold text-gray-800 leading-tight mb-4 transition-colors duration-200 hover:text-blue-500">02</div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Write HTML & CSS</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Full control. Use utility classes, custom fonts, grid layouts — anything a browser can render.</p>
       </div>
-      <div class="lp-step" data-aos="fade-up" data-aos-delay="200">
-        <div class="lp-step-num">03</div>
-        <h3 class="lp-step-title">Preview in real-time</h3>
-        <p class="lp-step-desc">The live iframe reflects your exact resume as you type. Toggle page guides to check boundaries.</p>
+      <div class="relative" data-aos="fade-up" data-aos-delay="200">
+        <div class="font-mono text-4xl font-bold text-gray-800 leading-tight mb-4 transition-colors duration-200 hover:text-blue-500">03</div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Preview live</h3>
+        <p class="text-sm leading-relaxed text-gray-400">The live iframe reflects your exact resume as you type. Toggle page guides to check boundaries.</p>
       </div>
-      <div class="lp-step" data-aos="fade-up" data-aos-delay="300">
-        <div class="lp-step-num">04</div>
-        <h3 class="lp-step-title">Export as PDF</h3>
-        <p class="lp-step-desc">Click Export. Playwright renders your HTML in headless Chromium and returns a pixel-perfect PDF.</p>
+      <div class="relative" data-aos="fade-up" data-aos-delay="300">
+        <div class="font-mono text-4xl font-bold text-gray-800 leading-tight mb-4 transition-colors duration-200 hover:text-blue-500">04</div>
+        <h3 class="text-base font-semibold text-gray-100 mb-2">Export as PDF</h3>
+        <p class="text-sm leading-relaxed text-gray-400">Click Export. Playwright renders your HTML in headless Chromium and returns a pixel-perfect PDF.</p>
       </div>
     </div>
   </section>
 
   <!-- ===================== FRAMEWORK SHOWCASE ===================== -->
-  <section class="lp-section" id="frameworks" data-aos="fade-up">
-    <div class="lp-section-head">
-      <p class="lp-eyebrow">// framework injector</p>
-      <h2 class="lp-section-title">Your CSS framework. Your rules.</h2>
-      <p class="lp-section-sub">Switch between Tailwind, Bootstrap, or raw CSS with one click. The preview updates immediately.</p>
+  <section class="py-16 sm:py-20 px-4 sm:px-8 w-full" id="frameworks" data-aos="fade-up">
+    <div class="w-full max-w-4xl mx-auto mb-8 sm:mb-12 text-center">
+      <p class="font-mono text-xs font-semibold text-blue-500 uppercase tracking-widest mb-4">framework injector</p>
+      <h2 class="font-sans text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-gray-100 mb-4">Your CSS framework. Your rules.</h2>
+      <p class="text-base sm:text-lg leading-relaxed text-gray-400">Switch between Tailwind, Bootstrap, or raw CSS with one click.</p>
     </div>
 
-    <div class="lp-fw-tabs">
-      <button class="lp-fw-tab" :class="{ 'lp-fw-tab--active': activeFw === 'none' }" @click="setFw('none')">Vanilla CSS</button>
-      <button class="lp-fw-tab" :class="{ 'lp-fw-tab--active': activeFw === 'tailwind' }" @click="setFw('tailwind')">Tailwind</button>
-      <button class="lp-fw-tab" :class="{ 'lp-fw-tab--active': activeFw === 'bootstrap' }" @click="setFw('bootstrap')">Bootstrap</button>
-    </div>
-
-    <div class="lp-fw-demo">
-      <div class="lp-fw-code">
-        <div class="lp-fw-code-header">
-          <span class="lp-fw-dot"></span>
-          <span class="lp-fw-filename">resume.html</span>
-        </div>
-        <div class="lp-fw-code-body" x-html="fwCodeSamples[activeFw]"></div>
+    <div class="w-full max-w-4xl mx-auto">
+      <div class="flex justify-center gap-1 bg-gray-900 border border-gray-800 rounded-md p-1 w-fit mx-auto mb-6 sm:mb-8">
+        <button class="px-4 sm:px-6 py-2 rounded bg-gray-950 text-gray-400 font-medium text-xs sm:text-sm cursor-pointer transition-all duration-150" :class="{ 'bg-blue-600 text-white': activeFw === 'none' }" @click="setFw('none')">Vanilla</button>
+        <button class="px-4 sm:px-6 py-2 rounded bg-gray-950 text-gray-400 font-medium text-xs sm:text-sm cursor-pointer transition-all duration-150" :class="{ 'bg-blue-600 text-white': activeFw === 'tailwind' }" @click="setFw('tailwind')">Tailwind</button>
+        <button class="px-4 sm:px-6 py-2 rounded bg-gray-950 text-gray-400 font-medium text-xs sm:text-sm cursor-pointer transition-all duration-150" :class="{ 'bg-blue-600 text-white': activeFw === 'bootstrap' }" @click="setFw('bootstrap')">Bootstrap</button>
       </div>
-      <div class="lp-fw-preview" x-html="fwPreviewSamples[activeFw]"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 border border-gray-800 rounded-lg overflow-hidden">
+        <div class="bg-gray-900 lg:border-r border-gray-800">
+          <div class="flex items-center gap-2 px-4 py-3 bg-gray-950 border-b border-gray-800">
+            <span class="w-2 h-2 rounded-full bg-blue-500 opacity-55"></span>
+            <span class="font-mono text-xs text-gray-500">resume.html</span>
+          </div>
+          <div class="px-4 sm:px-5 py-4 font-mono text-xs sm:text-sm leading-relaxed text-gray-400 min-h-48 max-h-96 overflow-auto whitespace-pre-wrap word-break lp-code-block" x-html="fwCodeSamples[activeFw]"></div>
+        </div>
+        <div class="bg-gray-900 p-4 min-h-48" x-html="fwPreviewSamples[activeFw]"></div>
+      </div>
     </div>
   </section>
 
   <!-- ===================== CTA ===================== -->
-  <section class="lp-cta" data-aos="fade-up">
-    <div class="lp-cta-glow" aria-hidden="true"></div>
-    <div class="lp-cta-inner">
-      <h2 class="lp-cta-title">Stop fighting Word.<br>Start coding your career.</h2>
-      <p class="lp-cta-sub">Open the workspace, write your HTML, and export a resume that actually looks the way you intended.</p>
-      <div class="lp-cta-btns">
-        <a href="{% url 'builder:workspace' %}" class="lp-btn-hero-primary">
-          <i class="fa-solid fa-rocket"></i> Open workspace — it&apos;s free
+  <section class="relative py-16 sm:py-24 px-4 sm:px-8 bg-gray-900 border-y border-gray-800 w-full" data-aos="fade-up">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="absolute w-96 h-96 -bottom-32 left-1/2 -translate-x-1/2 rounded-full bg-blue-600/5 blur-3xl"></div>
+    </div>
+    <div class="relative w-full max-w-3xl mx-auto text-center">
+      <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-gray-100 mb-6">Stop fighting Word.<br class="hidden sm:block">Start coding your career.</h2>
+      <p class="text-base sm:text-lg leading-relaxed text-gray-400 mb-8 sm:mb-10">Open the workspace, write your HTML, and export a resume that actually looks the way you intended.</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="{% url 'builder:workspace' %}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-blue-600 text-white font-semibold no-underline hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95">
+          <i class="fas fa-rocket"></i> Open workspace
         </a>
         {% if not user.is_authenticated %}
-        <a href="{% url 'account_signup' %}" class="lp-btn-hero-ghost">Create free account</a>
+        <a href="{% url 'account_signup' %}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-gray-950 text-gray-300 font-medium border border-gray-800 no-underline hover:text-gray-100 hover:border-blue-500 transition-colors">Create account</a>
         {% endif %}
       </div>
     </div>
   </section>
 
   <!-- ===================== FOOTER ===================== -->
-  <footer class="lp-footer">
-    <div class="lp-footer-inner">
-      <a href="{% url 'landing' %}" class="lp-brand lp-brand--sm">code<span>2</span>resume</a>
-      <nav class="lp-footer-links">
-        <a href="{% url 'builder:workspace' %}">Workspace</a>
+  <footer class="py-8 sm:py-9 px-4 sm:px-8 border-t border-gray-800 bg-gray-950 w-full">
+    <div class="w-full max-w-6xl mx-auto flex flex-col items-center gap-4 text-center">
+      <a href="{% url 'landing' %}" class="font-mono text-sm font-bold text-gray-100 no-underline">code<span class="text-blue-500">2</span>resume</a>
+      <nav class="flex items-center gap-4 sm:gap-6 flex-wrap justify-center text-xs sm:text-sm">
+        <a href="{% url 'builder:workspace' %}" class="text-gray-500 no-underline hover:text-blue-500 transition-colors">Workspace</a>
         {% if user.is_authenticated %}
-        <a href="{% url 'accounts:profile' %}">My Resumes</a>
+        <a href="{% url 'accounts:profile' %}" class="text-gray-500 no-underline hover:text-blue-500 transition-colors">My Resumes</a>
         {% else %}
-        <a href="{% url 'account_signup' %}">Sign up</a>
-        <a href="{% url 'account_login' %}">Sign in</a>
+        <a href="{% url 'account_signup' %}" class="text-gray-500 no-underline hover:text-blue-500 transition-colors">Sign up</a>
+        <a href="{% url 'account_login' %}" class="text-gray-500 no-underline hover:text-blue-500 transition-colors">Sign in</a>
         {% endif %}
-        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a>
+        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener" class="text-gray-500 no-underline hover:text-blue-500 transition-colors">Brand Nova</a>
       </nav>
-      <p class="lp-footer-credit">
-        Built with <span style="color:var(--danger)">❤</span> by
-        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a>
+      <p class="text-xs text-gray-500">
+        Built with <span class="text-red-500">❤</span> by
+        <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener" class="text-blue-500 no-underline hover:underline">Brand Nova</a>
       </p>
     </div>
   </footer>
 
-</div><!-- /lp-root -->
+</div><!-- /root -->
 {% endblock %}
 
 {% block extra_js %}
 <script>
-/* ──────────────────────────────────────────────────────────────
-   applyTheme — mirrors workspace.js; needed on the landing page
-   since workspace.js is not loaded here.
-────────────────────────────────────────────────────────────── */
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
+    const root = document.querySelector('[x-data="landingPage()"]');
+    if (root) {
+        if (theme === 'light') {
+            root.classList.add('light-theme');
+        } else {
+            root.classList.remove('light-theme');
+        }
+    }
     const darkLink  = document.querySelector('link[href*="highlight.min.css"]:not(#hljs-light-theme)');
     const lightLink = document.getElementById('hljs-light-theme');
     if (theme === 'light') {
@@ -303,133 +352,65 @@ function applyTheme(theme) {
     }
 }
 
-/* ──────────────────────────────────────────────────────────────
-   Apply theme immediately on script parse to prevent flash
-────────────────────────────────────────────────────────────── */
 applyTheme((localStorage.getItem('c2r-theme') || 'dark'));
 
-/* ──────────────────────────────────────────────────────────────
-   Alpine component
-────────────────────────────────────────────────────────────── */
 function landingPage() {
     return {
-        /* ── state ── */
         scrolled:       false,
-        showCursor:     true,
-        typedHtml:      '',
         previewVisible: false,
-        previewName:    '',
-        previewBarW:    0,
-        activeFw:       'none',
         isDark:         (localStorage.getItem('c2r-theme') || 'dark') === 'dark',
-        counters:       { frameworks: 0, pages: 0, export: 0, shortcuts: 0 },
+        activeFw:       'none',
+        counters:       { frameworks: 3, pages: 4, export: 800, shortcuts: 8 },
 
-        /* ── framework code samples ── */
-fwCodeSamples: {
-    none: `<span class="t-dim">/* Vanilla CSS resume */</span>
-<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"resume"</span><span class="t-tag">&gt;</span>
-  <span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>
-  <span class="t-tag">&lt;span&gt;</span><span class="t-text">Software Engineer · London, UK</span><span class="t-tag">&lt;/span&gt;</span>
-  <span class="t-tag">&lt;hr&gt;</span>
-  <span class="t-tag">&lt;section</span> <span class="t-attr">class</span>=<span class="t-val">"experience"</span><span class="t-tag">&gt;</span>
-    <span class="t-tag">&lt;h3&gt;</span><span class="t-text">Experience</span><span class="t-tag">&lt;/h3&gt;</span>
-    <span class="t-tag">&lt;p&gt;</span><span class="t-tag">&lt;strong&gt;</span><span class="t-text">Lead Engineer</span><span class="t-tag">&lt;/strong&gt;</span><span class="t-text">, Analytical Engine Co.</span><span class="t-tag">&lt;/p&gt;</span>
-    <span class="t-tag">&lt;i&gt;</span><span class="t-text">1843 – Present</span><span class="t-tag">&lt;/i&gt;</span>
-  <span class="t-tag">&lt;/section&gt;</span>
-<span class="t-tag">&lt;/div&gt;</span>`,
+        fwCodeSamples: {
+            none: `<span class="tw-dim">/* Vanilla CSS */</span>
+<span class="tw-tag">&lt;div</span> <span class="tw-attr">class</span>=<span class="tw-val">"resume"</span><span class="tw-tag">&gt;</span>
+  <span class="tw-tag">&lt;h1&gt;</span><span class="tw-text">Ada Lovelace</span><span class="tw-tag">&lt;/h1&gt;</span>
+  <span class="tw-tag">&lt;span&gt;</span><span class="tw-text">Software Engineer</span><span class="tw-tag">&lt;/span&gt;</span>
+  <span class="tw-tag">&lt;hr&gt;</span>
+  <span class="tw-tag">&lt;section&gt;</span>
+    <span class="tw-tag">&lt;h3&gt;</span><span class="tw-text">Experience</span><span class="tw-tag">&lt;/h3&gt;</span>
+  <span class="tw-tag">&lt;/section&gt;</span>
+<span class="tw-tag">&lt;/div&gt;</span>`,
 
-    tailwind: `<span class="t-dim">/* Tailwind utility classes */</span>
-<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"max-w-2xl mx-auto p-8"</span><span class="t-tag">&gt;</span>
-  <span class="t-tag">&lt;h1</span> <span class="t-attr">class</span>=<span class="t-val">"text-3xl font-bold tracking-tight text-gray-900"</span><span class="t-tag">&gt;</span>
-    <span class="t-text">Ada Lovelace</span>
-  <span class="t-tag">&lt;/h1&gt;</span>
-  <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"text-gray-600 mt-1"</span><span class="t-tag">&gt;</span>
-    <span class="t-text">Software Engineer · London, UK</span>
-  <span class="t-tag">&lt;/p&gt;</span>
-  <span class="t-tag">&lt;hr</span> <span class="t-attr">class</span>=<span class="t-val">"my-4 border-gray-200"</span><span class="t-tag">/&gt;</span>
-  <span class="t-tag">&lt;section&gt;</span>
-    <span class="t-tag">&lt;h3</span> <span class="t-attr">class</span>=<span class="t-val">"text-xs font-semibold uppercase tracking-wider text-gray-400"</span><span class="t-tag">&gt;</span>
-      <span class="t-text">Experience</span>
-    <span class="t-tag">&lt;/h3&gt;</span>
-    <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"mt-2"</span><span class="t-tag">&gt;</span>
-      <span class="t-tag">&lt;span</span> <span class="t-attr">class</span>=<span class="t-val">"font-semibold"</span><span class="t-tag">&gt;</span><span class="t-text">Lead Engineer</span><span class="t-tag">&lt;/span&gt;</span><span class="t-text">, Analytical Engine Co.</span>
-    <span class="t-tag">&lt;/p&gt;</span>
-    <span class="t-tag">&lt;i</span> <span class="t-attr">class</span>=<span class="t-val">"text-gray-500 text-sm"</span><span class="t-tag">&gt;</span><span class="t-text">1843 – Present</span><span class="t-tag">&lt;/i&gt;</span>
-  <span class="t-tag">&lt;/section&gt;</span>
-<span class="t-tag">&lt;/div&gt;</span>`,
+            tailwind: `<span class="tw-dim">/* Tailwind utilities */</span>
+<span class="tw-tag">&lt;div</span> <span class="tw-attr">class</span>=<span class="tw-val">"max-w-2xl mx-auto p-8"</span><span class="tw-tag">&gt;</span>
+  <span class="tw-tag">&lt;h1</span> <span class="tw-attr">class</span>=<span class="tw-val">"text-3xl font-bold"</span><span class="tw-tag">&gt;</span>
+    <span class="tw-text">Ada Lovelace</span>
+  <span class="tw-tag">&lt;/h1&gt;</span>
+  <span class="tw-tag">&lt;p</span> <span class="tw-attr">class</span>=<span class="tw-val">"text-gray-600 mt-1"</span><span class="tw-tag">&gt;</span>
+    <span class="tw-text">Software Engineer</span>
+  <span class="tw-tag">&lt;/p&gt;</span>
+<span class="tw-tag">&lt;/div&gt;</span>`,
 
-    bootstrap: `<span class="t-dim">/* Bootstrap components */</span>
-<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"container py-4"</span><span class="t-tag">&gt;</span>
-  <span class="t-tag">&lt;h1</span> <span class="t-attr">class</span>=<span class="t-val">"h3 fw-bold mb-0"</span><span class="t-tag">&gt;</span>
-    <span class="t-text">Ada Lovelace</span>
-  <span class="t-tag">&lt;/h1&gt;</span>
-  <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"text-muted small mb-2"</span><span class="t-tag">&gt;</span>
-    <span class="t-text">Software Engineer · London, UK</span>
-  <span class="t-tag">&lt;/p&gt;</span>
-  <span class="t-tag">&lt;hr</span> <span class="t-tag">/&gt;</span>
-  <span class="t-tag">&lt;section&gt;</span>
-    <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"text-muted small text-uppercase fw-bold mb-2"</span> <span class="t-attr">style</span>=<span class="t-val">"letter-spacing:.08em;"</span><span class="t-tag">&gt;</span>
-      <span class="t-text">Experience</span>
-    <span class="t-tag">&lt;/p&gt;</span>
-    <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"fw-semibold mb-0 small"</span><span class="t-tag">&gt;</span>
-      <span class="t-tag">&lt;strong&gt;</span><span class="t-text">Lead Engineer</span><span class="t-tag">&lt;/strong&gt;</span><span class="t-text">, Analytical Engine Co.</span>
-    <span class="t-tag">&lt;/p&gt;</span>
-    <span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"text-muted"</span> <span class="t-attr">style</span>=<span class="t-val">"font-size:11px;"</span><span class="t-tag">&gt;</span><span class="t-text">1843 – Present</span><span class="t-tag">&lt;/p&gt;</span>
-  <span class="t-tag">&lt;/section&gt;</span>
-<span class="t-tag">&lt;/div&gt;</span>`,
-},
+            bootstrap: `<span class="tw-dim">/* Bootstrap components */</span>
+<span class="tw-tag">&lt;div</span> <span class="tw-attr">class</span>=<span class="tw-val">"container py-4"</span><span class="tw-tag">&gt;</span>
+  <span class="tw-tag">&lt;h1</span> <span class="tw-attr">class</span>=<span class="tw-val">"h3 fw-bold"</span><span class="tw-tag">&gt;</span>
+    <span class="tw-text">Ada Lovelace</span>
+  <span class="tw-tag">&lt;/h1&gt;</span>
+  <span class="tw-tag">&lt;p</span> <span class="tw-attr">class</span>=<span class="tw-val">"text-muted"</span><span class="tw-tag">&gt;</span>
+    <span class="tw-text">Software Engineer</span>
+  <span class="tw-tag">&lt;/p&gt;</span>
+<span class="tw-tag">&lt;/div&gt;</span>`,
+        },
 
-/* ── framework preview samples ── */
-fwPreviewSamples: {
-    none: `<div style="font-family:Georgia,serif;padding:24px;background:#fff;height:100%;">
+        fwPreviewSamples: {
+            none: `<div style="font-family:Georgia,serif;padding:24px;background:#fff;height:100%;">
              <h1 style="font-size:24px;font-weight:700;margin:0 0 4px;color:#111;">Ada Lovelace</h1>
-             <span style="color:#555;font-size:13px;display:block;margin-bottom:16px;">Software Engineer · London, UK</span>
-             <hr style="border:none;border-top:2px solid #111;margin:0 0 20px;">
-             <section>
-               <h3 style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:0 0 8px;">Experience</h3>
-               <p style="font-size:13px;margin:0 0 2px;"><strong style="font-weight:600;">Lead Engineer</strong>, Analytical Engine Co.</p>
-               <i style="color:#666;font-size:12px;">1843 – Present</i>
-             </section>
-           </div>`,
-
-    tailwind: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+             <span style="color:#555;font-size:13px;">Software Engineer · London, UK</span>
+             </div>`,
+            tailwind: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
                <div class="p-8 bg-white h-full">
-                 <h1 class="text-3xl font-bold tracking-tight text-gray-900 mb-1">Ada Lovelace</h1>
-                 <p class="text-gray-600 mt-1 mb-4">Software Engineer · London, UK</p>
-                 <hr class="my-4 border-gray-200">
-                 <section>
-                   <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Experience</h3>
-                   <p class="mt-2"><span class="font-semibold">Lead Engineer</span>, Analytical Engine Co.</p>
-                   <i class="text-gray-500 text-sm">1843 – Present</i>
-                 </section>
+                 <h1 class="text-3xl font-bold text-gray-900 mb-1">Ada Lovelace</h1>
+                 <p class="text-gray-600">Software Engineer · London, UK</p>
                </div>`,
-
-    bootstrap: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+            bootstrap: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
                 <div class="container py-4 bg-white h-100">
                   <h1 class="h3 fw-bold mb-0">Ada Lovelace</h1>
-                  <p class="text-muted small mb-2">Software Engineer · London, UK</p>
-                  <hr>
-                  <section>
-                    <p class="text-muted small text-uppercase fw-bold mb-2" style="letter-spacing:.08em;">Experience</p>
-                    <p class="fw-semibold mb-0 small"><strong>Lead Engineer</strong>, Analytical Engine Co.</p>
-                    <p class="text-muted" style="font-size:11px;">1843 – Present</p>
-                  </section>
+                  <p class="text-muted">Software Engineer · London, UK</p>
                 </div>`,
-},
+        },
 
-        /* ── typing animation frames ── */
-        _typeFrames: [
-            { html: '',                                                                                                                      name: '' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span>',                                                                                name: '' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">A</span>',                                                   name: 'A' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada</span>',                                                  name: 'Ada' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span>',                                         name: 'Ada Lovelace' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>',   name: 'Ada Lovelace' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>\n<span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"role"</span><span class="t-tag">&gt;</span>', name: 'Ada Lovelace' },
-            { html: '<span class="t-tag">&lt;h1&gt;</span><span class="t-text">Ada Lovelace</span><span class="t-tag">&lt;/h1&gt;</span>\n<span class="t-tag">&lt;p</span> <span class="t-attr">class</span>=<span class="t-val">"role"</span><span class="t-tag">&gt;</span><span class="t-text">Software Engineer</span><span class="t-tag">&lt;/p&gt;</span>', name: 'Ada Lovelace' },
-        ],
-
-        /* ── init ── */
         init() {
             applyTheme(this.isDark ? 'dark' : 'light');
 
@@ -437,22 +418,16 @@ fwPreviewSamples: {
                 this.scrolled = window.scrollY > 40;
             }, { passive: true });
 
-            /* cursor blink */
-            setInterval(() => { this.showCursor = !this.showCursor; }, 530);
+            this._runTypingAnimation('hero-typewriter');
+            this._runTypingAnimation('hero-typewriter-mobile');
 
-            /* typing */
-            this._runTypingAnimation();
-
-            /* AOS (already loaded by base.html) */
             if (typeof AOS !== 'undefined') {
                 AOS.init({ duration: 700, once: true, offset: 60 });
             }
 
-            /* stat counters */
             this._initCounters();
         },
 
-        /* ── theme toggle ── */
         toggleTheme() {
             this.isDark = !this.isDark;
             const t = this.isDark ? 'dark' : 'light';
@@ -460,38 +435,99 @@ fwPreviewSamples: {
             localStorage.setItem('c2r-theme', t);
         },
 
-        /* ── framework tab ── */
         setFw(fw) { this.activeFw = fw; },
 
-        /* ── typing animation ── */
-        _runTypingAnimation() {
-            let frame = 0;
-            const advance = () => {
-                if (frame < this._typeFrames.length) {
-                    const f        = this._typeFrames[frame];
-                    this.typedHtml   = f.html;
-                    this.previewName = f.name;
-                    if (frame >= 4) {
-                        this.previewVisible = true;
-                        this.previewBarW    = Math.min(frame * 18, 90);
-                    }
-                    frame++;
-                    const delay = frame < 3 ? 120 : frame < 6 ? 300 : 400;
-                    setTimeout(advance, delay);
-                } else {
-                    setTimeout(() => {
-                        frame               = 0;
-                        this.previewVisible = false;
-                        this.previewBarW    = 0;
-                        this.typedHtml      = '';
-                        this._runTypingAnimation();
-                    }, 3200);
+        _runTypingAnimation(elementId) {
+            const typewriter = document.getElementById(elementId);
+            if (!typewriter) return;
+
+            const rawCode = typewriter.dataset.code
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#x27;/g, "'");
+
+            typewriter.innerHTML = '';
+            let pos = 0;
+            let outputBuffer = '';
+
+            const milestones = [
+                { pos: 48, action: () => animateBar('preview-name-fill', 100) },
+                { pos: 95, action: () => animateBar('preview-location-fill', 100) },
+                { pos: 155, action: () => animateBar('preview-exp-fill', 100) },
+            ];
+
+            function animateBar(id, width) {
+                const el = document.getElementById(id);
+                if (el) el.style.width = width + '%';
+            }
+
+            function escapeHtml(str) {
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return str.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            function highlightTag(tagContent) {
+                if (tagContent.startsWith('<!--')) {
+                    return `<span class="tw-dim">${escapeHtml(tagContent)}</span>`;
                 }
-            };
-            advance();
+                if (tagContent.startsWith('</')) {
+                    return `<span class="tw-tag">&lt;/<span class="tw-attr">${escapeHtml(tagContent.slice(2, -1))}</span>&gt;</span>`;
+                }
+                const match = tagContent.match(/^<([a-z0-9-]+)([^>]*)>(.*)$/i);
+                if (match) {
+                    const tagName = match[1];
+                    const attrs = match[2] || '';
+                    let attrHtml = '';
+                    if (attrs) {
+                        attrHtml = attrs.replace(/([a-z-]+)=("([^"]*)"|'([^']*)')/gi, (m, attr, fullVal) => {
+                            return `<span class="tw-attr">${attr}</span>=<span class="tw-val">${fullVal}</span>`;
+                        });
+                    }
+                    return `<span class="tw-tag">&lt;<span class="tw-attr">${tagName}</span>${attrHtml}<span class="tw-tag">&gt;</span></span>`;
+                }
+                return `<span class="tw-tag">${escapeHtml(tagContent)}</span>`;
+            }
+
+            function type() {
+                if (pos >= rawCode.length) {
+                    typewriter.classList.add('typing-complete');
+                    return;
+                }
+
+                milestones.forEach(m => {
+                    if (pos === m.pos) m.action();
+                });
+
+                const char = rawCode[pos];
+
+                if (char === '<') {
+                    type.context.insideTag = true;
+                    type.context.tagBuf = char;
+                } else if (type.context.insideTag) {
+                    type.context.tagBuf += char;
+                    if (char === '>') {
+                        type.context.insideTag = false;
+                        outputBuffer += highlightTag(type.context.tagBuf);
+                        typewriter.innerHTML = outputBuffer;
+                        type.context.tagBuf = '';
+                    }
+                } else {
+                    outputBuffer += `<span class="tw-text">${escapeHtml(char)}</span>`;
+                    typewriter.innerHTML = outputBuffer;
+                }
+
+                pos++;
+                const baseDelay = 25;
+                const delay = char === ' ' ? baseDelay * 1.2 : char === '<' ? baseDelay * 2.5 : baseDelay + Math.random() * 8;
+                setTimeout(() => type.call(this), delay);
+            }
+
+            type.context = { insideTag: false, tagBuf: '' };
+            this.previewVisible = true;
+            setTimeout(() => type.call(this), 600);
         },
 
-        /* ── counter animation ── */
         _initCounters() {
             const targets = { frameworks: 3, pages: 4, export: 800, shortcuts: 8 };
             const el = document.getElementById('lp-stats-row');
@@ -515,124 +551,10 @@ fwPreviewSamples: {
         },
     };
 }
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const typewriter = document.getElementById('hero-typewriter');
-  if (!typewriter) return;
-  
-  // Get raw code from data attribute and decode
-  const rawCode = typewriter.dataset.code
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'");
-  
-  typewriter.innerHTML = '';
-  typewriter.classList.remove('typing-complete');
-  
-  // Preview milestones: character position → action
-  const milestones = [
-    { pos: 48, action: () => animateBar('preview-name-fill', 100) },
-    { pos: 95, action: () => animateBar('preview-location-fill', 100) },
-    { pos: 155, action: () => animateBar('preview-exp-fill', 100) },
-  ];
-  
-  let pos = 0;
-  let outputBuffer = '';
-  
-  function animateBar(id, width) {
-    const el = document.getElementById(id);
-    if (el) el.style.width = width + '%';
-  }
-  
-  // Escape HTML for safe insertion into text nodes
-  function escapeHtml(str) {
-    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return str.replace(/[&<>"']/g, m => map[m]);
-  }
-  
-  // Highlight a complete tag with syntax coloring
-  function highlightTag(tagContent) {
-    // Simple pattern: <tag attr="value"> or </tag> or <!-- comment -->
-    if (tagContent.startsWith('<!--')) {
-      return `<span class="tw-dim">${escapeHtml(tagContent)}</span>`;
-    }
-    // Closing tag
-    if (tagContent.startsWith('</')) {
-      return `<span class="tw-tag">&lt;/<span class="tw-attr">${escapeHtml(tagContent.slice(2, -1))}</span>&gt;</span>`;
-    }
-    // Self-closing or opening tag
-    const match = tagContent.match(/^<([a-z0-9-]+)([^>]*)>(.*)$/i);
-    if (match) {
-      const tagName = match[1];
-      const attrs = match[2] || '';
-      const closer = match[3] || '';
-      let attrHtml = '';
-      if (attrs) {
-        // Highlight attributes and values
-        attrHtml = attrs.replace(/([a-z-]+)=("([^"]*)"|'([^']*)')/gi, (m, attr, fullVal, dbl, sgl) => {
-          const val = dbl || sgl || '';
-          return `<span class="tw-attr">${attr}</span>=<span class="tw-val">${fullVal}</span>`;
-        });
-      }
-      return `<span class="tw-tag">&lt;<span class="tw-attr">${tagName}</span>${attrHtml}<span class="tw-tag">&gt;</span></span>`;
-    }
-    // Fallback
-    return `<span class="tw-tag">${escapeHtml(tagContent)}</span>`;
-  }
-  
-  function type() {
-    if (pos >= rawCode.length) {
-      typewriter.classList.add('typing-complete');
-      return;
-    }
-    
-    // Trigger milestone actions
-    milestones.forEach(m => {
-      if (pos === m.pos) m.action();
-    });
-    
-    const char = rawCode[pos];
-    
-    // Tag buffering logic: collect entire tag before outputting
-    if (char === '<') {
-      type.context.insideTag = true;
-      type.context.tagBuf = char;
-    } 
-    else if (type.context.insideTag) {
-      type.context.tagBuf += char;
-      if (char === '>') {
-        // Tag complete — highlight and output the whole thing
-        type.context.insideTag = false;
-        outputBuffer += highlightTag(type.context.tagBuf);
-        typewriter.innerHTML = outputBuffer;
-        type.context.tagBuf = '';
-      }
-    } 
-    else {
-      // Regular text character
-      outputBuffer += `<span class="tw-text">${escapeHtml(char)}</span>`;
-      typewriter.innerHTML = outputBuffer;
-    }
-    
-    // Auto-scroll to keep cursor in view
-    typewriter.scrollTop = typewriter.scrollHeight;
-    
-    pos++;
-    // Natural typing variation: slower for spaces, faster for code
-    const delay = char === ' ' ? 30 : char === '<' ? 80 : Math.random() * 20 + 30;
-    setTimeout(type, delay);
-  }
-  
-  // Initialize context object for stateful parsing
-  type.context = {
-    insideTag: false,
-    tagBuf: ''
-  };
-  
-  // Start after brief delay
-  setTimeout(type, 600);
+
+// Initialize Alpine when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Alpine will be auto-initialized via defer in base.html
 });
 </script>
 {% endblock %}

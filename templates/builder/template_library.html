@@ -13,14 +13,12 @@
             code<span style="color:var(--accent);">2</span>resume
         </a>
         <div class="flex items-center gap-3">
-            <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme">
-                <i class="fa-solid fa-sun theme-icon-sun"></i>
-                <i class="fa-solid fa-moon theme-icon-moon"></i>
-            </button>
             <a href="/" class="btn btn-primary">
-                <i class="fa-solid fa-pen-to-square"></i>
+                <i class="fas fa-pen-to-square"></i>
                 Open Workspace
             </a>
+            {# Theme toggle and auth dropdown #}
+            {% include "partials/theme_and_auth_dropdown.html" %}
         </div>
     </header>
 
@@ -47,38 +45,51 @@
                 <div class="template-preview-wrap">
                     {% if tpl.preview_image %}
                     <img src="{{ tpl.preview_image.url }}" alt="{{ tpl.title }} preview"
-                         class="template-preview-img">
+                        class="template-preview-img">
                     {% else %}
                     <div class="template-preview-placeholder">
-                        <i class="fa-regular fa-file-lines" style="font-size: 2rem; color:var(--text-muted);"></i>
-                        <span style="font-size:11px; color:var(--text-muted); margin-top:6px;">No preview</span>
+                        <i class="far fa-file-lines" style="font-size: 3rem; color:var(--text-muted);"></i>
+                        <span style="font-size:12px; color:var(--text-muted); margin-top:6px;">Preview is temporarily unavailable.</span>
+                        <button class="btn btn-ghost my-2"><i class="fas fa-edit"></i>Load template to workspace</button>
                     </div>
                     {% endif %}
 
                     {# Premium badge overlay #}
                     {% if tpl.is_premium %}
                     <div class="template-premium-badge">
-                        <i class="fa-solid fa-lock" style="font-size:10px;"></i>
+                        <i class="fas fa-lock" style="font-size:10px;"></i>
                         Premium
                     </div>
                     {% endif %}
 
-                    {# Hover overlay with action button #}
+                    {# Hover overlay with action button + full description #}
                     <div class="template-hover-overlay">
-                        {% if tpl.is_premium %}
-                        <span class="btn btn-ghost" style="cursor:default; opacity:0.7;">
-                            <i class="fa-solid fa-lock"></i>
-                            Premium only
-                        </span>
-                        {% else %}
-                        <button
-                            @click.stop="confirmOpen = true"
-                            class="btn btn-primary"
-                        >
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            Use this template
-                        </button>
-                        {% endif %}
+                        <div class="template-hover-content">
+                            {# Action button (always at top) #}
+                            <div class="template-hover-actions">
+                                {% if tpl.is_premium %}
+                                <span class="btn btn-ghost" style="cursor:default; opacity:0.7;">
+                                    <i class="fas fa-lock"></i>
+                                    Premium only
+                                </span>
+                                {% else %}
+                                <button
+                                    @click.stop="confirmOpen = true"
+                                    class="btn btn-primary"
+                                >
+                                    <i class="fas fa-wand-magic-sparkles"></i>
+                                    Use this template
+                                </button>
+                                {% endif %}
+                            </div>
+
+                            {# Scrollable description (hidden scrollbar) #}
+                            {% if tpl.description %}
+                            <div class="template-hover-desc">
+                                {{ tpl.description }}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
@@ -128,7 +139,7 @@
                                 </p>
                             </div>
                             <button @click="confirmOpen = false" class="shortcuts-close">
-                                <i class="fa-solid fa-xmark"></i>
+                                <i class="fas fa-xmark"></i>
                             </button>
                         </div>
                         <div class="shortcuts-body" style="gap:8px;">
@@ -138,12 +149,12 @@
                             </p>
                         </div>
                         <div class="shortcuts-footer"
-                             style="display:flex; gap:8px; justify-content:flex-end; padding:16px 24px;">
+                            style="display:flex; gap:8px; justify-content:flex-end; padding:16px 24px;">
                             <button @click="confirmOpen = false" class="btn btn-ghost">Cancel</button>
                             <form method="POST" action="{% url 'builder:load_template' tpl.slug %}" style="margin:0;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    <i class="fas fa-wand-magic-sparkles"></i>
                                     Load template
                                 </button>
                             </form>

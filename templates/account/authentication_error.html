@@ -7,7 +7,7 @@
 {% block auth_content %}
 <div class="text-center py-4">
     <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-        <i class="fa-solid fa-circle-exclamation text-3xl text-red-400"></i>
+        <i class="fas fa-circle-exclamation text-3xl text-red-400"></i>
     </div>
     <h1 class="text-xl font-bold mb-2" style="color: var(--text-primary);">Authentication failed</h1>
     <p class="text-sm mb-3" style="color: var(--text-muted);">
@@ -19,11 +19,11 @@
     
     <div class="flex flex-col gap-3">
         <a href="{% url 'account_login' %}" class="btn btn-primary w-full justify-center">
-            <i class="fa-solid fa-arrow-rotate-right mr-2"></i>
+            <i class="fas fa-arrow-rotate-right mr-2"></i>
             Try again
         </a>
         <a href="/" class="btn btn-ghost w-full justify-center">
-            <i class="fa-solid fa-house mr-2"></i>
+            <i class="fas fa-house mr-2"></i>
             Go to homepage
         </a>
     </div>
@@ -35,12 +35,12 @@
     <p class="text-xs" style="color: var(--text-muted);">
         Still having issues? 
         <a href="mailto:support@code2resume.com" style="color: var(--accent);" class="hover:underline">
-            <i class="fa-regular fa-envelope mr-1"></i> Contact support
+            <i class="far fa-envelope mr-1"></i> Contact support
         </a>
     </p>
     <p class="text-xs" style="color: var(--text-muted);">
         <a href="{% url 'account_signup' %}" style="color: var(--accent);" class="hover:underline">
-            <i class="fa-solid fa-envelope mr-1"></i> Sign up with email instead
+            <i class="fas fa-envelope mr-1"></i> Sign up with email instead
         </a>
     </p>
 </div>

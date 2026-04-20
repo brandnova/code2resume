@@ -39,12 +39,12 @@
         <div class="flex gap-3 flex-col sm:flex-row pt-2">
             <a href="{% url 'accounts:profile' %}" 
                class="btn btn-primary flex-1 justify-center text-center">
-                <i class="fa-solid fa-user mr-2"></i>
+                <i class="fas fa-user mr-2"></i>
                 Go to Profile
             </a>
             <a href="{% url 'account_email' %}" 
                class="btn btn-secondary flex-1 justify-center text-center">
-                <i class="fa-solid fa-envelope mr-2"></i>
+                <i class="fas fa-envelope mr-2"></i>
                 Manage Emails
             </a>
         </div>
@@ -55,9 +55,9 @@
         <a href="{% url 'resume:builder' %}" 
            class="inline-flex items-center gap-2 text-sm hover:underline"
            style="color: var(--accent);">
-            <i class="fa-solid fa-code"></i>
+            <i class="fas fa-code"></i>
             Start building your resume
-            <i class="fa-solid fa-arrow-right"></i>
+            <i class="fas fa-arrow-right"></i>
         </a>
     </div>
     {% endif %}
@@ -67,7 +67,7 @@
 {% block auth_footer %}
 <p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
     <a href="/" style="color: var(--accent);" class="hover:underline">
-        <i class="fa-solid fa-home"></i> Back to Home
+        <i class="fas fa-home"></i> Back to Home
     </a>
 </p>
 {% endblock %}

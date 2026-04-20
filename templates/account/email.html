@@ -9,7 +9,7 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold" style="color: var(--text-primary);">Email Addresses</h1>
-        <a href="{% url 'account_change_password' %}" class="text-xs hover:underline" style="color: var(--accent);">Change password <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="{% url 'account_change_password' %}" class="text-xs hover:underline" style="color: var(--accent);">Change password <i class="fas fa-arrow-right"></i></a>
     </div>
 
     {% if user.emailaddress_set.all %}
@@ -82,6 +82,6 @@
 
 {% block auth_footer %}
 <p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
-    <a href="{% url 'accounts:profile' %}" style="color: var(--accent);" class="hover:underline"><i class="fa-solid fa-arrow-left"></i> Back to profile</a>
+    <a href="{% url 'accounts:profile' %}" style="color: var(--accent);" class="hover:underline"><i class="fas fa-arrow-left"></i> Back to profile</a>
 </p>
 {% endblock %}

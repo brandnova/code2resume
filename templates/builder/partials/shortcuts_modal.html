@@ -1,0 +1,96 @@
+{% load static %}
+
+{# ===================== SHORTCUTS MODAL ===================== #}
+<div
+    x-show="showShortcuts"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    @click.self="closeShortcuts()"
+    class="shortcuts-backdrop"
+    style="display:none;"
+>
+    <div
+        class="shortcuts-card"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+    >
+        <div class="shortcuts-header">
+            <div>
+                <h2 class="shortcuts-title">Keyboard Shortcuts</h2>
+                <p class="shortcuts-subtitle">Press <kbd class="kbd">Ctrl+K</kbd> to toggle</p>
+            </div>
+            <button @click="closeShortcuts()" class="shortcuts-close">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="shortcuts-body">
+            <div class="shortcuts-group">
+                <h3 class="shortcuts-group-title">Editor</h3>
+                <div class="shortcuts-list">
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Switch to HTML editor</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">1</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Switch to CSS editor</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">2</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Indent</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Tab</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Undo</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">Z</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Redo</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">Y</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Select all</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">A</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Copy / Cut / Paste</span>
+                        <div class="shortcut-keys">
+                            <kbd class="kbd">Ctrl</kbd><kbd class="kbd">C</kbd>
+                            <span style="color:var(--text-muted); font-size:11px; margin: 0 2px;">/</span>
+                            <kbd class="kbd">X</kbd>
+                            <span style="color:var(--text-muted); font-size:11px; margin: 0 2px;">/</span>
+                            <kbd class="kbd">V</kbd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shortcuts-group">
+                <h3 class="shortcuts-group-title">Workspace</h3>
+                <div class="shortcuts-list">
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Save progress</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">S</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Toggle shortcuts panel</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">K</kbd></div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Close modal / menu</span>
+                        <div class="shortcut-keys"><kbd class="kbd">Esc</kbd></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shortcuts-footer">
+            Undo, Redo, Copy, Cut, and Paste are native browser shortcuts — they work inside the editors without any custom handling.
+        </div>
+    </div>
+</div>

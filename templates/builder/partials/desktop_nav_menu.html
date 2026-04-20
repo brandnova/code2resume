@@ -27,7 +27,7 @@
     class="btn btn-ghost"
     title="Toggle page break guides"
 >
-    <i class="fa-regular fa-file-lines"></i>
+    <i class="far fa-file-lines"></i>
     <span>Guides</span>
 </button>
 
@@ -38,7 +38,7 @@
     class="btn btn-ghost"
     title="Save resume to your profile"
 >
-    <i class="fa-regular fa-floppy-disk"></i>
+    <i class="far fa-floppy-disk"></i>
     <span class="hidden sm:inline">Save</span>
 </button>
 {% else %}
@@ -47,7 +47,7 @@
     class="btn btn-ghost"
     title="Sign in to save your resume"
 >
-    <i class="fa-regular fa-floppy-disk"></i>
+    <i class="far fa-floppy-disk"></i>
     <span class="hidden sm:inline">Save</span>
 </a>
 {% endif %}
@@ -64,117 +64,9 @@
     <input type="hidden" name="framework">
     <input type="hidden" name="paper">
     <button type="submit" class="btn btn-primary" :disabled="isExporting">
-        <i class="fa-solid fa-download"            x-show="!isExporting"></i>
-        <i class="fa-solid fa-circle-notch fa-spin" x-show="isExporting"></i>
+        <i class="fas fa-download"            x-show="!isExporting"></i>
+        <i class="fas fa-circle-notch fa-spin" x-show="isExporting"></i>
         <span x-text="isExporting ? 'Generating…' : 'Export PDF'"></span>
     </button>
 </form>
 
-{# ---------- Theme toggle ---------- #}
-<button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme" title="Toggle theme">
-    <i class="fa-solid fa-sun theme-icon-sun"></i>
-    <i class="fa-solid fa-moon theme-icon-moon"></i>
-</button>
-
-{# ---------- User avatar / auth dropdown ---------- #}
-<div class="relative" x-data="{ userMenuOpen: false }">
-
-    <button
-        @click="userMenuOpen = !userMenuOpen"
-        @click.outside="userMenuOpen = false"
-        class="user-avatar-btn"
-        :class="userMenuOpen ? 'ring-2 ring-accent' : ''"
-        title="Account"
-    >
-        {% if user.is_authenticated %}
-            {% if user.avatar_url %}
-            <img src="{{ user.avatar_url }}" alt="{{ user.get_display_name }}"
-                 class="w-full h-full object-cover rounded-full">
-            {% else %}
-            <span class="avatar-initials">{{ user.get_display_name|first|upper }}</span>
-            {% endif %}
-        {% else %}
-        <i class="fa-regular fa-user" style="font-size: 14px; color: var(--text-secondary);"></i>
-        {% endif %}
-    </button>
-
-    {# Dropdown panel #}
-    <div
-        x-show="userMenuOpen"
-        x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0 scale-95 translate-y-1"
-        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-100"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
-        class="user-dropdown"
-        style="display: none;"
-        @click="userMenuOpen = false"
-    >
-        {% if user.is_authenticated %}
-
-        {# User info header #}
-        <div class="user-dropdown-header">
-            <p class="font-semibold text-sm truncate" style="color: var(--text-primary);">
-                {{ user.get_display_name }}
-            </p>
-            <p class="text-xs truncate" style="color: var(--text-muted);">{{ user.email }}</p>
-        </div>
-
-        <div class="user-dropdown-divider"></div>
-
-        <a href="/?new=1" class="user-dropdown-item">
-            <i class="fa-solid fa-plus"></i>
-            New Resume
-        </a>
-        <a href="{% url 'accounts:profile' %}" class="user-dropdown-item">
-            <i class="fa-regular fa-id-card"></i>
-            My Resumes
-        </a>
-         <a href="{% url 'builder:template_library' %}" class="user-dropdown-item">
-            <i class="fa-regular fa-folder-open"></i>
-            Templates
-        </a>
-        <a href="{% url 'accounts:profile_edit' %}" class="user-dropdown-item">
-            <i class="fa-regular fa-pen-to-square"></i>
-            Edit Profile
-        </a>
-
-        <div class="user-dropdown-divider"></div>
-
-        <a href="{% url 'account_logout' %}" class="user-dropdown-item" style="color: var(--danger);">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            Sign out
-        </a>
-
-        {% else %}
-
-        <div class="user-dropdown-header">
-            <p class="text-sm" style="color: var(--text-muted);">Save your resumes and access them anywhere.</p>
-        </div>
-
-        <div class="user-dropdown-divider"></div>
-
-        <a href="/?new=1" class="user-dropdown-item">
-            <i class="fa-solid fa-plus"></i>
-            New Resume
-        </a>
-        <a href="{% url 'builder:template_library' %}" class="user-dropdown-item">
-            <i class="fa-regular fa-folder-open"></i>
-            Templates
-        </a>
-
-        <div class="user-dropdown-divider"></div>
-
-        <a href="{% url 'account_login' %}" class="user-dropdown-item">
-            <i class="fa-solid fa-right-to-bracket"></i>
-            Sign in
-        </a>
-        <a href="{% url 'account_signup' %}" class="user-dropdown-item">
-            <i class="fa-solid fa-user-plus"></i>
-            Create account
-        </a>
-
-        {% endif %}
-    </div>
-</div>

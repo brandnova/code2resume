@@ -47,6 +47,7 @@ function resumeWorkspace() {
         mobileView:        "editor",
         sessionSaved:      true,
         showShortcuts:     false,
+        showHelp:          false,
         mobileMenuOpen:    false,
 
         /* save modal */
@@ -243,8 +244,13 @@ ${this.cssCode}
 
         /* ---- shortcuts modal ---- */
 
-        openShortcuts()  { this.showShortcuts  = true;  this.mobileMenuOpen = false; },
-        closeShortcuts() { this.showShortcuts  = false; },
+        openShortcuts()  { this.showShortcuts = true; this.showHelp = false; this.mobileMenuOpen = false; },
+        closeShortcuts() { this.showShortcuts = false; },
+
+        /* ---- help modal ---- */
+
+        openHelp()       { this.showHelp = true; this.showShortcuts = false; this.mobileMenuOpen = false; },
+        closeHelp()      { this.showHelp = false; },
 
 
         /* ---- keyboard shortcuts ---- */
@@ -252,28 +258,36 @@ ${this.cssCode}
         initKeyboardShortcuts() {
             document.addEventListener('keydown', (e) => {
                 const ctrl = e.ctrlKey || e.metaKey;
+                const isEditorFocused = document.activeElement?.closest('#html-editor, #css-editor') ||
+                                        document.activeElement?.tagName === 'TEXTAREA' ||
+                                        document.activeElement?.isContentEditable;
 
+                // Escape closes any open modal/menu
                 if (e.key === 'Escape') {
                     if (this.showNewResumeModal) { this.showNewResumeModal = false; return; }
                     if (this.showSaveModal)      { this.closeSaveModal();           return; }
                     if (this.showShortcuts)      { this.closeShortcuts();           return; }
+                    if (this.showHelp)           { this.closeHelp();                return; }
                     if (this.mobileMenuOpen)     { this.mobileMenuOpen = false;     return; }
                 }
 
-                if (e.key === '?' && !ctrl) {
-                    const inEditor = document.activeElement?.closest('#html-editor, #css-editor');
-                    if (!inEditor) { e.preventDefault(); this.showShortcuts = true; }
+                // '?' opens Help modal (only when NOT typing in editor)
+                if (e.key === '?' && !ctrl && !isEditorFocused) {
+                    e.preventDefault();
+                    this.openHelp();
+                    return;
+                }
+
+                // Ctrl+K / Cmd+K toggles Shortcuts modal
+                if (ctrl && (e.key === 'k' || e.key === 'K')) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    this.showShortcuts = !this.showShortcuts;
+                    if (this.showShortcuts) this.showHelp = false;
                     return;
                 }
 
                 if (!ctrl) return;
-
-                if (e.key === 'k' || e.key === 'K') {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    this.showShortcuts = !this.showShortcuts;
-                    return;
-                }
 
                 if (e.key === 's') { e.preventDefault(); this.saveSession(); return; }
                 if (e.key === '1') { e.preventDefault(); this.switchTab('html'); return; }

@@ -1,0 +1,758 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard — Code2Resume{% endblock %}
+
+{% block extra_head %}
+<script src="{% static 'js/chart.min.js' %}"></script>
+<style>
+    /* Dashboard layout */
+    .dash-root {
+        display: flex;
+        min-height: 100vh;
+        background: var(--bg-base);
+        position: relative;
+    }
+
+    /* Sidebar - desktop */
+    .dash-sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--bg-border);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+        transform: translateX(0);
+    }
+
+    /* Sidebar - mobile collapsed */
+    .dash-sidebar.mobile-collapsed {
+        transform: translateX(-100%);
+    }
+
+    /* Overlay for mobile */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .dash-sidebar-brand {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--bg-border);
+        text-decoration: none;
+        display: block;
+    }
+
+    .dash-sidebar-brand .wordmark {
+        font-family: var(--font-mono);
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .dash-sidebar-brand .wordmark span { color: var(--accent); }
+
+    .dash-sidebar-brand .sub {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .dash-nav {
+        padding: 12px 10px;
+        flex: 1;
+    }
+
+    .dash-nav-label {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 8px 10px 4px;
+    }
+
+    .dash-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: background 0.12s, color 0.12s;
+        margin-bottom: 2px;
+    }
+
+    .dash-nav-item:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+
+    .dash-nav-item.active {
+        background: var(--accent-dim);
+        color: var(--accent-hover);
+    }
+
+    .dash-nav-item i { width: 18px; text-align: center; flex-shrink: 0; }
+
+    .dash-sidebar-footer {
+        padding: 14px;
+        border-top: 1px solid var(--bg-border);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    /* Main content */
+    .dash-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        margin-left: 260px;
+        width: calc(100% - 260px);
+        transition: margin-left 0.3s ease;
+    }
+
+    .dash-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        height: 56px;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--bg-border);
+        flex-shrink: 0;
+        gap: 12px;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .dash-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sidebar-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: var(--radius-sm);
+        transition: background 0.12s;
+    }
+
+    .sidebar-toggle:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+
+    .dash-page-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+    }
+
+    .dash-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Theme toggle button */
+    .theme-toggle-btn {
+        background: var(--bg-elevated);
+        border: 1px solid var(--bg-border);
+        border-radius: var(--radius-sm);
+        padding: 6px 10px;
+        font-size: 13px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.12s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .theme-toggle-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+
+    /* Period filter - now at top of content */
+    .period-filter-bar {
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--bg-border);
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .period-filter-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .period-filters {
+        display: flex;
+        gap: 4px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--bg-border);
+        border-radius: var(--radius-sm);
+        padding: 3px;
+        flex-wrap: wrap;
+    }
+
+    .period-pill {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 4px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: background 0.12s, color 0.12s;
+        white-space: nowrap;
+    }
+
+    .period-pill:hover { color: var(--text-primary); }
+
+    .period-pill.active {
+        background: var(--bg-surface);
+        color: var(--accent-hover);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Content area */
+    .dash-content {
+        padding: 24px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    /* Stat cards */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .stat-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--bg-border);
+        border-radius: var(--radius-md);
+        padding: 18px 20px;
+        transition: border-color 0.15s;
+    }
+
+    .stat-card:hover { border-color: var(--accent); }
+
+    .stat-card-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+
+    .stat-card-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -0.03em;
+        line-height: 1;
+    }
+
+    .stat-card-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 5px;
+    }
+
+    .stat-card-icon {
+        font-size: 18px;
+        color: var(--accent);
+        margin-bottom: 10px;
+    }
+
+    /* Chart panels */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .chart-grid.single { grid-template-columns: 1fr; }
+    .chart-grid.wide   { grid-template-columns: 2fr 1fr; }
+
+    .chart-panel {
+        background: var(--bg-surface);
+        border: 1px solid var(--bg-border);
+        border-radius: var(--radius-md);
+        padding: 20px 22px;
+    }
+
+    .chart-panel-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+    }
+
+    .chart-wrap {
+        position: relative;
+        width: 100%;
+        min-height: 200px;
+    }
+
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Table panels */
+    .table-panel {
+        background: var(--bg-surface);
+        border: 1px solid var(--bg-border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .table-panel-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--bg-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .table-panel-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .dash-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .dash-table th {
+        padding: 10px 20px;
+        text-align: left;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        background: var(--bg-elevated);
+        border-bottom: 1px solid var(--bg-border);
+    }
+
+    .dash-table td {
+        padding: 11px 20px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--bg-border);
+    }
+
+    .dash-table tr:last-child td { border-bottom: none; }
+    .dash-table tr:hover td { background: var(--bg-elevated); }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 2px 7px;
+        border-radius: 20px;
+        border: 1px solid transparent;
+    }
+
+    .badge-success  { background: rgba(52,211,153,.12);  border-color: rgba(52,211,153,.3);  color: var(--success); }
+    .badge-danger   { background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.3); color: var(--danger);  }
+    .badge-warning  { background: rgba(251,191,36,.12);  border-color: rgba(251,191,36,.3);  color: var(--warning); }
+    .badge-accent   { background: var(--accent-dim);     border-color: rgba(79,126,247,.3);  color: var(--accent);  }
+    .badge-muted    { background: var(--bg-elevated);    border-color: var(--bg-border);     color: var(--text-muted); }
+
+    /* Empty state */
+    .dash-empty {
+        text-align: center;
+        padding: 48px 20px;
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--bg-border);
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all 0.12s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+    }
+
+    .btn-ghost:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .sidebar-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dash-sidebar {
+            transform: translateX(-100%);
+        }
+        
+        .dash-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+        
+        .dash-main {
+            margin-left: 0;
+            width: 100%;
+        }
+        
+        .chart-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .chart-grid.wide {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .dash-content {
+            padding: 16px;
+        }
+        
+        .period-filter-bar {
+            padding: 12px 16px;
+        }
+        
+        .dash-topbar {
+            padding: 0 16px;
+        }
+        
+        .period-filters {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .period-filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-root" x-data="{ mobileSidebarOpen: false }">
+    
+    <!-- Overlay -->
+    <div class="sidebar-overlay" :class="{ active: mobileSidebarOpen }" @click="mobileSidebarOpen = false"></div>
+    
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" :class="{ 'mobile-open': mobileSidebarOpen }">
+        <a href="{% url 'dashboard:overview' %}" class="dash-sidebar-brand">
+            <div class="wordmark">code<span>2</span>resume</div>
+            <div class="sub">Dashboard</div>
+        </a>
+
+        <nav class="dash-nav">
+            <div class="dash-nav-label">Analytics</div>
+            <a href="{% url 'dashboard:overview' %}?period={{ period }}"
+               class="dash-nav-item {% if page == 'overview' %}active{% endif %}">
+                <i class="fa-solid fa-chart-line"></i> Overview
+            </a>
+            <a href="{% url 'dashboard:exports' %}?period={{ period }}"
+               class="dash-nav-item {% if page == 'exports' %}active{% endif %}">
+                <i class="fa-solid fa-file-arrow-down"></i> PDF Exports
+            </a>
+            <a href="{% url 'dashboard:templates' %}?period={{ period }}"
+               class="dash-nav-item {% if page == 'templates' %}active{% endif %}">
+                <i class="fa-solid fa-layer-group"></i> Templates
+            </a>
+            <a href="{% url 'dashboard:users' %}?period={{ period }}"
+               class="dash-nav-item {% if page == 'users' %}active{% endif %}">
+                <i class="fa-solid fa-users"></i> Users
+            </a>
+
+            <div class="dash-nav-label" style="margin-top:12px;">Site</div>
+            <a href="/" class="dash-nav-item">
+                <i class="fa-solid fa-pen-to-square"></i> Workspace
+            </a>
+            <a href="/admin/" class="dash-nav-item">
+                <i class="fa-solid fa-screwdriver-wrench"></i> Django Admin
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-footer">
+            <button onclick="toggleGlobalTheme()" class="btn-ghost" style="width:100%; justify-content:center;">
+                <i class="fa-solid fa-sun theme-icon-sun"></i>
+                <i class="fa-solid fa-moon theme-icon-moon"></i>
+                Toggle theme
+            </button>
+            <a href="{% url 'account_logout' %}" class="btn-ghost" style="width:100%; justify-content:center; color:var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <!-- Top Bar with toggle and theme button -->
+        <div class="dash-topbar">
+            <div class="dash-topbar-left">
+                <button class="sidebar-toggle" @click="mobileSidebarOpen = !mobileSidebarOpen">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span class="dash-page-title">{% block page_title %}{% endblock %}</span>
+            </div>
+            <div class="dash-topbar-right">
+                <button onclick="toggleGlobalTheme()" class="theme-toggle-btn">
+                    <i class="fa-solid fa-sun theme-icon-sun"></i>
+                    <i class="fa-solid fa-moon theme-icon-moon"></i>
+                    <span class="hide-mobile">Theme</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Period Filter - directly at top of content -->
+        <div class="period-filter-bar">
+            <span class="period-filter-label">
+                <i class="fa-solid fa-calendar"></i> Time Period
+            </span>
+            <div class="period-filters">
+                {% for key, label in period_labels.items %}
+                <a href="?period={{ key }}" 
+                   class="period-pill {% if period == key %}active{% endif %}">
+                    {{ label }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="dash-content">
+            {% block dash_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 900px) {
+        .hide-mobile {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+// Wait for DOM to be ready before initializing charts
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart.js global config
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.color = getComputedStyle(document.documentElement)
+            .getPropertyValue('--text-muted').trim() || '#6b7280';
+        Chart.defaults.borderColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--bg-border').trim() || '#e5e7eb';
+        Chart.defaults.font.family = getComputedStyle(document.documentElement)
+            .getPropertyValue('--font-ui').trim() || 'system-ui';
+        Chart.defaults.font.size = 12;
+        Chart.defaults.plugins.legend.labels.boxWidth = 10;
+        Chart.defaults.plugins.legend.labels.padding = 14;
+    }
+});
+
+// Global chart functions
+window.ACCENT = '#4f7ef7';
+window.SUCCESS = '#34d399';
+window.DANGER = '#f87171';
+window.WARNING = '#fbbf24';
+window.MUTED = 'rgba(79,126,247,0.15)';
+
+window.lineChart = function(id, labels, data, label, color) {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet');
+        return null;
+    }
+    const ctx = document.getElementById(id);
+    if (!ctx) {
+        console.warn('Canvas element not found:', id);
+        return null;
+    }
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label || '',
+                data: data,
+                borderColor: color || window.ACCENT,
+                backgroundColor: color ? color.replace(')', ', 0.08)').replace('rgb', 'rgba') : window.MUTED,
+                borderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                fill: true,
+                tension: 0.35,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } },
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+            }
+        }
+    });
+};
+
+window.barChart = function(id, labels, data, label, color) {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet');
+        return null;
+    }
+    const ctx = document.getElementById(id);
+    if (!ctx) return null;
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label || '',
+                data: data,
+                backgroundColor: color || window.ACCENT,
+                borderRadius: 4,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+            }
+        }
+    });
+};
+
+window.donutChart = function(id, labels, data, colors) {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet');
+        return null;
+    }
+    const ctx = document.getElementById(id);
+    if (!ctx) return null;
+    return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors || [window.ACCENT, window.SUCCESS, window.WARNING, window.DANGER, '#a78bfa'],
+                borderWidth: 0,
+                hoverOffset: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            cutout: '65%',
+        }
+    });
+};
+
+window.stackedBarChart = function(id, labels, datasets) {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet');
+        return null;
+    }
+    const ctx = document.getElementById(id);
+    if (!ctx) return null;
+    return new Chart(ctx, {
+        type: 'bar',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: true, position: 'top' } },
+            scales: {
+                x: { stacked: true, grid: { display: false } },
+                y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } },
+            }
+        }
+    });
+};
+</script>
+{% endblock %}

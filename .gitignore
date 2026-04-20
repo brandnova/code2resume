@@ -21,7 +21,6 @@ media/
 
 # Environment variables
 .env
-.env.*
 
 # Migrations (optional – usually keep these!)
 # */migrations/*

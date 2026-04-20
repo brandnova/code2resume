@@ -18,7 +18,7 @@ FRAMEWORK_CDN_MAP = {
 
 # Paper sizes: name -> (playwright_format, width_px_at_96dpi, height_px_at_96dpi)
 PAPER_SIZES = {
-    "a4":     ("A4",     794,  1123),
+    "a4":     ("A4",     794,  1013),
     "letter": ("Letter", 816,  1056),
     "legal":  ("Legal",  816,  1344),
     "a5":     ("A5",     559,   794),
@@ -224,29 +224,51 @@ def export_pdf(request):
     """
     Renders the resume to PDF via Playwright and returns it as a download.
     """
+    import time
     html      = request.POST.get("html",      "")
     css       = request.POST.get("css",       "")
     framework = request.POST.get("framework", "none")
     paper     = request.POST.get("paper",     "a4")
 
-    framework_css   = FRAMEWORK_CDN_MAP.get(framework, "")
-    paper_format, _, _ = PAPER_SIZES.get(paper, PAPER_SIZES["a4"])
+    framework_css        = FRAMEWORK_CDN_MAP.get(framework, "")
+    paper_format, _, _   = PAPER_SIZES.get(paper, PAPER_SIZES["a4"])
 
     service = PDFService(
-        html=html,
-        css=css,
+        html=html, css=css,
         framework_css=framework_css,
         paper_format=paper_format,
     )
 
+    start   = time.monotonic()
+    success = True
     try:
         pdf_bytes = service.render_pdf()
     except Exception as e:
+        success = False
+        _record_pdf_export(request, paper, framework, False, 0)
         return JsonResponse({"error": str(e)}, status=500)
+
+    duration_ms = int((time.monotonic() - start) * 1000)
+    _record_pdf_export(request, paper, framework, True, duration_ms)
 
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = 'attachment; filename="resume.pdf"'
     return response
+
+
+def _record_pdf_export(request, paper, framework, success, duration_ms):
+    """Fire-and-forget PDF export event recording. Never raises."""
+    try:
+        from dashboard.models import PDFExport
+        PDFExport.objects.create(
+            user        = request.user if request.user.is_authenticated else None,
+            paper_size  = paper,
+            framework   = framework,
+            success     = success,
+            duration_ms = duration_ms,
+        )
+    except Exception:
+        pass
 
 
 def public_resume(request, slug):
@@ -304,19 +326,30 @@ def load_template(request, slug):
         from django.http import Http404
         raise Http404
 
-    # Premium enforcement hook — uncomment when subscriptions are live:
+    # Premium enforcement hook (activate when subscriptions are live):
     # if template.is_premium and not getattr(request.user, 'is_premium', False):
     #     return JsonResponse({"error": "Premium template"}, status=403)
 
-    # Load template content into session as a fresh unsaved state
     request.session['resume_state'] = {
         'html':         template.html_content,
         'css':          template.css_content,
         'framework':    template.framework,
         'paper':        template.paper_size,
         'photo_url':    '',
-        'resume_slug':  '',   # not saved yet — user starts fresh
+        'resume_slug':  '',
         'resume_title': '',
     }
     request.session.modified = True
+
+    # Record the load event
+    try:
+        from dashboard.models import TemplateLoad
+        TemplateLoad.objects.create(
+            template = template,
+            user     = request.user if request.user.is_authenticated else None,
+        )
+    except Exception:
+        pass
+
     return redirect('builder:workspace')
+

@@ -7,93 +7,33 @@
 <div class="min-h-screen" style="background: var(--bg-base);">
 
     {# Header bar #}
-    <header class="border-b px-6 py-4 flex items-center justify-between relative"
+    <header class="border-b px-4 sm:px-6 py-4 flex items-center justify-between gap-4 relative"
             style="background: var(--bg-surface); border-color: var(--bg-border);">
-        <a href="/" class="font-mono text-lg font-bold" style="color: var(--text-primary); text-decoration:none;">
+        <a href="/" class="font-mono text-lg font-bold whitespace-nowrap" 
+        style="color: var(--text-primary); text-decoration:none;">
             code<span style="color: var(--accent);">2</span>resume
         </a>
         
-        <div class="flex items-center gap-3">
-            <!-- Account dropdown -->
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" 
-                        @click.away="open = false"
-                        class="btn btn-ghost text-sm flex items-center gap-2">
-                    <i class="fa-regular fa-circle-user"></i>
-                    <span class="hidden sm:inline">Account</span>
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                </button>
-                
-                <!-- FIXED DROPDOWN: explicit positioning + layer promotion -->
-                <div x-show="open" 
-                    x-transition:enter="transition ease-out duration-150"
-                    x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
-                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-                    x-cloak
-                    class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-50"
-                    style="
-                        position: absolute;
-                        background: var(--bg-elevated); 
-                        border: 1px solid var(--bg-border);
-                        will-change: transform, opacity;
-                        white-space: nowrap;
-                    ">
-                    <a href="{% url 'account_email' %}" 
-                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
-                    style="color: var(--text-primary);">
-                        <i class="fa-regular fa-envelope w-4"></i> Email Addresses
-                    </a>
-                    <a href="{% url 'account_change_password' %}" 
-                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
-                    style="color: var(--text-primary);">
-                        <i class="fa-solid fa-key w-4"></i> Change Password
-                    </a>
-                    <a href="{% url 'socialaccount_connections' %}" 
-                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
-                    style="color: var(--text-primary);">
-                        <i class="fa-solid fa-link w-4"></i> Connected Accounts
-                    </a>
-                    <a href="{% url 'accounts:profile_edit' %}" 
-                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors"
-                    style="color: var(--text-primary);">
-                        <i class="fa-regular fa-user w-4"></i> Edit Profile
-                    </a>
-                    <hr style="border-color: var(--bg-border);" class="my-1">
-                    <a href="{% url 'account_logout' %}" 
-                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition-colors text-red-400">
-                        <i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign Out
-                    </a>
-                </div>
-            </div>
-            <a href="/?new=1" class="btn btn-primary text-sm">
-                <i class="fa-solid fa-plus"></i>
-                New Resume
-            </a>
-            <a href="{% url 'builder:template_library' %}" class="btn btn-ghost text-sm">
-                <i class="fa-regular fa-folder-open"></i>
-                <span class="hidden sm:inline">Templates</span>
-            </a>
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {% include "partials/theme_and_auth_dropdown.html" %}
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-6 py-10">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
         {# User greeting #}
-        <div class="flex items-center gap-4 mb-10">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 sm:mb-10">
             {% if request.user.avatar_url %}
             <img src="{{ request.user.avatar_url }}" alt="Avatar"
-                 class="w-14 h-14 rounded-full object-cover border-2"
-                 style="border-color: var(--accent);">
+                class="w-14 h-14 rounded-full object-cover border-2 mx-auto sm:mx-0"
+                style="border-color: var(--accent);">
             {% else %}
-            <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
-                 style="background: var(--accent-dim); color: var(--accent);">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold mx-auto sm:mx-0"
+                style="background: var(--accent-dim); color: var(--accent);">
                 {{ request.user.get_display_name|first|upper }}
             </div>
             {% endif %}
-            <div>
+            <div class="text-center sm:text-left">
                 <h1 class="text-2xl font-bold" style="color: var(--text-primary);">
                     {{ request.user.get_display_name }}
                 </h1>
@@ -110,8 +50,47 @@
         </div>
         {% endfor %}
 
+        {# Account Actions - Improved mobile layout #}
+        <div class="mb-8">
+            <h2 class="text-sm font-bold uppercase tracking-widest mb-3" style="color: var(--text-muted);">
+                Account Settings
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                <a href="{% url 'account_email' %}" 
+                   class="btn btn-ghost text-sm py-2 px-3"
+                   style="color: var(--text-primary);">
+                    <i class="far fa-envelope w-4"></i>
+                    <span class="truncate">Email</span>
+                </a>
+                <a href="{% url 'account_change_password' %}" 
+                   class="btn btn-ghost text-sm py-2 px-3"
+                   style="color: var(--text-primary);">
+                    <i class="fas fa-key w-4"></i>
+                    <span class="truncate">Password</span>
+                </a>
+                <a href="{% url 'account_reset_password' %}" 
+                   class="btn btn-ghost text-sm py-2 px-3"
+                   style="color: var(--text-primary);">
+                    <i class="fas fa-lock-open w-4"></i>
+                    <span class="truncate">Reset</span>
+                </a>
+                <a href="{% url 'socialaccount_connections' %}" 
+                   class="btn btn-ghost text-sm py-2 px-3"
+                   style="color: var(--text-primary);">
+                    <i class="fas fa-link w-4"></i>
+                    <span class="truncate">Social</span>
+                </a>
+                <a href="{% url 'accounts:profile_edit' %}" 
+                   class="btn btn-ghost text-sm py-2 px-3"
+                   style="color: var(--text-primary);">
+                    <i class="far fa-user w-4"></i>
+                    <span class="truncate">Profile</span>
+                </a>
+            </div>
+        </div>
+
         {# Resumes section #}
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center justify-between mb-4">
             <h2 class="text-sm font-bold uppercase tracking-widest" style="color: var(--text-muted);">
                 Saved Resumes
             </h2>
@@ -124,60 +103,64 @@
         {% if resumes %}
         <div class="grid gap-3">
             {% for resume in resumes %}
-            <div class="flex items-center justify-between px-5 py-4 rounded-xl border transition-colors"
+            <div class="p-4 rounded-xl border transition-colors"
                  style="background: var(--bg-surface); border-color: var(--bg-border);"
                  onmouseover="this.style.borderColor='var(--accent)'"
                  onmouseout="this.style.borderColor='var(--bg-border)'">
-                <div class="min-w-0">
+                
+                {# Resume info - full width on mobile #}
+                <div class="mb-3">
                     <p class="font-semibold truncate" style="color: var(--text-primary);">{{ resume.title }}</p>
-                    <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+                    <p class="text-xs mt-1" style="color: var(--text-muted);">
                         {{ resume.framework|capfirst }} &middot; {{ resume.paper_size|upper }}
                         &middot; updated {{ resume.updated_at|timesince }} ago
                     </p>
                 </div>
-                <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                
+                {# Action buttons - wrap properly on mobile #}
+                <div class="flex flex-wrap items-center gap-2">
                     <a href="{% url 'accounts:resume_open' resume.slug %}"
-                       class="btn btn-ghost text-xs">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span class="hidden sm:inline">Open</span>
+                       class="btn btn-ghost text-sm py-1.5 px-3 flex-1 sm:flex-none">
+                        <i class="fas fa-pen-to-square"></i>
+                        <span>Open</span>
                     </a>
+                    
                     {# Public toggle #}
-                    <form method="POST" action="{% url 'accounts:resume_toggle_public' resume.slug %}">
+                    <form method="POST" action="{% url 'accounts:resume_toggle_public' resume.slug %}" class="inline">
                         {% csrf_token %}
-                        <button
-                            type="submit"
-                            class="btn btn-ghost text-xs"
-                            :title="resume.is_public ? 'Make private' : 'Make public'"
-                            style="{% if resume.is_public %}color: var(--success);{% endif %}"
-                            onmouseover="this.style.borderColor='var(--accent)'"
-                            onmouseout="this.style.borderColor='var(--bg-border)'"
-                        >
+                        <button type="submit" 
+                                class="btn btn-ghost text-sm py-1.5 px-3"
+                                title="{% if resume.is_public %}Make private{% else %}Make public{% endif %}"
+                                style="{% if resume.is_public %}color: var(--success);{% endif %}">
                             {% if resume.is_public %}
-                            <i class="fa-solid fa-eye"></i>
+                            <i class="fas fa-eye"></i>
+                            <span class="inline">Public</span>
                             {% else %}
-                            <i class="fa-solid fa-eye-slash"></i>
+                            <i class="fas fa-eye-slash"></i>
+                            <span class="inline">Private</span>
                             {% endif %}
                         </button>
                     </form>
 
-                    {# Copy public link — only when public #}
+                    {# Copy public link #}
                     {% if resume.is_public %}
-                    <button
-                        class="btn btn-ghost text-xs"
-                        onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'builder:public_resume' resume.slug %}').then(() => this.innerHTML = '<i class=\'fa-solid fa-check\'></i>').then(() => setTimeout(() => this.innerHTML = '<i class=\'fa-solid fa-link\'></i>', 1800))"
-                        title="Copy public link"
-                    >
-                        <i class="fa-solid fa-link"></i>
+                    <button class="btn btn-ghost text-sm py-1.5 px-3"
+                            onclick="copyLink(this, '{{ request.scheme }}://{{ request.get_host }}{% url 'builder:public_resume' resume.slug %}')"
+                            title="Copy public link">
+                        <i class="fas fa-link"></i>
+                        <span class="inline">Copy Link</span>
                     </button>
                     {% endif %}
+                    
+                    {# Delete #}
                     <form method="POST" action="{% url 'accounts:resume_delete' resume.slug %}"
-                          onsubmit="return confirm('Delete \'{{ resume.title }}\'?')">
+                          onsubmit="return confirm('Delete \'{{ resume.title }}\'?')"
+                          class="inline">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-ghost text-xs"
-                                style="color: var(--danger);"
-                                onmouseover="this.style.borderColor='var(--danger)'"
-                                onmouseout="this.style.borderColor='var(--bg-border)'">
-                            <i class="fa-solid fa-trash-can"></i>
+                        <button type="submit" class="btn btn-ghost text-sm py-1.5 px-3"
+                                style="color: var(--danger);">
+                            <i class="fas fa-trash-can"></i>
+                            <span class="inline">Delete</span>
                         </button>
                     </form>
                 </div>
@@ -194,7 +177,7 @@
                 Start building and save your first resume from the workspace.
             </p>
             <a href="/" class="btn btn-primary">
-                <i class="fa-solid fa-plus"></i>
+                <i class="fas fa-plus"></i>
                 Start building
             </a>
         </div>
@@ -202,4 +185,23 @@
 
     </main>
 </div>
+
+<script>
+// Helper function for copy link with better UX
+function copyLink(button, url) {
+    navigator.clipboard.writeText(url).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i><span class="inline">Copied!</span>';
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    }).catch(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-times"></i><span class="inline">Failed</span>';
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 2000);
+    });
+}
+</script>
 {% endblock %}

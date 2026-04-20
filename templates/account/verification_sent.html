@@ -74,12 +74,12 @@
     <div class="flex gap-3 flex-col sm:flex-row pt-4">
         <a href="{% url 'account_login' %}" 
            class="btn btn-primary flex-1 justify-center text-center">
-            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
+            <i class="fas fa-arrow-right-to-bracket mr-2"></i>
             Go to Sign In
         </a>
         <a href="{% url 'account_email' %}" 
            class="btn btn-secondary flex-1 justify-center text-center">
-            <i class="fa-solid fa-envelope mr-2"></i>
+            <i class="fas fa-envelope mr-2"></i>
             Manage Emails
         </a>
     </div>
@@ -89,11 +89,11 @@
 {% block auth_footer %}
 <div class="flex flex-col sm:flex-row justify-center gap-3 mt-4 text-xs" style="color: var(--text-muted);">
     <a href="/" style="color: var(--accent);" class="hover:underline">
-        <i class="fa-solid fa-home"></i> Home
+        <i class="fas fa-home"></i> Home
     </a>
     <span class="hidden sm:inline">•</span>
     <a href="#" style="color: var(--accent);" class="hover:underline">
-        <i class="fa-solid fa-question-circle"></i> Help Center
+        <i class="fas fa-question-circle"></i> Help Center
     </a>
 </div>
 {% endblock %}

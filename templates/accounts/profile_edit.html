@@ -6,21 +6,21 @@
 <div class="min-h-screen flex items-center justify-center px-4 py-12"
      style="background: var(--bg-base);">
     <div class="w-full max-w-lg">
-
         <div class="text-center mb-8">
-            <a href="/" class="font-mono text-2xl font-bold tracking-tight"
-               style="color: var(--text-primary); text-decoration:none;">
-                code<span style="color: var(--accent);">2</span>resume
+            <a href="/" class="inline-block">
+                <span class="font-mono text-2xl font-bold tracking-tight" style="color: var(--text-primary);">
+                    code<span style="color: var(--accent);">2</span>resume
+                </span>
             </a>
+            <p class="mt-2 text-sm" style="color: var(--text-muted);">Manage profile info</p>
         </div>
 
-        <div class="rounded-xl border p-8"
-             style="background: var(--bg-surface); border-color: var(--bg-border);">
+        <div class="rounded-xl border p-8" style="background: var(--bg-surface); border-color: var(--bg-border);">
 
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-xl font-bold" style="color: var(--text-primary);">Edit Profile</h1>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-ghost text-sm">
-                    <i class="fa-solid fa-arrow-left"></i> Back
+                <a href="{% url 'socialaccount_connections' %}" class="text-xs hover:underline" style="color: var(--accent);">
+                    Connect Social Account <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
 
@@ -47,6 +47,9 @@
                 </button>
             </form>
         </div>
+        <p class="text-center mt-4 text-xs" style="color: var(--text-muted);">
+            <a href="{% url 'accounts:profile' %}" style="color: var(--accent);" class="hover:underline"><i class="fas fa-arrow-left"></i> Back to profile</a>
+        </p>
     </div>
 </div>
 {% endblock %}
