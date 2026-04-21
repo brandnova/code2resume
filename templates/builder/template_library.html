@@ -7,22 +7,21 @@
 <div class="min-h-screen" style="background: var(--bg-base);">
 
     {# ---- Header ---- #}
-    <header class="border-b px-6 py-4 flex items-center justify-between sticky top-0 z-50"
+    <header class="border-b px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-50"
             style="background: var(--bg-surface); border-color: var(--bg-border);">
         <a href="/" class="font-mono text-lg font-bold" style="color:var(--text-primary); text-decoration:none;">
             code<span style="color:var(--accent);">2</span>resume
         </a>
         <div class="flex items-center gap-3">
-            {# Theme toggle and auth dropdown #}
             {% include "partials/theme_and_auth_dropdown.html" %}
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 py-12">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         {# ---- Page heading ---- #}
-        <div class="mb-10">
-            <h1 class="text-3xl font-bold tracking-tight mb-2" style="color:var(--text-primary);">
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2" style="color:var(--text-primary);">
                 Resume Templates
             </h1>
             <p class="text-sm" style="color:var(--text-muted);">
@@ -31,12 +30,25 @@
         </div>
 
         {% if templates %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted);">
+                All Templates
+            </h2>
+            <span class="text-xs px-2 py-0.5 rounded"
+                  style="background: var(--bg-elevated); color: var(--text-muted);">
+                {{ templates.count }} template{{ templates.count|pluralize }}
+            </span>
+        </div>
+        
+        {# More compact grid - 2 columns on mobile, 3 on tablet, 4 on desktop #}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {% for tpl in templates %}
-            <div
-                class="template-card group"
-                x-data="{ confirmOpen: false }"
-            >
+            <div class="template-card rounded-lg border overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer"
+                 style="background: var(--bg-surface); border-color: var(--bg-border);"
+                 x-data="{ confirmOpen: false }"
+                 @mouseenter="$event.currentTarget.style.borderColor = 'var(--accent)'"
+                 @mouseleave="$event.currentTarget.style.borderColor = 'var(--bg-border)'">
+                
                 {# ---- Preview image ---- #}
                 <div class="template-preview-wrap">
                     {% if tpl.preview_image %}
@@ -44,42 +56,41 @@
                         class="template-preview-img">
                     {% else %}
                     <div class="template-preview-placeholder">
-                        <i class="far fa-file-lines" style="font-size: 3rem; color:var(--text-muted);"></i>
-                        <span style="font-size:12px; color:var(--text-muted); margin-top:6px;">Preview is temporarily unavailable.</span>
-                        <button class="btn btn-ghost my-2"><i class="fas fa-external-link"></i>Load template to workspace</button>
+                        <i class="far fa-file-lines text-4xl" style="color:var(--text-muted);"></i>
+                        <span class="text-xs mt-2 text-center px-2" style="color:var(--text-muted);">Preview temporarily unavailable</span>
                     </div>
                     {% endif %}
 
                     {# Premium badge overlay #}
                     {% if tpl.is_premium %}
-                    <div class="template-premium-badge">
-                        <i class="fas fa-lock" style="font-size:10px;"></i>
+                    <div class="template-premium-badge inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                         style="background: rgba(251, 191, 36, 0.9); color: #000;">
+                        <i class="fas fa-lock text-[8px]"></i>
                         Premium
                     </div>
                     {% endif %}
 
                     {# Hover overlay with action button + full description #}
-                    <div class="template-hover-overlay">
+                    <div class="template-hover-overlay rounded-t-lg">
                         <div class="template-hover-content">
-                            {# Action button (always at top) #}
                             <div class="template-hover-actions">
                                 {% if tpl.is_premium %}
-                                <span class="btn btn-ghost" style="cursor:default; opacity:0.7;">
-                                    <i class="fas fa-lock"></i>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md opacity-80"
+                                      style="background: var(--bg-surface); color: var(--warning);">
+                                    <i class="fas fa-lock text-[10px]"></i>
                                     Premium only
                                 </span>
                                 {% else %}
                                 <button
                                     @click.stop="confirmOpen = true"
-                                    class="btn btn-primary"
-                                >
-                                    <i class="fas fa-wand-magic-sparkles"></i>
-                                    Use this template
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all hover:scale-105"
+                                    style="background: var(--accent); color: white;">
+                                    <i class="fas fa-wand-magic-sparkles text-[10px]"></i>
+                                    Use
                                 </button>
                                 {% endif %}
                             </div>
 
-                            {# Scrollable description (hidden scrollbar) #}
                             {% if tpl.description %}
                             <div class="template-hover-desc">
                                 {{ tpl.description }}
@@ -89,25 +100,26 @@
                     </div>
                 </div>
 
-                {# ---- Card footer ---- #}
-                <div class="template-card-footer">
-                    <div class="min-w-0">
-                        <p class="font-semibold text-sm truncate" style="color:var(--text-primary);">
+                {# ---- Card footer - more compact ---- #}
+                <div class="px-2 py-2 border-t" style="border-color: var(--bg-border);">
+                    <div>
+                        <p class="font-semibold text-xs truncate" style="color:var(--text-primary);">
                             {{ tpl.title }}
                         </p>
-                        {% if tpl.description %}
-                        <p class="text-xs mt-0.5 truncate" style="color:var(--text-muted);">
-                            {{ tpl.description }}
-                        </p>
-                        {% endif %}
-                    </div>
-                    <div class="flex items-center gap-1.5 flex-shrink-0 ml-3">
-                        <span class="template-meta-pill">{{ tpl.framework|capfirst }}</span>
-                        <span class="template-meta-pill">{{ tpl.paper_size|upper }}</span>
+                        <div class="flex items-center gap-1 mt-1.5">
+                            <span class="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                                  style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--bg-border);">
+                                {{ tpl.framework|capfirst }}
+                            </span>
+                            <span class="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                                  style="background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--bg-border);">
+                                {{ tpl.paper_size|upper }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                {# ---- Confirmation modal (per card, lightweight) ---- #}
+                {# ---- Confirmation modal ---- #}
                 <div
                     x-show="confirmOpen"
                     x-transition:enter="transition ease-out duration-150"
@@ -117,40 +129,43 @@
                     x-transition:leave-start="opacity-100"
                     x-transition:leave-end="opacity-0"
                     @click.self="confirmOpen = false"
-                    class="shortcuts-backdrop"
+                    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     style="display:none;"
                 >
                     <div
-                        class="shortcuts-card"
-                        style="max-width:400px;"
+                        class="rounded-lg max-w-sm mx-4 w-full"
+                        style="background: var(--bg-surface);"
                         x-transition:enter="transition ease-out duration-150"
                         x-transition:enter-start="opacity-0 scale-95"
                         x-transition:enter-end="opacity-100 scale-100"
                     >
-                        <div class="shortcuts-header">
+                        <div class="flex items-center justify-between p-4 border-b" style="border-color: var(--bg-border);">
                             <div>
-                                <h2 class="shortcuts-title">Load "{{ tpl.title }}"?</h2>
-                                <p class="shortcuts-subtitle">
+                                <h3 class="font-semibold text-sm" style="color:var(--text-primary);">Load "{{ tpl.title }}"?</h3>
+                                <p class="text-xs mt-0.5" style="color:var(--text-muted);">
                                     This will replace your current workspace content.
                                 </p>
                             </div>
-                            <button @click="confirmOpen = false" class="shortcuts-close">
+                            <button @click="confirmOpen = false" class="text-lg hover:opacity-70" style="color:var(--text-muted);">
                                 <i class="fas fa-xmark"></i>
                             </button>
                         </div>
-                        <div class="shortcuts-body" style="gap:8px;">
-                            <p class="text-sm" style="color:var(--text-secondary); line-height:1.6;">
+                        <div class="p-4">
+                            <p class="text-xs" style="color:var(--text-secondary); line-height:1.5;">
                                 Any unsaved changes in your editor will be lost.
                                 Save your current work first if you need it.
                             </p>
                         </div>
-                        <div class="shortcuts-footer"
-                            style="display:flex; gap:8px; justify-content:flex-end; padding:16px 24px;">
-                            <button @click="confirmOpen = false" class="btn btn-ghost">Cancel</button>
-                            <form method="POST" action="{% url 'builder:load_template' tpl.slug %}" style="margin:0;">
+                        <div class="flex gap-2 justify-end p-4 border-t" style="border-color: var(--bg-border);">
+                            <button @click="confirmOpen = false" class="px-3 py-1.5 text-xs font-medium rounded-md transition"
+                                    style="background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--bg-border);">
+                                Cancel
+                            </button>
+                            <form method="POST" action="{% url 'builder:load_template' tpl.slug %}" class="m-0">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-wand-magic-sparkles"></i>
+                                <button type="submit" class="px-3 py-1.5 text-xs font-medium rounded-md transition"
+                                        style="background: var(--accent); color: white;">
+                                    <i class="fas fa-wand-magic-sparkles text-[10px]"></i>
                                     Load template
                                 </button>
                             </form>

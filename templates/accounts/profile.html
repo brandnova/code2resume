@@ -126,8 +126,10 @@
                         <span>Open</span>
                     </a>
                     
-                    {# Public toggle #}
-                    <form method="POST" action="{% url 'accounts:resume_toggle_public' resume.slug %}" class="inline">
+                    {# Public toggle - with alert for development feature #}
+                    <form method="POST" action="{% url 'accounts:resume_toggle_public' resume.slug %}" 
+                          class="inline"
+                          onsubmit="showPublicToggleAlert(event)">
                         {% csrf_token %}
                         <button type="submit" 
                                 class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md hover:scale-[1.02]"
@@ -215,5 +217,84 @@ function copyLink(button, url) {
         }, 2000);
     });
 }
+
+// Alert for public toggle feature (in development)
+function showPublicToggleAlert(event) {
+    event.preventDefault(); // Prevent form submission
+    
+    // Create alert container if it doesn't exist
+    let alertContainer = document.getElementById('public-toggle-alert');
+    if (!alertContainer) {
+        alertContainer = document.createElement('div');
+        alertContainer.id = 'public-toggle-alert';
+        alertContainer.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top fade-in duration-300';
+        document.body.appendChild(alertContainer);
+    }
+    
+    // Create the alert
+    const alert = document.createElement('div');
+    alert.className = 'mb-3 px-5 py-3 rounded-lg shadow-xl min-w-[280px] max-w-md flex items-start gap-3';
+    alert.style.cssText = `
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border-left: 4px solid #fbbf24;
+        animation: slideDown 0.3s ease-out;
+    `;
+    
+    alert.innerHTML = `
+        <div class="flex-shrink-0">
+            <i class="fas fa-code-branch text-white text-base"></i>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm font-semibold text-white mb-0.5">Feature in Development</p>
+            <p class="text-xs text-white/90">Public resume sharing is coming soon! We're working hard to bring you this feature.</p>
+        </div>
+        <button onclick="this.closest('.mb-3').remove()" class="flex-shrink-0 text-white/80 hover:text-white transition">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    `;
+    
+    // Add to container
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alert);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.style.animation = 'slideUp 0.3s ease-out';
+            setTimeout(() => alert.remove(), 300);
+        }
+    }, 5000);
+}
+
+// Add animations to the page
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+    
+    .animate-in {
+        animation: slideDown 0.3s ease-out;
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

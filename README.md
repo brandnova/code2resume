@@ -211,6 +211,79 @@ commented out, ready to be activated when the subscription system is live.
 
 ---
 
+## Phase 3.5: Site Management Dashboard
+
+A staff-only analytics dashboard at `/dashboard/` giving real-time
+visibility into how Code2Resume is being used and growing.
+
+### Access
+
+Only users with `is_staff=True` can access the dashboard.
+Non-staff users are redirected to the login page.
+Set staff status via Django admin or: `python manage.py shell -c
+"from accounts.models import User; User.objects.filter(email='you@example.com').update(is_staff=True)"`
+
+### Pages
+
+**Overview** — six summary cards (unique visitors, new users, resumes
+created, PDFs exported, template loads, average export time) plus four
+line charts (visitors, users, resumes, PDFs over time) and donut charts
+for framework and paper size distribution.
+
+**PDF Exports** — stacked bar chart of success vs failures per day,
+paper size and framework donut charts, and a table of the last 200
+individual export events with timing and user attribution.
+
+**Templates** — bar chart of loads per template, breakdown table,
+and a full template inventory showing framework, paper size, type,
+active status, and display order.
+
+**Users** — daily signup line chart, recent signups table, and a
+top-users-by-resume-count table.
+
+### Data architecture
+
+| Table | Purpose | Retention |
+|---|---|---|
+| `SiteVisit` | One row per unique session per day on `/` and `/home/` | 90 days raw, then pruned |
+| `PDFExport` | One row per export attempt with duration and outcome | 90 days raw |
+| `TemplateLoad` | One row per confirmed template load | 90 days raw |
+| `DailyStat` | Aggregated daily snapshot | Permanent |
+
+Raw tables are deduplicated at write time (visits use `get_or_create`
+on session hash + date). `DailyStat` rows are written by the
+`aggregate_stats` management command and are fully idempotent — running
+it twice for the same date produces the same result.
+
+Today's data is read directly from raw tables (bypassing `DailyStat`
+which only covers completed days) so the dashboard is always current
+without waiting for the nightly command.
+
+### Aggregation
+
+```bash
+# Aggregate yesterday (run nightly via Render cron job: 0 1 * * *)
+python manage.py aggregate_stats
+
+# Back-fill the last 30 days
+python manage.py aggregate_stats --days 30
+
+# Aggregate a specific date
+python manage.py aggregate_stats --date 2025-06-15
+```
+
+Render cron job config: schedule `0 1 * * *`,
+command `python manage.py aggregate_stats --days 1`.
+
+### PDF export tracking
+
+Each export records paper size, framework choice, success/failure,
+duration in milliseconds, and the user (nullable — anonymous exports
+are tracked). Duration tracking requires no extra configuration —
+it is measured inside `export_pdf` using `time.monotonic()`.
+
+---
+
 ## Getting Started
 
 ### Prerequisites

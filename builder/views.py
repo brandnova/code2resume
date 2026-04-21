@@ -1,4 +1,6 @@
 import json
+import urllib.request
+import threading
 from django.shortcuts import redirect, render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST, require_GET
@@ -15,6 +17,45 @@ FRAMEWORK_CDN_MAP = {
     "bootstrap": '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">',
     "none":      "",
 }
+
+# Simple in-process cache — persists for the lifetime of the worker
+_framework_css_cache = {}
+_framework_css_lock  = threading.Lock()
+
+FRAMEWORK_CSS_URLS = {
+    "tailwind":  "https://cdn.tailwindcss.com/tailwind.min.css",
+    "bootstrap": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+}
+
+def _fetch_framework_css(framework: str) -> str:
+    """
+    Fetches and caches the CSS for a given framework.
+    Falls back to an empty string on network error.
+    Tailwind CDN's /tailwind.min.css is the pre-built full utility CSS —
+    no JS engine required, pure stylesheet.
+    """
+    if framework not in FRAMEWORK_CSS_URLS:
+        return ""
+
+    with _framework_css_lock:
+        if framework in _framework_css_cache:
+            return _framework_css_cache[framework]
+
+    url = FRAMEWORK_CSS_URLS[framework]
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Code2Resume/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            css = resp.read().decode("utf-8")
+    except Exception:
+        css = ""
+
+    with _framework_css_lock:
+        _framework_css_cache[framework] = css
+
+    return css
 
 # Paper sizes: name -> (playwright_format, width_px_at_96dpi, height_px_at_96dpi)
 PAPER_SIZES = {
@@ -205,7 +246,7 @@ def save_as_resume(request):
     request.session['resume_state'] = state
     request.session.modified = True
 
-    return JsonResponse({"status": "ok", "slug": resume.slug, "title": resume.title})
+    return JsonResponse({"status": "ok", "slug": resume.slug, "title": resume.title, "photo_url": resume.photo_url,})
 
 
 @require_POST
@@ -286,14 +327,18 @@ def public_resume(request, slug):
     if not resume.is_public:
         return render(request, 'builder/resume_404.html', status=404)
 
-    framework_css = FRAMEWORK_CDN_MAP.get(resume.framework, '')
-    paper_format, paper_w, paper_h = PAPER_SIZES.get(resume.paper_size, PAPER_SIZES['a4'])
+    paper_format, paper_w, paper_h = PAPER_SIZES.get(
+        resume.paper_size, PAPER_SIZES['a4']
+    )
+
+    safe_html = sanitize_html(resume.html_content)
+    safe_css  = sanitize_css(resume.css_content)
 
     context = {
         'resume':        resume,
-        'safe_html':     sanitize_html(resume.html_content),
-        'safe_css':      sanitize_css(resume.css_content),
-        'framework_css': framework_css,
+        'safe_html':     safe_html,
+        'safe_css':      safe_css,
+        'framework_css': FRAMEWORK_CDN_MAP.get(resume.framework, ''),
         'paper_w':       paper_w,
         'paper_h':       paper_h,
         'owner':         resume.user,

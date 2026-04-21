@@ -336,6 +336,7 @@ ${this.cssCode}
                 if (res.ok) {
                     this.currentResumeSlug = data.slug;
                     this.saveTitle         = data.title;
+                    this.photoUrl          = data.photo_url || this.photoUrl;
                     this.sessionSaved      = true;
                     this.closeSaveModal();
                 } else {
