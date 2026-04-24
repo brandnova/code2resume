@@ -18,10 +18,13 @@ const FRAMEWORK_CDN = {
 };
 
 const PAPER_DIMENSIONS = {
-    a4:     { w: 794,  h: 1123 },
-    letter: { w: 816,  h: 1056 },
-    legal:  { w: 816,  h: 1344 },
-    a5:     { w: 559,  h: 794  },
+    // w: CSS pixel width of paper at 96dpi
+    // h: full paper height at 96dpi (for iframe sizing)
+    // contentH: usable height after 10mm top+bottom margins (where PDF cuts)
+    a4:     { w: 794,  h: 1123, contentH: 1047 },
+    letter: { w: 816,  h: 1056, contentH:  980 },
+    legal:  { w: 816,  h: 1344, contentH: 1268 },
+    a5:     { w: 559,  h:  794, contentH:  718 },
 };
 
 const MAX_PAGES = 8;
@@ -76,7 +79,7 @@ function resumeWorkspace() {
         get pageBreakPositions() {
             return Array.from(
                 { length: MAX_PAGES - 1 },
-                (_, i) => (i + 1) * this.paperDims.h
+                (_, i) => (i + 1) * this.paperDims.contentH
             );
         },
 

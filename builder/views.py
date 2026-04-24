@@ -313,10 +313,6 @@ def _record_pdf_export(request, paper, framework, success, duration_ms):
 
 
 def public_resume(request, slug):
-    """
-    Public-facing resume page. Renders a user's saved resume if is_public=True.
-    HTML and CSS are sanitized before rendering to prevent injection attacks.
-    """
     from accounts.models import Resume
 
     try:
@@ -331,17 +327,14 @@ def public_resume(request, slug):
         resume.paper_size, PAPER_SIZES['a4']
     )
 
-    safe_html = sanitize_html(resume.html_content)
-    safe_css  = sanitize_css(resume.css_content)
-
     context = {
-        'resume':        resume,
-        'safe_html':     safe_html,
-        'safe_css':      safe_css,
-        'framework_css': FRAMEWORK_CDN_MAP.get(resume.framework, ''),
-        'paper_w':       paper_w,
-        'paper_h':       paper_h,
-        'owner':         resume.user,
+        'resume':      resume,
+        'owner':       resume.user,
+        'html_content': resume.html_content,
+        'css_content':  resume.css_content,
+        'framework':   resume.framework,
+        'paper_w':     paper_w,
+        'paper_h':     paper_h,
     }
     return render(request, 'builder/public_resume.html', context)
 

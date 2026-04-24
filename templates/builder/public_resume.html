@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static %}
-{% load json_extras %}
 
 {% block title %}{{ resume.title }} — Code2Resume{% endblock %}
 
@@ -70,27 +69,19 @@
     }
 
     /*
-     * Scroll area: both axes scrollable, no flex centering.
-     * Flex centering on the scroll container prevents horizontal
-     * scroll when content is wider than the viewport.
+     * Desktop: simple vertical scroll, paper centered, full width visible.
+     * The paper is never wider than the viewport on desktop since screens
+     * are typically >= 1024px wide and A4 is 794px.
      */
     .resume-scroll-area {
         flex: 1;
-        overflow: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
-        padding: 20px;
-    }
-
-    /*
-     * Inner wrapper: min-width forces the scroll area to be at least
-     * as wide as the paper, enabling horizontal scroll on narrow screens.
-     * justify-content centers the paper on wide screens.
-     */
-    .resume-scroll-inner {
+        padding: 24px;
         display: flex;
-        justify-content: center;
-        min-width: max-content;
-        min-height: 100%;
+        flex-direction: column;
+        align-items: center;
     }
 
     .resume-paper-wrap {
@@ -101,7 +92,6 @@
             0 4px 16px rgba(0,0,0,0.22),
             0 20px 60px rgba(0,0,0,0.32);
         border-radius: 1px;
-        position: relative;
     }
 
     .resume-iframe {
@@ -126,10 +116,7 @@
         color: var(--text-muted);
     }
 
-    .resume-footer-text a {
-        color: var(--accent);
-        text-decoration: none;
-    }
+    .resume-footer-text a { color: var(--accent); text-decoration: none; }
 
     .meta-pill {
         font-size: 10px;
@@ -144,19 +131,71 @@
         white-space: nowrap;
     }
 
-    .resume-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: var(--text-muted);
-        font-size: 13px;
+    /*
+     * Mobile: the paper renders at full desktop width (794px for A4).
+     * We scale it down to fit the viewport width, then let the user
+     * pinch-zoom back up to read detail. This gives an instant overview
+     * of the full resume and free exploration without clipping.
+     *
+     * The scroll area switches to overflow:auto in both axes so the
+     * scaled-up (zoomed) paper can be panned freely.
+     */
+    @media (max-width: 860px) {
+        .resume-scroll-area {
+            overflow: auto;
+            padding: 12px;
+            align-items: flex-start;
+            /* Allow native browser pinch-zoom on the content */
+            touch-action: pan-x pan-y pinch-zoom;
+        }
+
+        .resume-scroll-area-mobile-inner {
+            /* min-width forces the scroll area to be at least as wide
+               as the paper so horizontal scroll works when zoomed in */
+            min-width: max-content;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 8px;
+        }
+
+        /*
+         * Scale the paper to fit viewport on initial load.
+         * transform-origin top-center keeps the top of the resume
+         * anchored while it scales down.
+         * The wrapper div compensates for the space lost by scaling
+         * so layout doesn't collapse.
+         */
+        .resume-paper-scaled {
+            transform-origin: top center;
+        }
+    }
+
+    @media (min-width: 861px) {
+        .resume-scroll-area-mobile-inner {
+            display: contents; /* transparent on desktop */
+        }
+        .resume-paper-scaled {
+            /* no transform on desktop */
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="resume-page">
+
+<div id="resume-data-store" style="display:none;">
+    <textarea id="rd-html">{{ html_content }}</textarea>
+    <textarea id="rd-css">{{ css_content }}</textarea>
+    <span id="rd-framework">{{ framework }}</span>
+    <span id="rd-paper-w">{{ paper_w }}</span>
+    <span id="rd-paper-h">{{ paper_h }}</span>
+</div>
+
+<div
+    class="resume-page"
+    x-data="publicResume()"
+    x-init="init()"
+>
 
     <header class="resume-topbar">
         <a href="/" class="resume-topbar-brand">code<span>2</span>resume</a>
@@ -167,35 +206,29 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-            <button onclick="toggleGlobalTheme()" class="btn btn-ghost btn-theme" title="Toggle theme">
+            <button
+                onclick="toggleGlobalTheme()"
+                class="btn btn-ghost btn-theme"
+                title="Toggle theme"
+            >
                 <i class="fa-solid fa-sun theme-icon-sun"></i>
                 <i class="fa-solid fa-moon theme-icon-moon"></i>
             </button>
-            <a href="/" class="btn btn-primary" style="font-size:12px; padding:5px 12px;">
-                <i class="fa-solid fa-pen-to-square"></i>
-            </a>
         </div>
     </header>
 
-    <div class="resume-scroll-area">
-        <div class="resume-scroll-inner">
+    <div class="resume-scroll-area" id="resumeScrollArea">
+        <div class="resume-scroll-area-mobile-inner" id="mobileInner">
             <div
-                class="resume-paper-wrap"
+                class="resume-paper-wrap resume-paper-scaled"
                 id="resumePaper"
-                style="width:{{ paper_w }}px; min-height:{{ paper_h }}px;"
+                :style="`width:${paperW}px; min-height:${paperH}px;`"
             >
-                <div
-                    id="resumeLoading"
-                    class="resume-loading"
-                    style="min-height:{{ paper_h }}px;"
-                >
-                    <i class="fa-solid fa-circle-notch fa-spin"></i>
-                    Loading…
-                </div>
                 <iframe
-                    id="resumeFrame"
+                    x-ref="previewFrame"
                     class="resume-iframe"
-                    style="width:{{ paper_w }}px; min-height:{{ paper_h }}px; display:none;"
+                    :srcdoc="iframeDocument"
+                    :style="`width:${paperW}px; min-height:${paperH}px;`"
                     sandbox="allow-scripts allow-same-origin"
                     title="{{ resume.title }}"
                 ></iframe>
@@ -207,94 +240,108 @@
         <span class="resume-footer-text">
             Built with <span style="color:var(--danger);">❤</span> using
             <a href="/" target="_blank" rel="noopener">Code2Resume</a>
-            — a <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a> project
+            | A <a href="https://brandnova.pythonanywhere.com" target="_blank" rel="noopener">Brand Nova</a> project
         </span>
         <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
             {% if resume.framework != 'none' %}
             <span class="meta-pill">{{ resume.framework|capfirst }}</span>
             {% endif %}
             <span class="meta-pill">{{ resume.paper_size|upper }}</span>
-            <a href="/" class="btn btn-ghost" style="font-size:11px; padding:4px 10px;">
+            <a href="/" class="btn btn-primary" style="font-size:11px; padding:4px 10px;">
                 <i class="fa-solid fa-plus"></i>
-                Create your own
+                Build your own
             </a>
         </div>
     </footer>
 
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-(function() {
-    var RESUME_HTML   = {{ safe_html|tojson|safe }};
-    var RESUME_CSS    = {{ safe_css|tojson|safe }};
-    var FRAMEWORK_TAG = {{ framework_css|tojson|safe }};
-    var PAPER_W       = {{ paper_w }};
-    var PAPER_H       = {{ paper_h }};
+const FRAMEWORK_CDN = {
+    none:      "",
+    tailwind:  '<script src="https://cdn.tailwindcss.com"><\/script>',
+    bootstrap: '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">',
+};
 
-    /*
-     * Build the complete iframe document as a string and assign it to
-     * srcdoc. This is identical to how the workspace preview works.
-     * The tojson filter has already escaped any </script> sequences
-     * inside the HTML and CSS strings, so the outer page's script block
-     * is safe. The framework CDN tag (Tailwind script, Bootstrap link)
-     * is injected into the iframe's <head> and runs in its own isolated
-     * context — it cannot affect the outer page's styles.
-     */
-    var iframeDoc = '<!DOCTYPE html>'
-        + '<html lang="en">'
-        + '<head>'
-        + '<meta charset="UTF-8">'
-        + '<meta name="viewport" content="width=' + PAPER_W + ', initial-scale=1.0">'
-        + FRAMEWORK_TAG
-        + '<style>'
-        + 'html,body{margin:0;padding:0;width:' + PAPER_W + 'px;min-width:' + PAPER_W + 'px;box-sizing:border-box;}'
-        + RESUME_CSS
-        + '<\/style>'
-        + '<\/head>'
-        + '<body>'
-        + RESUME_HTML
-        + '<\/body>'
-        + '<\/html>';
+function publicResume() {
+    return {
+        iframeDocument: "",
+        paperW: 794,
+        paperH: 1123,
 
-    var frame   = document.getElementById('resumeFrame');
-    var paper   = document.getElementById('resumePaper');
-    var loading = document.getElementById('resumeLoading');
+        init() {
+            const htmlContent = document.getElementById('rd-html').value;
+            const cssContent  = document.getElementById('rd-css').value;
+            const framework   = document.getElementById('rd-framework').textContent.trim();
+            const paperW      = parseInt(document.getElementById('rd-paper-w').textContent.trim(), 10);
+            const paperH      = parseInt(document.getElementById('rd-paper-h').textContent.trim(), 10);
 
-    function resizeFrame() {
-        try {
-            var iDoc = frame.contentDocument || frame.contentWindow.document;
-            var body = iDoc.body;
-            var html = iDoc.documentElement;
-            if (body && html) {
-                var h = Math.max(
-                    body.scrollHeight, body.offsetHeight,
-                    html.scrollHeight, html.offsetHeight,
-                    PAPER_H
-                );
-                frame.style.minHeight = h + 'px';
-                paper.style.minHeight = h + 'px';
+            this.paperW = paperW || 794;
+            this.paperH = paperH || 1123;
+
+            const frameworkTag = FRAMEWORK_CDN[framework] || '';
+
+            this.iframeDocument = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=${this.paperW}, initial-scale=1.0">
+${frameworkTag}
+<style>
+html, body { margin: 0; padding: 0; width: ${this.paperW}px; }
+${cssContent}
+</style>
+</head>
+<body>
+${htmlContent}
+</body>
+</html>`;
+
+            /*
+             * Mobile scaling: once the iframe document is set, calculate
+             * a scale factor that fits the paper width into the viewport.
+             * We apply this as a CSS transform so the paper renders at
+             * full resolution (no blur) and the user can pinch back to
+             * full size to read detail.
+             */
+            this.$nextTick(() => this._applyMobileScale());
+            window.addEventListener('resize', () => this._applyMobileScale());
+        },
+
+        _applyMobileScale() {
+            const paper     = document.getElementById('resumePaper');
+            const inner     = document.getElementById('mobileInner');
+            const isMobile  = window.innerWidth <= 860;
+
+            if (!isMobile) {
+                paper.style.transform       = '';
+                paper.style.transformOrigin = '';
+                if (inner) inner.style.minWidth = '';
+                if (inner) inner.style.height   = '';
+                return;
             }
-        } catch(e) {
-            frame.style.minHeight = PAPER_H + 'px';
-            paper.style.minHeight = PAPER_H + 'px';
-        }
-    }
 
-    frame.addEventListener('load', function() {
-        loading.style.display = 'none';
-        frame.style.display   = 'block';
-        resizeFrame();
-        /*
-         * Tailwind CDN runs after the load event — it scans the DOM and
-         * injects styles ~200-600ms later. Run resize again to capture
-         * any layout shift caused by the injected styles.
-         */
-        setTimeout(resizeFrame, 700);
-        setTimeout(resizeFrame, 1800);
-    });
+            const availableW = window.innerWidth - 24; // 12px padding each side
+            const scale      = Math.min(1, availableW / this.paperW);
+            const scaledH    = this.paperH * scale;
 
-    frame.srcdoc = iframeDoc;
-}());
+            paper.style.transform       = `scale(${scale})`;
+            paper.style.transformOrigin = 'top center';
+
+            /*
+             * CSS transform doesn't affect layout — the paper still
+             * occupies its original dimensions in the flow. We shrink
+             * the inner wrapper to match the visually scaled height so
+             * there's no dead whitespace below the resume.
+             */
+            if (inner) {
+                inner.style.height   = scaledH + 'px';
+                inner.style.minWidth = '';  // no horizontal constraint at initial scale
+            }
+        },
+    };
+}
 </script>
-
 {% endblock %}

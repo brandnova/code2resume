@@ -20,7 +20,7 @@
         <div class="shortcuts-header">
             <div>
                 <h2 class="shortcuts-title">How to Use Code2Resume</h2>
-                <p class="shortcuts-subtitle">Press <kbd class="kbd">?</kbd> to toggle</p>
+                <p class="shortcuts-subtitle">A practical guide to getting the best results</p>
             </div>
             <button @click="closeHelp()" class="shortcuts-close">
                 <i class="fas fa-xmark"></i>
@@ -28,60 +28,163 @@
         </div>
 
         <div class="shortcuts-body">
+
+            {# ---- Workspace ---- #}
             <div class="shortcuts-group">
                 <h3 class="shortcuts-group-title">Workspace & Editor</h3>
                 <div class="shortcuts-list">
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Split-Pane Layout</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">HTML/CSS tabs on the left, live preview iframe on the right. Updates instantly on every keystroke.</span>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Split-Pane Layout</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            HTML and CSS editors on the left, live preview iframe on the right. The preview updates on every keystroke — no save button needed.
+                        </span>
                     </div>
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Code Editors</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">Powered by CodeJar + Highlight.js. Supports Tab-to-indent, native Undo/Redo, and all browser text shortcuts.</span>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Code Editors</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Powered by CodeJar and Highlight.js. Tab inserts two spaces, Ctrl+Z undoes, Ctrl+Y redoes. Standard browser shortcuts (Ctrl+A, Ctrl+C, Ctrl+V) work normally inside the editors.
+                        </span>
                     </div>
-                </div>
-            </div>
-
-            <div class="shortcuts-group">
-                <h3 class="shortcuts-group-title">Controls & Export</h3>
-                <div class="shortcuts-list">
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Framework Injector</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">Select None, Tailwind, or Bootstrap. CDN injects directly into preview & PDF engine.</span>
-                    </div>
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Paper Size</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">Choose A4, Letter, Legal, or A5. Preview resizes to match 96 dpi dimensions.</span>
-                    </div>
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Page Break Guides</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">Toggle dashed overlay lines to prevent awkward content splits across pages.</span>
-                    </div>
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Export PDF</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">Renders pixel-perfect output via headless Chromium (Playwright) with your exact framework & paper settings.</span>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Auto-Save</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Your work saves to your session every 1.5 seconds automatically. The "Saved / Saving…" indicator in the navbar reflects this. Refreshing or reopening the tab restores your last state. Logged-in users can also save named resumes to their profile with the Save button.
+                        </span>
                     </div>
                 </div>
             </div>
 
+            {# ---- Framework & CSS ---- #}
             <div class="shortcuts-group">
-                <h3 class="shortcuts-group-title">Persistence & Themes</h3>
+                <h3 class="shortcuts-group-title">Framework Injector — What to Expect</h3>
                 <div class="shortcuts-list">
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Auto-Save</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">State saves to Django session every 1.5s. Refreshing or reopening restores your last work.</span>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">None (plain CSS)</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Most reliable for PDF output. You have complete control over every pixel. Use <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">pt</code> or <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">mm</code> units for font sizes and spacing when targeting print — they map directly to the PDF output with no surprises.
+                        </span>
                     </div>
-                    <div class="shortcut-row">
-                        <span class="shortcut-desc">Dark/Light Theme</span>
-                        <span class="shortcut-desc" style="font-size: 12px; color: var(--text-muted);">Toggle via sun/moon button in navbar. Preference persists in localStorage. Highlight.js swaps automatically.</span>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Tailwind CSS</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            The Play CDN runs a JavaScript engine that scans your HTML and generates styles on the fly. It works well in the preview and in PDF output. Avoid <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">@apply</code> — it requires a build step and won't work via CDN. Stick to utility classes directly on elements. Responsive variants (<code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">sm:</code>, <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">md:</code>) are available but irrelevant in PDFs since PDFs have no viewport.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Bootstrap</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Bootstrap's CSS resets (box-sizing, margin, font) apply globally inside the preview and PDF. This can shift your custom CSS in unexpected ways. If something looks off, inspect which Bootstrap rule is overriding yours and add a more specific selector. Bootstrap's grid system works, but PDF pages have no concept of viewport breakpoints — your layout will always render at the paper width.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Mixing frameworks with custom CSS</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Your CSS in the CSS tab is loaded after the framework, so your rules take precedence. Use this to override framework defaults. If a utility class is fighting your custom style, add <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">!important</code> sparingly or increase selector specificity.
+                        </span>
                     </div>
                 </div>
             </div>
+
+            {# ---- Page break guidelines ---- #}
+            <div class="shortcuts-group">
+                <h3 class="shortcuts-group-title">Page Break Guides</h3>
+                <div class="shortcuts-list">
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">What the guides show</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            The dashed red lines mark where Playwright will cut the page when generating the PDF. Content that crosses a line will be split across two pages. Toggle them with the Guides button in the navbar.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Keeping content on one page</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            If a section is cut mid-way, reduce font size, line-height, or section padding until the content fits above the guide line. A font size of 13–14px with 1.4–1.5 line-height is a good starting point for a dense single-page resume. You can also use <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">page-break-before: always</code> or <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">page-break-inside: avoid</code> in your CSS to control where breaks happen.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Why the guides account for margins</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            The PDF is generated with 10mm margins on all sides. The guide positions account for this — they mark the printable content area, not the full paper height. Content between guides is safe; content that crosses a guide will be clipped or pushed to the next page.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {# ---- PDF best practices ---- #}
+            <div class="shortcuts-group">
+                <h3 class="shortcuts-group-title">PDF Output — Best Practices</h3>
+                <div class="shortcuts-list">
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Fonts</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Use web-safe fonts (Georgia, Times New Roman, Arial, Segoe UI) or Google Fonts loaded via a <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">&lt;link&gt;</code> tag in your HTML. Custom fonts load correctly during PDF generation because Playwright fetches external resources. Avoid base64-embedded fonts — they inflate the resume HTML and slow down generation.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Images and photos</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Images linked via URL render correctly in the PDF as long as the URL is publicly accessible. Use absolute URLs (starting with <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">https://</code>). Locally hosted images will not render in the PDF since Playwright runs server-side and cannot access your local machine.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Colours and backgrounds</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            The PDF engine has <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">print_background: True</code> enabled, so background colours and images print correctly. If a background colour is missing from your PDF, add <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">-webkit-print-color-adjust: exact</code> to the relevant element.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Sizing units</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            The resume renders at 96dpi in a browser context. <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">px</code> units behave exactly as they do in the preview. <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">rem</code> and <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">em</code> work normally. Avoid <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">vw</code> and <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">vh</code> — the PDF viewport is the paper width, not the browser window, so these units produce unpredictable results.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">Keeping it to one page</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            Watch the first page break guide. If your content reaches it, try: reducing <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">line-height</code> from 1.6 to 1.4, trimming <code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">margin-bottom</code> on section headings, reducing body padding, or dropping font size by 1px. Small adjustments compound across a full page.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-weight:600;">What the preview doesn't show</span>
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            The preview is a browser iframe — it renders identically to how Playwright will render your resume, with one exception: print-specific CSS (<code style="font-family:var(--font-mono); font-size:11px; background:var(--bg-elevated); padding:1px 4px; border-radius:3px;">@media print</code>) is not active in the preview but will be active in the PDF. Use this deliberately to hide elements in the PDF that are visible in the preview, or vice versa.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {# ---- Paper sizes ---- #}
+            <div class="shortcuts-group">
+                <h3 class="shortcuts-group-title">Paper Sizes</h3>
+                <div class="shortcuts-list">
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            <strong style="color:var(--text-primary);">A4</strong> (794×1123px) — Standard in most of the world. Use this unless you're applying to North American companies.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            <strong style="color:var(--text-primary);">Letter</strong> (816×1056px) — Standard in the US and Canada. Slightly wider and shorter than A4.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            <strong style="color:var(--text-primary);">A5</strong> (559×794px) — Half the size of A4. Useful for concise one-page summaries or compact portfolio cards.
+                        </span>
+                    </div>
+                    <div class="shortcut-row" style="flex-direction:column; align-items:flex-start; gap:3px;">
+                        <span class="shortcut-desc" style="font-size:12px; color:var(--text-muted);">
+                            <strong style="color:var(--text-primary);">Legal</strong> (816×1344px) — Taller than Letter. Rarely used for resumes but useful for very detailed CVs.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="shortcuts-footer">
-            Built for developers who care about the source code of their career. 
-            Press <kbd class="kbd">Ctrl+K</kbd> for full keyboard shortcuts.
+            Built for developers who care about the source code of their career.
+            Press <kbd class="kbd">Ctrl+K</kbd> for keyboard shortcuts.
         </div>
     </div>
 </div>

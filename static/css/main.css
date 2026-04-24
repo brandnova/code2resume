@@ -786,12 +786,16 @@ html, body {
     }
 
     .preview-scroll {
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
         padding: 12px;
+        display: block;
     }
 
     .a4-paper {
-        width: 100%;
-        min-height: unset;
+        flex-shrink: 0;
+        margin: 0 auto;
+        min-width: max-content;
     }
 
     .preview-iframe {
